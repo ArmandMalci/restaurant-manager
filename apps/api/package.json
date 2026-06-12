@@ -61,7 +61,10 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "@restaurant/shared": "<rootDir>/../../../packages/shared/dist/index.js"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
