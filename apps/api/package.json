@@ -2,6 +2,9 @@
   "name": "@restaurant/api",
   "version": "0.0.1",
   "private": true,
+  "prisma": {
+    "seed": "tsx ../../prisma/seed.ts"
+  },
   "scripts": {
     "build": "nest build",
     "dev": "nest start --watch",
@@ -46,6 +49,7 @@
     "prisma": "^7.8.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.2.0",
+    "tsx": "^4.22.4",
     "typescript": "^5.7.0"
   },
   "jest": {
