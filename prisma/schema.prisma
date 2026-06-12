@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Staff {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         StaffRole
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  orders        Order[]
+  shifts        Shift[]
+  refreshTokens RefreshToken[]
+
+  @@map("staff")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  staffId   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Table {
+  id        String      @id @default(uuid())
+  number    Int         @unique
+  seats     Int
+  status    TableStatus @default(available)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  orders       Order[]
+  reservations Reservation[]
+
+  @@map("tables")
+}
+
+model MenuCategory {
+  id        String     @id @default(uuid())
+  name      String
+  sortOrder Int        @default(0)
+  items     MenuItem[]
+
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  categoryId  String
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category        MenuCategory     @relation(fields: [categoryId], references: [id])
+  orderItems      OrderItem[]
+  inventoryUsages InventoryUsage[]
+
+  @@map("menu_items")
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  tableId   String
+  staffId   String
+  status    OrderStatus @default(draft)
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  table Table      @relation(fields: [tableId], references: [id])
+  staff Staff      @relation(fields: [staffId], references: [id])
+  items OrderItem[]
+  bill  Bill?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String          @id @default(uuid())
+  orderId    String
+  menuItemId String
+  quantity   Int
+  status     OrderItemStatus @default(pending)
+  notes      String?
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+model Reservation {
+  id         String   @id @default(uuid())
+  tableId    String
+  guestName  String
+  guestEmail String?
+  guestPhone String?
+  partySize  Int
+  date       DateTime
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  table Table @relation(fields: [tableId], references: [id])
+
+  @@map("reservations")
+}
+
+model Shift {
+  id        String    @id @default(uuid())
+  staffId   String
+  startTime DateTime
+  endTime   DateTime?
+  createdAt DateTime  @default(now())
+
+  staff Staff @relation(fields: [staffId], references: [id])
+
+  @@map("shifts")
+}
+
+model InventoryItem {
+  id        String   @id @default(uuid())
+  name      String
+  unit      String
+  quantity  Decimal  @db.Decimal(10, 3)
+  minStock  Decimal  @db.Decimal(10, 3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usages InventoryUsage[]
+
+  @@map("inventory_items")
+}
+
+model InventoryUsage {
+  id              String  @id @default(uuid())
+  inventoryItemId String
+  menuItemId      String
+  quantityUsed    Decimal @db.Decimal(10, 3)
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  menuItem      MenuItem      @relation(fields: [menuItemId], references: [id])
+
+  @@map("inventory_usages")
+}
+
+model Bill {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  subtotal  Decimal  @db.Decimal(10, 2)
+  tax       Decimal  @db.Decimal(10, 2)
+  total     Decimal  @db.Decimal(10, 2)
+  paid      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("bills")
+}
+
+enum StaffRole {
+  manager
+  waiter
+  kitchen
+  host
+}
+
+enum TableStatus {
+  available
+  occupied
+  reserved
+}
+
+enum OrderStatus {
+  draft
+  sent
+  in_progress
+  ready
+  served
+}
+
+enum OrderItemStatus {
+  pending
+  in_progress
+  ready
+}
