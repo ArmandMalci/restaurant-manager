@@ -23,10 +23,8 @@ const now = new Date()
 describe('TableSchema', () => {
   it('parses a valid table', () => {
     const result = TableSchema.safeParse({
-      id: uuid(), number: 1, capacity: 4,
-      status: 'available', waiterId: null,
-      positionX: 100, positionY: 200,
-      createdAt: now, updatedAt: now,
+      id: uuid(), number: 1, seats: 4,
+      status: 'available', createdAt: now, updatedAt: now,
     })
     expect(result.success).toBe(true)
   })

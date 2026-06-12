@@ -6,11 +6,8 @@ export type TableStatus = z.infer<typeof TableStatusSchema>
 export const TableSchema = z.object({
   id: z.string().uuid(),
   number: z.number().int().positive(),
-  capacity: z.number().int().positive(),
+  seats: z.number().int().positive(),
   status: TableStatusSchema,
-  waiterId: z.string().uuid().nullable(),
-  positionX: z.number().default(0),
-  positionY: z.number().default(0),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 })
@@ -21,3 +18,6 @@ export type CreateTableDto = z.infer<typeof CreateTableSchema>
 
 export const UpdateTableSchema = CreateTableSchema.partial()
 export type UpdateTableDto = z.infer<typeof UpdateTableSchema>
+
+export const SetTableStatusSchema = z.object({ status: TableStatusSchema })
+export type SetTableStatusDto = z.infer<typeof SetTableStatusSchema>
