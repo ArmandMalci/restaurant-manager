@@ -28,3 +28,13 @@ coverage/
 
 # superpowers brainstorm (not source)
 .superpowers/
+
+# ruflo/claude-flow runtime (generated, not source)
+.claude/agents/
+.claude/commands/
+.claude/helpers/
+.claude/memory.db
+.claude/skills/
+.claude-flow/
+.swarm/
+ruvector*
