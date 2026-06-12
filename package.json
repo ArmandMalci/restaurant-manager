@@ -10,13 +10,19 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --ignore-path .gitignore"
   },
   "devDependencies": {
-    "turbo": "^2.9.18",
+    "@types/pg": "^8.20.0",
     "prettier": "^3.4.0",
+    "turbo": "^2.9.18",
     "typescript": "^5.7.0"
   },
   "packageManager": "pnpm@10.11.0",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "pg": "^8.21.0"
   }
 }
