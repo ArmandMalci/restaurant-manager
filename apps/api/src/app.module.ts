@@ -8,6 +8,7 @@ import { TableModule } from './table/table.module'
 import { OrderModule } from './order/order.module'
 import { ReservationModule } from './reservation/reservation.module'
 import { StaffModule } from './staff/staff.module'
+import { ReportsModule } from './reports/reports.module'
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StaffModule } from './staff/staff.module'
     OrderModule,
     ReservationModule,
     StaffModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
 })
