@@ -9,6 +9,7 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main",
+    "gen:spec": "tsx scripts/generate-spec.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "test": "jest",
     "typecheck": "tsc --noEmit"
