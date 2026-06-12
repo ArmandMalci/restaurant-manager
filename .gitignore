@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# builds
+dist/
+.next/
+out/
+build/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# turbo
+.turbo/
+
+# testing
+coverage/
+
+# misc
+.DS_Store
+*.pem
+.vscode/
+.idea/
+
+# superpowers brainstorm (not source)
+.superpowers/
