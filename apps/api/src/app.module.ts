@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module'
 import { AuthModule } from './auth/auth.module'
 import { MenuModule } from './menu/menu.module'
 import { TableModule } from './table/table.module'
+import { OrderModule } from './order/order.module'
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { TableModule } from './table/table.module'
     AuthModule,
     MenuModule,
     TableModule,
+    OrderModule,
   ],
   controllers: [HealthController],
 })
