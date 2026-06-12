@@ -102,6 +102,15 @@ describe('AuthService', () => {
         .rejects.toThrow(UnauthorizedException)
     })
 
+    it('throws UnauthorizedException when token belongs to different staff', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1', token: 'tok', staffId: 'other-uid',
+        expiresAt: new Date(Date.now() + 100_000),
+      })
+      await expect(service.refresh('uid', 'email', 'manager', 'tok'))
+        .rejects.toThrow(UnauthorizedException)
+    })
+
     it('throws UnauthorizedException for expired token', async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValue({
         id: 'rt-1', token: 'tok', staffId: 'uid',

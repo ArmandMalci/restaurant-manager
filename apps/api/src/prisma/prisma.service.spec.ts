@@ -32,4 +32,9 @@ describe('PrismaService', () => {
   it('is defined', () => {
     expect(service).toBeDefined()
   })
+
+  it('onModuleInit calls $connect', async () => {
+    await service.onModuleInit()
+    expect(service.$connect).toHaveBeenCalledTimes(1)
+  })
 })
