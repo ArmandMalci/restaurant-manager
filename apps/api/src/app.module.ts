@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module'
 import { MenuModule } from './menu/menu.module'
 import { TableModule } from './table/table.module'
 import { OrderModule } from './order/order.module'
+import { ReservationModule } from './reservation/reservation.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { OrderModule } from './order/order.module'
     MenuModule,
     TableModule,
     OrderModule,
+    ReservationModule,
   ],
   controllers: [HealthController],
 })
