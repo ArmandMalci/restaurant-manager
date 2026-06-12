@@ -1,4 +1,4 @@
-import { ExecutionContext } from '@nestjs/common'
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import fastifyCookie from '@fastify/cookie'
@@ -127,5 +127,32 @@ describe('AuthController', () => {
     })
     expect(res.statusCode).toBe(204)
     expect(mockAuthService.logout).not.toHaveBeenCalled()
+  })
+
+  it('POST /auth/login returns 401 when service throws UnauthorizedException', async () => {
+    mockAuthService.login.mockRejectedValue(new UnauthorizedException('Invalid credentials'))
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { email: 'a@b.com', password: 'wrong' },
+    })
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('POST /auth/refresh cookie has correct security attributes', async () => {
+    mockAuthService.refresh.mockResolvedValue({
+      accessToken: 'new-tok',
+      refreshToken: 'new-ref',
+    })
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/refresh',
+      cookies: { refresh_token: 'old-ref' },
+    })
+    const cookie = res.headers['set-cookie'] as string
+    expect(cookie).toMatch(/HttpOnly/i)
+    expect(cookie).toMatch(/SameSite=Strict/i)
+    expect(cookie).toMatch(/Path=\/auth\/refresh/)
+    expect(cookie).toMatch(/Max-Age=604800/)
   })
 })

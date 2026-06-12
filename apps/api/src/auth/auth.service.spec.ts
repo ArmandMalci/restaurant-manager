@@ -93,6 +93,17 @@ describe('AuthService', () => {
       expect(result.user.email).toBe('a@b.com')
       expect(mockPrisma.refreshToken.create).toHaveBeenCalledTimes(1)
     })
+
+    it('propagates error when refresh token DB write fails', async () => {
+      const hash = await bcrypt.hash('pass123', 10)
+      mockPrisma.staff.findUnique.mockResolvedValue({
+        id: 'uuid-1', email: 'a@b.com', passwordHash: hash,
+        role: 'manager', active: true, name: 'A',
+      })
+      mockPrisma.refreshToken.create.mockRejectedValue(new Error('DB write failed'))
+      await expect(service.login({ email: 'a@b.com', password: 'pass123' }))
+        .rejects.toThrow('DB write failed')
+    })
   })
 
   describe('refresh', () => {
@@ -133,6 +144,29 @@ describe('AuthService', () => {
       expect(typeof result.refreshToken).toBe('string')
       expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { id: 'rt-1' } })
       expect(mockPrisma.refreshToken.create).toHaveBeenCalledTimes(1)
+    })
+
+    it('propagates error when access token signing fails', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1', token: 'valid-tok', staffId: 'uid',
+        expiresAt: new Date(Date.now() + 100_000),
+      })
+      mockPrisma.refreshToken.delete.mockResolvedValue({})
+      mockJwt.signAsync.mockRejectedValue(new Error('signing failed'))
+      await expect(service.refresh('uid', 'email', 'manager', 'valid-tok'))
+        .rejects.toThrow('signing failed')
+    })
+
+    it('propagates error when new token creation fails after old token deleted', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValue({
+        id: 'rt-1', token: 'valid-tok', staffId: 'uid',
+        expiresAt: new Date(Date.now() + 100_000),
+      })
+      mockPrisma.refreshToken.delete.mockResolvedValue({})
+      mockPrisma.refreshToken.create.mockRejectedValue(new Error('DB write failed'))
+      await expect(service.refresh('uid', 'email', 'manager', 'valid-tok'))
+        .rejects.toThrow('DB write failed')
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { id: 'rt-1' } })
     })
   })
 
