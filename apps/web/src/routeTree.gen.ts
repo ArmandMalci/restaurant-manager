@@ -13,6 +13,12 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AppTablesIndexRouteImport } from './routes/_app/tables/index'
+import { Route as AppStaffIndexRouteImport } from './routes/_app/staff/index'
+import { Route as AppReservationsIndexRouteImport } from './routes/_app/reservations/index'
+import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
+import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
+import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
 
 const AuthRoute = AuthRouteImport.update({
@@ -33,6 +39,36 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppTablesIndexRoute = AppTablesIndexRouteImport.update({
+  id: '/tables/',
+  path: '/tables/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStaffIndexRoute = AppStaffIndexRouteImport.update({
+  id: '/staff/',
+  path: '/staff/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReservationsIndexRoute = AppReservationsIndexRouteImport.update({
+  id: '/reservations/',
+  path: '/reservations/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsIndexRoute = AppReportsIndexRouteImport.update({
+  id: '/reports/',
+  path: '/reports/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrdersIndexRoute = AppOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMenuIndexRoute = AppMenuIndexRouteImport.update({
+  id: '/menu/',
+  path: '/menu/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
@@ -43,11 +79,23 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/dashboard/': typeof AppDashboardIndexRoute
+  '/menu/': typeof AppMenuIndexRoute
+  '/orders/': typeof AppOrdersIndexRoute
+  '/reports/': typeof AppReportsIndexRoute
+  '/reservations/': typeof AppReservationsIndexRoute
+  '/staff/': typeof AppStaffIndexRoute
+  '/tables/': typeof AppTablesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/dashboard': typeof AppDashboardIndexRoute
+  '/menu': typeof AppMenuIndexRoute
+  '/orders': typeof AppOrdersIndexRoute
+  '/reports': typeof AppReportsIndexRoute
+  '/reservations': typeof AppReservationsIndexRoute
+  '/staff': typeof AppStaffIndexRoute
+  '/tables': typeof AppTablesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -56,12 +104,36 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_app/dashboard/': typeof AppDashboardIndexRoute
+  '/_app/menu/': typeof AppMenuIndexRoute
+  '/_app/orders/': typeof AppOrdersIndexRoute
+  '/_app/reports/': typeof AppReportsIndexRoute
+  '/_app/reservations/': typeof AppReservationsIndexRoute
+  '/_app/staff/': typeof AppStaffIndexRoute
+  '/_app/tables/': typeof AppTablesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/dashboard/'
+    | '/menu/'
+    | '/orders/'
+    | '/reports/'
+    | '/reservations/'
+    | '/staff/'
+    | '/tables/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/dashboard'
+  to:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/menu'
+    | '/orders'
+    | '/reports'
+    | '/reservations'
+    | '/staff'
+    | '/tables'
   id:
     | '__root__'
     | '/'
@@ -69,6 +141,12 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_auth/login'
     | '/_app/dashboard/'
+    | '/_app/menu/'
+    | '/_app/orders/'
+    | '/_app/reports/'
+    | '/_app/reservations/'
+    | '/_app/staff/'
+    | '/_app/tables/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -107,6 +185,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/tables/': {
+      id: '/_app/tables/'
+      path: '/tables'
+      fullPath: '/tables/'
+      preLoaderRoute: typeof AppTablesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/staff/': {
+      id: '/_app/staff/'
+      path: '/staff'
+      fullPath: '/staff/'
+      preLoaderRoute: typeof AppStaffIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reservations/': {
+      id: '/_app/reservations/'
+      path: '/reservations'
+      fullPath: '/reservations/'
+      preLoaderRoute: typeof AppReservationsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports/': {
+      id: '/_app/reports/'
+      path: '/reports'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof AppReportsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/orders/': {
+      id: '/_app/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AppOrdersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/menu/': {
+      id: '/_app/menu/'
+      path: '/menu'
+      fullPath: '/menu/'
+      preLoaderRoute: typeof AppMenuIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard/': {
       id: '/_app/dashboard/'
       path: '/dashboard'
@@ -119,10 +239,22 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
+  AppMenuIndexRoute: typeof AppMenuIndexRoute
+  AppOrdersIndexRoute: typeof AppOrdersIndexRoute
+  AppReportsIndexRoute: typeof AppReportsIndexRoute
+  AppReservationsIndexRoute: typeof AppReservationsIndexRoute
+  AppStaffIndexRoute: typeof AppStaffIndexRoute
+  AppTablesIndexRoute: typeof AppTablesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardIndexRoute: AppDashboardIndexRoute,
+  AppMenuIndexRoute: AppMenuIndexRoute,
+  AppOrdersIndexRoute: AppOrdersIndexRoute,
+  AppReportsIndexRoute: AppReportsIndexRoute,
+  AppReservationsIndexRoute: AppReservationsIndexRoute,
+  AppStaffIndexRoute: AppStaffIndexRoute,
+  AppTablesIndexRoute: AppTablesIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
