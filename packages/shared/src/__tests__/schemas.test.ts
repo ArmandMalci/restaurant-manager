@@ -52,10 +52,10 @@ describe('OrderSchema', () => {
   it('parses a valid order', () => {
     const result = OrderSchema.safeParse({
       id: uuid(), tableId: uuid(), staffId: uuid(),
-      status: 'draft',
+      status: 'draft', notes: null,
       items: [{
         id: uuid(), orderId: uuid(), menuItemId: uuid(),
-        quantity: 2, modifiers: ['no onions'], status: 'pending', notes: null,
+        quantity: 2, status: 'pending', notes: null,
       }],
       createdAt: now, updatedAt: now,
     })
