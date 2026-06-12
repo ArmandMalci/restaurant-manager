@@ -88,13 +88,13 @@ describe('ReservationSchema', () => {
     const result = ReservationSchema.safeParse({
       id: uuid(), tableId: null,
       guestName: 'Bob', guestPhone: '+1234', guestEmail: null,
-      partySize: 3, date: '2026-07-01', time: '19:30',
+      partySize: 3, date: '2026-07-01T19:30:00.000Z',
       notes: null, createdAt: now, updatedAt: now,
     })
     expect(result.success).toBe(true)
   })
   it('rejects malformed date', () => {
-    expect(ReservationSchema.shape.date.safeParse('July 1').success).toBe(false)
+    expect(ReservationSchema.shape.date.safeParse('not-a-date').success).toBe(false)
   })
 })
 
