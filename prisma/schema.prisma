@@ -16,9 +16,10 @@ model Staff {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  orders        Order[]
-  shifts        Shift[]
-  refreshTokens RefreshToken[]
+  orders             Order[]
+  shifts             Shift[]
+  refreshTokens      RefreshToken[]
+  pushSubscriptions  PushSubscription[]
 
   @@map("staff")
 }
@@ -216,4 +217,17 @@ model RestaurantSettings {
   updatedAt    DateTime @updatedAt
 
   @@map("restaurant_settings")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  staffId   String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
 }
