@@ -21,6 +21,7 @@ import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index
 import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
 import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
+import { Route as AppBillingIndexRouteImport } from './routes/_app/billing/index'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -80,10 +81,16 @@ const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBillingIndexRoute = AppBillingIndexRouteImport.update({
+  id: '/billing/',
+  path: '/billing/',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
+  '/billing/': typeof AppBillingIndexRoute
   '/dashboard/': typeof AppDashboardIndexRoute
   '/menu/': typeof AppMenuIndexRoute
   '/orders/': typeof AppOrdersIndexRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
+  '/billing': typeof AppBillingIndexRoute
   '/dashboard': typeof AppDashboardIndexRoute
   '/menu': typeof AppMenuIndexRoute
   '/orders': typeof AppOrdersIndexRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
+  '/_app/billing/': typeof AppBillingIndexRoute
   '/_app/dashboard/': typeof AppDashboardIndexRoute
   '/_app/menu/': typeof AppMenuIndexRoute
   '/_app/orders/': typeof AppOrdersIndexRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/billing/'
     | '/dashboard/'
     | '/menu/'
     | '/orders/'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/billing'
     | '/dashboard'
     | '/menu'
     | '/orders'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_auth'
     | '/_auth/login'
+    | '/_app/billing/'
     | '/_app/dashboard/'
     | '/_app/menu/'
     | '/_app/orders/'
@@ -253,10 +265,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/billing/': {
+      id: '/_app/billing/'
+      path: '/billing'
+      fullPath: '/billing/'
+      preLoaderRoute: typeof AppBillingIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppBillingIndexRoute: typeof AppBillingIndexRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
   AppMenuIndexRoute: typeof AppMenuIndexRoute
   AppOrdersIndexRoute: typeof AppOrdersIndexRoute
@@ -268,6 +288,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBillingIndexRoute: AppBillingIndexRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
   AppMenuIndexRoute: AppMenuIndexRoute,
   AppOrdersIndexRoute: AppOrdersIndexRoute,
