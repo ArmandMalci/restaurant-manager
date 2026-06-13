@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import type { CreateOrderDto, UpdateOrderStatusDto, UpdateOrderItemStatusDto } from '@restaurant/shared'
+import { NotificationsService } from '../notifications/notifications.service'
 
 const WITH_ITEMS = { items: { orderBy: { id: 'asc' as const } } }
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   findAll(status?: string) {
     return this.prisma.order.findMany({
@@ -22,8 +26,8 @@ export class OrderService {
     return order
   }
 
-  create(dto: CreateOrderDto, staffId: string) {
-    return this.prisma.order.create({
+  async create(dto: CreateOrderDto, staffId: string) {
+    const order = await this.prisma.order.create({
       data: {
         tableId: dto.tableId,
         staffId,
@@ -38,11 +42,29 @@ export class OrderService {
       },
       include: WITH_ITEMS,
     })
+    const table = await this.prisma.table.findUnique({ where: { id: dto.tableId } })
+    await this.notifications.sendToRole('kitchen', {
+      title: 'New Order',
+      body: `New order received for Table ${table?.number ?? '?'}`,
+    })
+    return order
   }
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto) {
-    await this.findOne(id)
-    return this.prisma.order.update({ where: { id }, data: { status: dto.status as never }, include: WITH_ITEMS })
+    const existing = await this.findOne(id)
+    const order = await this.prisma.order.update({
+      where: { id },
+      data: { status: dto.status as never },
+      include: WITH_ITEMS,
+    })
+    if (dto.status === 'ready') {
+      const table = await this.prisma.table.findUnique({ where: { id: existing.tableId } })
+      await this.notifications.sendToStaff(existing.staffId, {
+        title: 'Order Ready',
+        body: `Table ${table?.number ?? '?'} order is ready to serve`,
+      })
+    }
+    return order
   }
 
   async updateItemStatus(orderId: string, itemId: string, dto: UpdateOrderItemStatusDto) {
