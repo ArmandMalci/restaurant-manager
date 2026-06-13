@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
+import { NotificationsService } from '../notifications/notifications.service'
 import type { CreateInventoryItemDto, UpdateInventoryItemDto, AdjustInventoryDto } from '@restaurant/shared'
 
 @Injectable()
 export class InventoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async findAll() {
     const items = await this.prisma.inventoryItem.findMany({ orderBy: { name: 'asc' } })
@@ -42,6 +46,13 @@ export class InventoryService {
       where: { id },
       data: { quantity: { increment: dto.delta } },
     })
-    return this.findOne(id)
+    const item = await this.findOne(id)
+    if (item.lowStock) {
+      await this.notifications.sendToRole('manager', {
+        title: 'Low Stock Alert',
+        body: `${item.name} is running low (${item.quantity} ${item.unit} remaining)`,
+      })
+    }
+    return item
   }
 }
