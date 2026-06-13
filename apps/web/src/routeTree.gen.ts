@@ -22,6 +22,7 @@ import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
 import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
 import { Route as AppInventoryIndexRouteImport } from './routes/_app/inventory/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
+import { Route as AppCalendarIndexRouteImport } from './routes/_app/calendar/index'
 import { Route as AppBillingIndexRouteImport } from './routes/_app/billing/index'
 
 const AuthRoute = AuthRouteImport.update({
@@ -87,6 +88,11 @@ const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCalendarIndexRoute = AppCalendarIndexRouteImport.update({
+  id: '/calendar/',
+  path: '/calendar/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBillingIndexRoute = AppBillingIndexRouteImport.update({
   id: '/billing/',
   path: '/billing/',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/billing/': typeof AppBillingIndexRoute
+  '/calendar/': typeof AppCalendarIndexRoute
   '/dashboard/': typeof AppDashboardIndexRoute
   '/inventory/': typeof AppInventoryIndexRoute
   '/menu/': typeof AppMenuIndexRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/billing': typeof AppBillingIndexRoute
+  '/calendar': typeof AppCalendarIndexRoute
   '/dashboard': typeof AppDashboardIndexRoute
   '/inventory': typeof AppInventoryIndexRoute
   '/menu': typeof AppMenuIndexRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_app/billing/': typeof AppBillingIndexRoute
+  '/_app/calendar/': typeof AppCalendarIndexRoute
   '/_app/dashboard/': typeof AppDashboardIndexRoute
   '/_app/inventory/': typeof AppInventoryIndexRoute
   '/_app/menu/': typeof AppMenuIndexRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/billing/'
+    | '/calendar/'
     | '/dashboard/'
     | '/inventory/'
     | '/menu/'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/billing'
+    | '/calendar'
     | '/dashboard'
     | '/inventory'
     | '/menu'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_auth/login'
     | '/_app/billing/'
+    | '/_app/calendar/'
     | '/_app/dashboard/'
     | '/_app/inventory/'
     | '/_app/menu/'
@@ -284,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/calendar/': {
+      id: '/_app/calendar/'
+      path: '/calendar'
+      fullPath: '/calendar/'
+      preLoaderRoute: typeof AppCalendarIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/billing/': {
       id: '/_app/billing/'
       path: '/billing'
@@ -296,6 +315,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppBillingIndexRoute: typeof AppBillingIndexRoute
+  AppCalendarIndexRoute: typeof AppCalendarIndexRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
   AppInventoryIndexRoute: typeof AppInventoryIndexRoute
   AppMenuIndexRoute: typeof AppMenuIndexRoute
@@ -309,6 +329,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppBillingIndexRoute: AppBillingIndexRoute,
+  AppCalendarIndexRoute: AppCalendarIndexRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
   AppInventoryIndexRoute: AppInventoryIndexRoute,
   AppMenuIndexRoute: AppMenuIndexRoute,
