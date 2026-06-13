@@ -10,6 +10,7 @@ import { ReservationModule } from './reservation/reservation.module'
 import { StaffModule } from './staff/staff.module'
 import { ReportsModule } from './reports/reports.module'
 import { SettingsModule } from './settings/settings.module'
+import { BillingModule } from './billing/billing.module'
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SettingsModule } from './settings/settings.module'
     StaffModule,
     ReportsModule,
     SettingsModule,
+    BillingModule,
   ],
   controllers: [HealthController],
 })
