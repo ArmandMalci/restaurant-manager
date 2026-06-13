@@ -35,6 +35,10 @@ coverage/
 .claude/helpers/
 .claude/memory.db
 .claude/skills/
+# project-specific definitions (source-controlled)
+!.claude/agents/restaurant/
+!.claude/commands/restaurant/
+!.claude/helpers/hooks/
 .claude-flow/
 .swarm/
 ruvector*
