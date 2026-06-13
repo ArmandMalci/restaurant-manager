@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { Save, Bell, BellOff } from 'lucide-react'
+import { Save, Bell, BellOff, Download } from 'lucide-react'
 import { useSettings, useUpdateSettings } from '@/lib/settings-api'
 import { subscribe, unsubscribe, isSubscribed } from '@/lib/notifications'
+import { useInstallPrompt } from '@/hooks/use-install-prompt'
 
 export const Route = createFileRoute('/_app/settings/')({
   component: SettingsPage,
@@ -41,6 +42,14 @@ function SettingsPage() {
 
   const [notifEnabled, setNotifEnabled] = useState(false)
   const [notifLoading, setNotifLoading] = useState(false)
+
+  const { canInstall, install } = useInstallPrompt()
+  const [installed, setInstalled] = useState(false)
+
+  async function handleInstall() {
+    const accepted = await install()
+    if (accepted) setInstalled(true)
+  }
 
   useEffect(() => {
     isSubscribed().then(setNotifEnabled)
@@ -168,6 +177,25 @@ function SettingsPage() {
               : 'Enable notifications'}
         </button>
       </div>
+
+      {canInstall && !installed && (
+        <div className="space-y-4 rounded-lg border p-6">
+          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+            Install App
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Install Restaurant Manager on this device for faster access and offline support.
+          </p>
+          <button
+            type="button"
+            onClick={handleInstall}
+            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Install App
+          </button>
+        </div>
+      )}
     </div>
   )
 }
