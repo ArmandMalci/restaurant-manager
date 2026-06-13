@@ -7,6 +7,7 @@ import {
   CalendarDays,
   Users,
   BarChart3,
+  Package,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { to: '/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/reservations', label: 'Reservations', icon: CalendarDays },
   { to: '/staff', label: 'Staff', icon: Users },
+  { to: '/inventory', label: 'Inventory', icon: Package },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
 ] as const
 
