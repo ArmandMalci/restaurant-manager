@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { Save } from 'lucide-react'
+import { Save, Bell, BellOff } from 'lucide-react'
 import { useSettings, useUpdateSettings } from '@/lib/settings-api'
+import { subscribe, unsubscribe, isSubscribed } from '@/lib/notifications'
 
 export const Route = createFileRoute('/_app/settings/')({
   component: SettingsPage,
@@ -37,6 +38,28 @@ function Field({
 function SettingsPage() {
   const { data, isLoading } = useSettings()
   const update = useUpdateSettings()
+
+  const [notifEnabled, setNotifEnabled] = useState(false)
+  const [notifLoading, setNotifLoading] = useState(false)
+
+  useEffect(() => {
+    isSubscribed().then(setNotifEnabled)
+  }, [])
+
+  async function toggleNotifications() {
+    setNotifLoading(true)
+    try {
+      if (notifEnabled) {
+        await unsubscribe()
+        setNotifEnabled(false)
+      } else {
+        const ok = await subscribe()
+        setNotifEnabled(ok)
+      }
+    } finally {
+      setNotifLoading(false)
+    }
+  }
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -123,6 +146,28 @@ function SettingsPage() {
           {update.isError && <span className="text-sm text-destructive">Failed to save</span>}
         </div>
       </form>
+
+      <div className="space-y-4 rounded-lg border p-6">
+        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+          Notifications
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Receive push notifications for orders and stock alerts on this device.
+        </p>
+        <button
+          type="button"
+          onClick={toggleNotifications}
+          disabled={notifLoading}
+          className="flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-60"
+        >
+          {notifEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+          {notifLoading
+            ? 'Updating…'
+            : notifEnabled
+              ? 'Disable notifications'
+              : 'Enable notifications'}
+        </button>
+      </div>
     </div>
   )
 }
