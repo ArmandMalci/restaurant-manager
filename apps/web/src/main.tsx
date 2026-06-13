@@ -4,7 +4,10 @@ import { RouterProvider } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { router } from './router'
 import { useAuthStore } from './stores/auth.store'
+import { setupAxiosOfflineInterceptor } from './lib/axios-setup'
 import './index.css'
+
+setupAxiosOfflineInterceptor()
 
 const queryClient = new QueryClient()
 
