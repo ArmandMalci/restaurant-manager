@@ -165,9 +165,11 @@ model Bill {
   id        String   @id @default(uuid())
   orderId   String   @unique
   subtotal  Decimal  @db.Decimal(10, 2)
+  discountPct Decimal @db.Decimal(5, 2) @default(0)
   tax       Decimal  @db.Decimal(10, 2)
   total     Decimal  @db.Decimal(10, 2)
   paid      Boolean  @default(false)
+  paidAt    DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
