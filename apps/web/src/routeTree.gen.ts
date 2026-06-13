@@ -20,6 +20,7 @@ import { Route as AppReservationsIndexRouteImport } from './routes/_app/reservat
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
 import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
+import { Route as AppInventoryIndexRouteImport } from './routes/_app/inventory/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
 import { Route as AppBillingIndexRouteImport } from './routes/_app/billing/index'
 
@@ -76,6 +77,11 @@ const AppMenuIndexRoute = AppMenuIndexRouteImport.update({
   path: '/menu/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInventoryIndexRoute = AppInventoryIndexRouteImport.update({
+  id: '/inventory/',
+  path: '/inventory/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/billing/': typeof AppBillingIndexRoute
   '/dashboard/': typeof AppDashboardIndexRoute
+  '/inventory/': typeof AppInventoryIndexRoute
   '/menu/': typeof AppMenuIndexRoute
   '/orders/': typeof AppOrdersIndexRoute
   '/reports/': typeof AppReportsIndexRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/billing': typeof AppBillingIndexRoute
   '/dashboard': typeof AppDashboardIndexRoute
+  '/inventory': typeof AppInventoryIndexRoute
   '/menu': typeof AppMenuIndexRoute
   '/orders': typeof AppOrdersIndexRoute
   '/reports': typeof AppReportsIndexRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_app/billing/': typeof AppBillingIndexRoute
   '/_app/dashboard/': typeof AppDashboardIndexRoute
+  '/_app/inventory/': typeof AppInventoryIndexRoute
   '/_app/menu/': typeof AppMenuIndexRoute
   '/_app/orders/': typeof AppOrdersIndexRoute
   '/_app/reports/': typeof AppReportsIndexRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/billing/'
     | '/dashboard/'
+    | '/inventory/'
     | '/menu/'
     | '/orders/'
     | '/reports/'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/billing'
     | '/dashboard'
+    | '/inventory'
     | '/menu'
     | '/orders'
     | '/reports'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_app/billing/'
     | '/_app/dashboard/'
+    | '/_app/inventory/'
     | '/_app/menu/'
     | '/_app/orders/'
     | '/_app/reports/'
@@ -258,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMenuIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/inventory/': {
+      id: '/_app/inventory/'
+      path: '/inventory'
+      fullPath: '/inventory/'
+      preLoaderRoute: typeof AppInventoryIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard/': {
       id: '/_app/dashboard/'
       path: '/dashboard'
@@ -278,6 +297,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppBillingIndexRoute: typeof AppBillingIndexRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
+  AppInventoryIndexRoute: typeof AppInventoryIndexRoute
   AppMenuIndexRoute: typeof AppMenuIndexRoute
   AppOrdersIndexRoute: typeof AppOrdersIndexRoute
   AppReportsIndexRoute: typeof AppReportsIndexRoute
@@ -290,6 +310,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppBillingIndexRoute: AppBillingIndexRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
+  AppInventoryIndexRoute: AppInventoryIndexRoute,
   AppMenuIndexRoute: AppMenuIndexRoute,
   AppOrdersIndexRoute: AppOrdersIndexRoute,
   AppReportsIndexRoute: AppReportsIndexRoute,
