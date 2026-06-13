@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import type { Bill } from '@prisma/client'
 import type { CreateBillDto } from './dto/billing.dto'
@@ -43,12 +44,13 @@ export class BillingService {
     }
 
     const subtotal = order.items.reduce((sum, item) => {
-      return sum + item.quantity * Number(item.menuItem.price)
-    }, 0)
+      return sum.plus(new Prisma.Decimal(item.quantity).times(item.menuItem.price))
+    }, new Prisma.Decimal(0))
 
-    const afterDiscount = subtotal * (1 - discountPct / 100)
-    const tax = afterDiscount * 0.1
-    const total = afterDiscount + tax
+    const discountPctDecimal = new Prisma.Decimal(discountPct)
+    const afterDiscount = subtotal.times(new Prisma.Decimal(1).minus(discountPctDecimal.dividedBy(100)))
+    const tax = afterDiscount.times(new Prisma.Decimal('0.1'))
+    const total = afterDiscount.plus(tax)
 
     return this.prisma.bill.create({
       data: {
