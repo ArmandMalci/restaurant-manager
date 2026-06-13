@@ -166,13 +166,17 @@ function BillingPage() {
               </div>
 
               {!bill.paid && (
-                <button
-                  onClick={handlePay}
-                  disabled={payBill.isPending}
-                  className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-60"
-                >
-                  {payBill.isPending ? 'Processing…' : 'Mark as Paid'}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handlePay}
+                    disabled={payBill.isPending}
+                    className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-60"
+                  >
+                    {payBill.isPending ? 'Processing…' : 'Mark as Paid'}
+                  </button>
+                  {payBill.isSuccess && <span className="text-sm text-green-600 font-medium">Paid!</span>}
+                  {payBill.isError && <span className="text-sm text-destructive">Failed to mark as paid</span>}
+                </div>
               )}
               {payBill.isSuccess && bill.paid && (
                 <span className="text-sm text-green-600 font-medium">Payment recorded!</span>
