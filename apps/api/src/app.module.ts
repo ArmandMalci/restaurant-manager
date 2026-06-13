@@ -13,6 +13,7 @@ import { SettingsModule } from './settings/settings.module'
 import { BillingModule } from './billing/billing.module'
 import { InventoryModule } from './inventory/inventory.module'
 import { ShiftModule } from './shift/shift.module'
+import { NotificationsModule } from './notifications/notifications.module'
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ShiftModule } from './shift/shift.module'
     BillingModule,
     InventoryModule,
     ShiftModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
 })
