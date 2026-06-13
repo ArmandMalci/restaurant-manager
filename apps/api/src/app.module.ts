@@ -12,6 +12,7 @@ import { ReportsModule } from './reports/reports.module'
 import { SettingsModule } from './settings/settings.module'
 import { BillingModule } from './billing/billing.module'
 import { InventoryModule } from './inventory/inventory.module'
+import { ShiftModule } from './shift/shift.module'
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { InventoryModule } from './inventory/inventory.module'
     SettingsModule,
     BillingModule,
     InventoryModule,
+    ShiftModule,
   ],
   controllers: [HealthController],
 })
