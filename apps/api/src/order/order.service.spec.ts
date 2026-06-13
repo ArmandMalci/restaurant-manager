@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing'
 import { NotFoundException } from '@nestjs/common'
 import { OrderService } from './order.service'
 import { PrismaService } from '../prisma/prisma.service'
+import { NotificationsService } from '../notifications/notifications.service'
 
 const mockItem = {
   id: 'item-1', orderId: 'ord-1', menuItemId: 'mi-1',
@@ -12,6 +13,11 @@ const mockOrder = {
   status: 'draft', notes: null,
   items: [mockItem],
   createdAt: new Date(), updatedAt: new Date(),
+}
+
+const mockNotifications = {
+  sendToRole: jest.fn().mockResolvedValue(undefined),
+  sendToStaff: jest.fn().mockResolvedValue(undefined),
 }
 
 const prismaMock = {
@@ -26,6 +32,9 @@ const prismaMock = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
+  table: {
+    findUnique: jest.fn(),
+  },
 }
 
 describe('OrderService', () => {
@@ -36,6 +45,7 @@ describe('OrderService', () => {
       providers: [
         OrderService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: NotificationsService, useValue: mockNotifications },
       ],
     }).compile()
     service = module.get(OrderService)
@@ -76,6 +86,7 @@ describe('OrderService', () => {
   describe('create', () => {
     it('creates order with items for the authenticated staff', async () => {
       prismaMock.order.create.mockResolvedValue(mockOrder)
+      prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 1 })
       const dto = { tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 2, notes: null }] }
       const result = await service.create(dto, 'staff-1')
       expect(result).toEqual(mockOrder)

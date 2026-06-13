@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing'
 import { NotFoundException } from '@nestjs/common'
 import { InventoryService } from './inventory.service'
 import { PrismaService } from '../prisma/prisma.service'
+import { NotificationsService } from '../notifications/notifications.service'
 
 const item = {
   id: 'abc-123',
@@ -11,6 +12,11 @@ const item = {
   minStock: 10,
   createdAt: new Date(),
   updatedAt: new Date(),
+}
+
+const mockNotifications = {
+  sendToRole: jest.fn().mockResolvedValue(undefined),
+  sendToStaff: jest.fn().mockResolvedValue(undefined),
 }
 
 const mockPrisma = {
@@ -31,6 +37,7 @@ describe('InventoryService', () => {
       providers: [
         InventoryService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: NotificationsService, useValue: mockNotifications },
       ],
     }).compile()
     service = module.get(InventoryService)
