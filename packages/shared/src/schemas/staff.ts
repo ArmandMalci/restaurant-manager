@@ -23,3 +23,6 @@ export const UpdateStaffSchema = CreateStaffSchema.omit({ password: true }).part
   password: z.string().min(8).optional(),
 })
 export type UpdateStaffDto = z.infer<typeof UpdateStaffSchema>
+
+export const SetActiveSchema = z.object({ active: z.boolean() })
+export type SetActiveDto = z.infer<typeof SetActiveSchema>

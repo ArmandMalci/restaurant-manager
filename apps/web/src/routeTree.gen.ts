@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AppTablesIndexRouteImport } from './routes/_app/tables/index'
 import { Route as AppStaffIndexRouteImport } from './routes/_app/staff/index'
+import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
 import { Route as AppReservationsIndexRouteImport } from './routes/_app/reservations/index'
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
@@ -47,6 +48,11 @@ const AppTablesIndexRoute = AppTablesIndexRouteImport.update({
 const AppStaffIndexRoute = AppStaffIndexRouteImport.update({
   id: '/staff/',
   path: '/staff/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppReservationsIndexRoute = AppReservationsIndexRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/orders/': typeof AppOrdersIndexRoute
   '/reports/': typeof AppReportsIndexRoute
   '/reservations/': typeof AppReservationsIndexRoute
+  '/settings/': typeof AppSettingsIndexRoute
   '/staff/': typeof AppStaffIndexRoute
   '/tables/': typeof AppTablesIndexRoute
 }
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/orders': typeof AppOrdersIndexRoute
   '/reports': typeof AppReportsIndexRoute
   '/reservations': typeof AppReservationsIndexRoute
+  '/settings': typeof AppSettingsIndexRoute
   '/staff': typeof AppStaffIndexRoute
   '/tables': typeof AppTablesIndexRoute
 }
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/_app/orders/': typeof AppOrdersIndexRoute
   '/_app/reports/': typeof AppReportsIndexRoute
   '/_app/reservations/': typeof AppReservationsIndexRoute
+  '/_app/settings/': typeof AppSettingsIndexRoute
   '/_app/staff/': typeof AppStaffIndexRoute
   '/_app/tables/': typeof AppTablesIndexRoute
 }
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/reports/'
     | '/reservations/'
+    | '/settings/'
     | '/staff/'
     | '/tables/'
   fileRoutesByTo: FileRoutesByTo
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/reports'
     | '/reservations'
+    | '/settings'
     | '/staff'
     | '/tables'
   id:
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/_app/orders/'
     | '/_app/reports/'
     | '/_app/reservations/'
+    | '/_app/settings/'
     | '/_app/staff/'
     | '/_app/tables/'
   fileRoutesById: FileRoutesById
@@ -199,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStaffIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/settings/': {
+      id: '/_app/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AppSettingsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/reservations/': {
       id: '/_app/reservations/'
       path: '/reservations'
@@ -243,6 +262,7 @@ interface AppRouteChildren {
   AppOrdersIndexRoute: typeof AppOrdersIndexRoute
   AppReportsIndexRoute: typeof AppReportsIndexRoute
   AppReservationsIndexRoute: typeof AppReservationsIndexRoute
+  AppSettingsIndexRoute: typeof AppSettingsIndexRoute
   AppStaffIndexRoute: typeof AppStaffIndexRoute
   AppTablesIndexRoute: typeof AppTablesIndexRoute
 }
@@ -253,6 +273,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppOrdersIndexRoute: AppOrdersIndexRoute,
   AppReportsIndexRoute: AppReportsIndexRoute,
   AppReservationsIndexRoute: AppReservationsIndexRoute,
+  AppSettingsIndexRoute: AppSettingsIndexRoute,
   AppStaffIndexRoute: AppStaffIndexRoute,
   AppTablesIndexRoute: AppTablesIndexRoute,
 }

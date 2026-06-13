@@ -202,3 +202,16 @@ enum OrderItemStatus {
   in_progress
   ready
 }
+
+model RestaurantSettings {
+  id           String   @id @default("default")
+  name         String   @default("My Restaurant")
+  description  String?
+  phone        String?
+  email        String?
+  address      String?
+  openingHours String?
+  updatedAt    DateTime @updatedAt
+
+  @@map("restaurant_settings")
+}

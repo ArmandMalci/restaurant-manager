@@ -9,6 +9,7 @@ import { OrderModule } from './order/order.module'
 import { ReservationModule } from './reservation/reservation.module'
 import { StaffModule } from './staff/staff.module'
 import { ReportsModule } from './reports/reports.module'
+import { SettingsModule } from './settings/settings.module'
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ReportsModule } from './reports/reports.module'
     ReservationModule,
     StaffModule,
     ReportsModule,
+    SettingsModule,
   ],
   controllers: [HealthController],
 })
