@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import type { BillingService } from './billing.service';
+import { BillingService } from './billing.service';
 import type { CreateBillDto } from './dto/billing.dto';
 
 @ApiTags('billing')

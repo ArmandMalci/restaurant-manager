@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { LoginSchema } from '@restaurant/shared';
-import type { AuthService } from './auth.service';
+import { AuthService } from './auth.service';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 

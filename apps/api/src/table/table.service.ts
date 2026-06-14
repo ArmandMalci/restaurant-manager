@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import type { CreateTableDto, UpdateTableDto, SetTableStatusDto } from '@restaurant/shared';
 
 @Injectable()

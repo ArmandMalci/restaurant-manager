@@ -15,7 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import type { MenuService } from './menu.service';
+import { MenuService } from './menu.service';
 import type {
   CreateMenuCategoryDto,
   UpdateMenuCategoryDto,

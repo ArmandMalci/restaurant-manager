@@ -15,7 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import type { ReservationService } from './reservation.service';
+import { ReservationService } from './reservation.service';
 import type { CreateReservationDto, UpdateReservationDto } from './dto/reservation.dto';
 
 @ApiTags('reservations')

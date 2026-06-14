@@ -15,7 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import type { StaffService } from './staff.service';
+import { StaffService } from './staff.service';
 import type { CreateStaffDto, UpdateStaffDto, SetActiveDto } from './dto/staff.dto';
 
 @ApiTags('staff')

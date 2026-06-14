@@ -14,7 +14,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import type { TableService } from './table.service';
+import { TableService } from './table.service';
 import type { CreateTableDto, UpdateTableDto, SetTableStatusDto } from './dto/table.dto';
 
 @ApiTags('tables')

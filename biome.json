@@ -43,6 +43,7 @@
         "noDefaultExport": "error",
         "noNonNullAssertion": "error",
         "noInferrableTypes": "error",
+        "useImportType": "off",
         "useConsistentArrayType": {
           "level": "error",
           "options": { "syntax": "shorthand" }

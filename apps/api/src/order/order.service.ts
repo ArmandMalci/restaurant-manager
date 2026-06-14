@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import type {
   CreateOrderDto,
   UpdateOrderStatusDto,
   UpdateOrderItemStatusDto,
 } from '@restaurant/shared';
-import type { NotificationsService } from '../notifications/notifications.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const WITH_ITEMS = { items: { orderBy: { id: 'asc' as const } } };
 
