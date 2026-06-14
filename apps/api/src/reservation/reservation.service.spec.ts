@@ -33,6 +33,7 @@ describe('ReservationService', () => {
     const module = await Test.createTestingModule({
       providers: [ReservationService, { provide: PrismaService, useValue: prismaMock }],
     }).compile();
+
     service = module.get(ReservationService);
     jest.clearAllMocks();
   });
@@ -41,6 +42,7 @@ describe('ReservationService', () => {
     it('returns all reservations when no date filter', async () => {
       prismaMock.reservation.findMany.mockResolvedValue([mockRes]);
       const result = await service.findAll();
+
       expect(result).toEqual([mockRes]);
       expect(prismaMock.reservation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: undefined }),
@@ -85,6 +87,7 @@ describe('ReservationService', () => {
         notes: null,
       };
       const result = await service.create(dto);
+
       expect(result).toEqual(mockRes);
     });
   });
@@ -94,6 +97,7 @@ describe('ReservationService', () => {
       prismaMock.reservation.findUnique.mockResolvedValue(mockRes);
       prismaMock.reservation.update.mockResolvedValue({ ...mockRes, partySize: 4 });
       const result = await service.update('res-1', { partySize: 4 });
+
       expect(result.partySize).toBe(4);
     });
 

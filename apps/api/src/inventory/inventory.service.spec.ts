@@ -40,6 +40,7 @@ describe('InventoryService', () => {
         { provide: NotificationsService, useValue: mockNotifications },
       ],
     }).compile();
+
     service = module.get(InventoryService);
     jest.clearAllMocks();
   });
@@ -48,13 +49,16 @@ describe('InventoryService', () => {
     it('returns items with lowStock: true when quantity <= minStock', async () => {
       mockPrisma.inventoryItem.findMany.mockResolvedValue([item]); // quantity 5 <= minStock 10
       const result = await service.findAll();
+
       expect(result[0].lowStock).toBe(true);
     });
 
     it('returns items with lowStock: false when quantity > minStock', async () => {
       const wellStocked = { ...item, quantity: 20, minStock: 10 };
+
       mockPrisma.inventoryItem.findMany.mockResolvedValue([wellStocked]);
       const result = await service.findAll();
+
       expect(result[0].lowStock).toBe(false);
     });
   });
@@ -63,6 +67,7 @@ describe('InventoryService', () => {
     it('returns item by id when found', async () => {
       mockPrisma.inventoryItem.findUnique.mockResolvedValue(item);
       const result = await service.findOne('abc-123');
+
       expect(result.id).toBe('abc-123');
       expect(result).toHaveProperty('lowStock');
       expect(mockPrisma.inventoryItem.findUnique).toHaveBeenCalledWith({
@@ -81,6 +86,7 @@ describe('InventoryService', () => {
       mockPrisma.inventoryItem.create.mockResolvedValue(item);
       const dto = { name: 'Tomatoes', unit: 'kg' as const, quantity: 5, minStock: 10 };
       const result = await service.create(dto);
+
       expect(mockPrisma.inventoryItem.create).toHaveBeenCalledWith({ data: dto });
       expect(result).toHaveProperty('lowStock', true);
     });
@@ -89,6 +95,7 @@ describe('InventoryService', () => {
   describe('adjust', () => {
     it('calls prisma update with { increment: delta } and returns updated item', async () => {
       const updatedItem = { ...item, quantity: 8 };
+
       // findOne is called twice: once to verify existence, once after update
       mockPrisma.inventoryItem.findUnique
         .mockResolvedValueOnce(item) // first findOne (existence check)

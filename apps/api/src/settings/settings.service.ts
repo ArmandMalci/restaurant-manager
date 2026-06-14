@@ -6,9 +6,9 @@ const SETTINGS_ID = 'default';
 
 @Injectable()
 export class SettingsService {
-  constructor(private readonly prisma: PrismaService) {}
+  public constructor(private readonly prisma: PrismaService) {}
 
-  async get() {
+  public async get() {
     return this.prisma.restaurantSettings.upsert({
       where: { id: SETTINGS_ID },
       create: { id: SETTINGS_ID },
@@ -16,7 +16,7 @@ export class SettingsService {
     });
   }
 
-  async update(dto: UpdateSettingsDto) {
+  public async update(dto: UpdateSettingsDto) {
     return this.prisma.restaurantSettings.upsert({
       where: { id: SETTINGS_ID },
       create: { id: SETTINGS_ID, ...dto },

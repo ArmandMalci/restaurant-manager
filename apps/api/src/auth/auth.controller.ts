@@ -16,15 +16,16 @@ interface FastifyRequestLike {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  public constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @HttpCode(200)
-  async login(
+  public async login(
     @Body(new ZodValidationPipe(LoginSchema)) body: { email: string; password: string },
     @Res({ passthrough: true }) res: FastifyReplyLike,
   ) {
     const { accessToken, refreshToken, user } = await this.authService.login(body);
+
     res.setCookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -32,13 +33,14 @@ export class AuthController {
       path: '/auth/refresh',
       maxAge: 7 * 24 * 60 * 60,
     });
+
     return { accessToken, user };
   }
 
   @Post('refresh')
   @HttpCode(200)
   @UseGuards(JwtRefreshGuard)
-  async refresh(
+  public async refresh(
     @CurrentUser() user: { id: string; email: string; role: string; refreshToken: string },
     @Res({ passthrough: true }) res: FastifyReplyLike,
   ) {
@@ -48,6 +50,7 @@ export class AuthController {
       user.role,
       user.refreshToken,
     );
+
     res.setCookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -55,13 +58,18 @@ export class AuthController {
       path: '/auth/refresh',
       maxAge: 7 * 24 * 60 * 60,
     });
+
     return { accessToken };
   }
 
   @Post('logout')
   @HttpCode(204)
-  async logout(@Req() req: FastifyRequestLike, @Res({ passthrough: true }) res: FastifyReplyLike) {
-    const token = req.cookies?.['refresh_token'];
+  public async logout(
+    @Req() req: FastifyRequestLike,
+    @Res({ passthrough: true }) res: FastifyReplyLike,
+  ) {
+    const token = req.cookies?.refresh_token;
+
     if (token) await this.authService.logout(token);
     res.clearCookie('refresh_token', { path: '/auth/refresh' });
   }

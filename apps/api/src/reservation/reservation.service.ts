@@ -4,22 +4,25 @@ import type { CreateReservationDto, UpdateReservationDto } from '@restaurant/sha
 
 @Injectable()
 export class ReservationService {
-  constructor(private readonly prisma: PrismaService) {}
+  public constructor(private readonly prisma: PrismaService) {}
 
-  findAll(date?: string) {
+  public findAll(date?: string) {
     const where = date
       ? { date: { gte: new Date(date), lt: new Date(new Date(date).getTime() + 86_400_000) } }
       : undefined;
+
     return this.prisma.reservation.findMany({ where, orderBy: { date: 'asc' } });
   }
 
-  async findOne(id: string) {
+  public async findOne(id: string) {
     const r = await this.prisma.reservation.findUnique({ where: { id } });
+
     if (!r) throw new NotFoundException('Reservation not found');
+
     return r;
   }
 
-  create(dto: CreateReservationDto) {
+  public create(dto: CreateReservationDto) {
     return this.prisma.reservation.create({
       data: {
         tableId: dto.tableId,
@@ -33,9 +36,10 @@ export class ReservationService {
     });
   }
 
-  async update(id: string, dto: UpdateReservationDto) {
+  public async update(id: string, dto: UpdateReservationDto) {
     await this.findOne(id);
     const data: Record<string, unknown> = {};
+
     if (dto.tableId !== undefined) data.tableId = dto.tableId;
     if (dto.guestName !== undefined) data.guestName = dto.guestName;
     if (dto.guestEmail !== undefined) data.guestEmail = dto.guestEmail;
@@ -43,11 +47,13 @@ export class ReservationService {
     if (dto.partySize !== undefined) data.partySize = dto.partySize;
     if (dto.date !== undefined) data.date = new Date(dto.date);
     if (dto.notes !== undefined) data.notes = dto.notes;
+
     return this.prisma.reservation.update({ where: { id }, data });
   }
 
-  async remove(id: string) {
+  public async remove(id: string) {
     await this.findOne(id);
+
     return this.prisma.reservation.delete({ where: { id } });
   }
 }

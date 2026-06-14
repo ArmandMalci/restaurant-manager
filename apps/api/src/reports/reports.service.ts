@@ -3,10 +3,11 @@ import type { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  public constructor(private readonly prisma: PrismaService) {}
 
-  async getSummary() {
+  public async getSummary() {
     const todayStart = new Date();
+
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date(todayStart.getTime() + 86_400_000);
 

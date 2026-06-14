@@ -22,33 +22,33 @@ import type { CreateTableDto, UpdateTableDto, SetTableStatusDto } from './dto/ta
 @UseGuards(JwtAuthGuard)
 @Controller('tables')
 export class TableController {
-  constructor(private readonly tables: TableService) {}
+  public constructor(private readonly tables: TableService) {}
 
   @Get()
   @ApiOperation({ summary: 'List all tables' })
-  getAll() {
+  public getAll() {
     return this.tables.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a table by id' })
-  getOne(@Param('id') id: string) {
-    return this.tables.findOne(id)
+  public getOne(@Param('id') id: string) {
+    return this.tables.findOne(id);
   }
 
   @Post()
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a table' })
-  create(@Body() dto: CreateTableDto) {
-    return this.tables.create(dto)
+  public create(@Body() dto: CreateTableDto) {
+    return this.tables.create(dto);
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a table' })
-  update(@Param('id') id: string, @Body() dto: UpdateTableDto) {
+  public update(@Param('id') id: string, @Body() dto: UpdateTableDto) {
     return this.tables.update(id, dto);
   }
 
@@ -57,13 +57,13 @@ export class TableController {
   @Roles('manager')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a table' })
-  remove(@Param('id') id: string) {
-    return this.tables.remove(id)
+  public remove(@Param('id') id: string) {
+    return this.tables.remove(id);
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Set table status' })
-  setStatus(@Param('id') id: string, @Body() dto: SetTableStatusDto) {
+  public setStatus(@Param('id') id: string, @Body() dto: SetTableStatusDto) {
     return this.tables.setStatus(id, dto);
   }
 }

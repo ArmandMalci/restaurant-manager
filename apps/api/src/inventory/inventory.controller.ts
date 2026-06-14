@@ -27,42 +27,42 @@ import type {
 @Roles('manager')
 @Controller('inventory')
 export class InventoryController {
-  constructor(private readonly inventory: InventoryService) {}
+  public constructor(private readonly inventory: InventoryService) {}
 
   @Get()
   @ApiOperation({ summary: 'List all inventory items' })
-  findAll() {
+  public findAll() {
     return this.inventory.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get an inventory item by id' })
-  findOne(@Param('id') id: string) {
-    return this.inventory.findOne(id)
+  public findOne(@Param('id') id: string) {
+    return this.inventory.findOne(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create an inventory item' })
-  create(@Body() dto: CreateInventoryItemDto) {
-    return this.inventory.create(dto)
+  public create(@Body() dto: CreateInventoryItemDto) {
+    return this.inventory.create(dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an inventory item' })
-  update(@Param('id') id: string, @Body() dto: UpdateInventoryItemDto) {
+  public update(@Param('id') id: string, @Body() dto: UpdateInventoryItemDto) {
     return this.inventory.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an inventory item' })
-  remove(@Param('id') id: string) {
-    return this.inventory.remove(id)
+  public remove(@Param('id') id: string) {
+    return this.inventory.remove(id);
   }
 
   @Post(':id/adjust')
   @ApiOperation({ summary: 'Adjust stock level' })
-  adjust(@Param('id') id: string, @Body() dto: AdjustInventoryDto) {
+  public adjust(@Param('id') id: string, @Body() dto: AdjustInventoryDto) {
     return this.inventory.adjust(id, dto);
   }
 }

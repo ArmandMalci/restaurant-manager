@@ -11,9 +11,10 @@ jest.mock('pg', () => ({
 }));
 jest.mock('@prisma/client', () => {
   class MockPrismaClient {
-    constructor(_opts?: unknown) {}
-    $connect = jest.fn().mockResolvedValue(undefined);
+    public constructor(_opts?: unknown) {}
+    public $connect = jest.fn().mockResolvedValue(undefined);
   }
+
   return { PrismaClient: MockPrismaClient };
 });
 
@@ -26,6 +27,7 @@ describe('PrismaService', () => {
     const module = await Test.createTestingModule({
       providers: [PrismaService],
     }).compile();
+
     service = module.get(PrismaService);
   });
 

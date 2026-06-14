@@ -26,6 +26,7 @@ describe('SettingsService', () => {
     const module = await Test.createTestingModule({
       providers: [SettingsService, { provide: PrismaService, useValue: prismaMock }],
     }).compile();
+
     service = module.get(SettingsService);
     jest.clearAllMocks();
   });
@@ -34,6 +35,7 @@ describe('SettingsService', () => {
     it('upserts with default id and returns settings', async () => {
       prismaMock.restaurantSettings.upsert.mockResolvedValue(mockRow);
       const result = await service.get();
+
       expect(result.id).toBe('default');
       expect(prismaMock.restaurantSettings.upsert).toHaveBeenCalledWith(
         expect.objectContaining({ where: { id: 'default' } }),
@@ -44,6 +46,7 @@ describe('SettingsService', () => {
       prismaMock.restaurantSettings.upsert.mockResolvedValue(mockRow);
       await service.get();
       const call = prismaMock.restaurantSettings.upsert.mock.calls[0][0];
+
       expect(call.create).toMatchObject({ id: 'default' });
       expect(call.update).toEqual({});
     });
@@ -52,10 +55,13 @@ describe('SettingsService', () => {
   describe('update', () => {
     it('upserts with provided dto fields', async () => {
       const updated = { ...mockRow, name: 'La Maison', phone: '+1 555 0100' };
+
       prismaMock.restaurantSettings.upsert.mockResolvedValue(updated);
       const result = await service.update({ name: 'La Maison', phone: '+1 555 0100' });
+
       expect(result.name).toBe('La Maison');
       const call = prismaMock.restaurantSettings.upsert.mock.calls[0][0];
+
       expect(call.update).toMatchObject({ name: 'La Maison', phone: '+1 555 0100' });
     });
 
@@ -63,6 +69,7 @@ describe('SettingsService', () => {
       prismaMock.restaurantSettings.upsert.mockResolvedValue(mockRow);
       await service.update({ address: '123 Main St' });
       const call = prismaMock.restaurantSettings.upsert.mock.calls[0][0];
+
       expect(call.update).toEqual({ address: '123 Main St' });
     });
   });

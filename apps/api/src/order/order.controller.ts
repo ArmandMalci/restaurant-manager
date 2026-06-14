@@ -28,36 +28,36 @@ import type {
 @UseGuards(JwtAuthGuard)
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orders: OrderService) {}
+  public constructor(private readonly orders: OrderService) {}
 
   @Get()
   @ApiOperation({ summary: 'List orders, optionally filtered by status' })
   @ApiQuery({ name: 'status', required: false })
-  getAll(@Query('status') status?: string) {
-    return this.orders.findAll(status)
+  public getAll(@Query('status') status?: string) {
+    return this.orders.findAll(status);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get an order with its items' })
-  getOne(@Param('id') id: string) {
-    return this.orders.findOne(id)
+  public getOne(@Param('id') id: string) {
+    return this.orders.findOne(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create an order with items' })
-  create(@Body() dto: CreateOrderDto, @CurrentUser('id') staffId: string) {
+  public create(@Body() dto: CreateOrderDto, @CurrentUser('id') staffId: string) {
     return this.orders.create(dto, staffId);
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update order status' })
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
+  public updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.orders.updateStatus(id, dto);
   }
 
   @Patch(':id/items/:itemId/status')
   @ApiOperation({ summary: 'Update order item status' })
-  updateItemStatus(
+  public updateItemStatus(
     @Param('id') id: string,
     @Param('itemId') itemId: string,
     @Body() dto: UpdateOrderItemStatusDto,
@@ -70,7 +70,7 @@ export class OrderController {
   @Roles('manager')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an order' })
-  remove(@Param('id') id: string) {
-    return this.orders.remove(id)
+  public remove(@Param('id') id: string) {
+    return this.orders.remove(id);
   }
 }

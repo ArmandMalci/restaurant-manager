@@ -22,6 +22,7 @@ describe('BillingService', () => {
     const module = await Test.createTestingModule({
       providers: [BillingService, { provide: PrismaService, useValue: prismaMock }],
     }).compile();
+
     service = module.get(BillingService);
     jest.clearAllMocks();
   });
@@ -72,6 +73,7 @@ describe('BillingService', () => {
 
       expect(prismaMock.bill.create).toHaveBeenCalled();
       const callData = prismaMock.bill.create.mock.calls[0][0].data;
+
       expect(callData.orderId).toBe('order-1');
       expect(callData.discountPct).toBe(20);
     });

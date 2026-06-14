@@ -29,6 +29,7 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: mockConfig },
       ],
     }).compile();
+
     service = module.get(AuthService);
     jest.clearAllMocks();
     mockJwt.signAsync.mockResolvedValue('signed-token');
@@ -37,6 +38,7 @@ describe('AuthService', () => {
   describe('validateUser', () => {
     it('returns user without passwordHash on valid credentials', async () => {
       const hash = await bcrypt.hash('password123', 10);
+
       mockPrisma.staff.findUnique.mockResolvedValue({
         id: 'uuid-1',
         email: 'a@b.com',
@@ -48,6 +50,7 @@ describe('AuthService', () => {
         updatedAt: new Date(),
       });
       const result = await service.validateUser('a@b.com', 'password123');
+
       expect(result).not.toBeNull();
       expect(result).not.toHaveProperty('passwordHash');
       expect(result?.email).toBe('a@b.com');
@@ -55,6 +58,7 @@ describe('AuthService', () => {
 
     it('returns null for wrong password', async () => {
       const hash = await bcrypt.hash('correct', 10);
+
       mockPrisma.staff.findUnique.mockResolvedValue({
         id: 'uuid-1',
         email: 'a@b.com',
@@ -73,6 +77,7 @@ describe('AuthService', () => {
 
     it('returns null for inactive staff', async () => {
       const hash = await bcrypt.hash('pass', 10);
+
       mockPrisma.staff.findUnique.mockResolvedValue({
         id: 'uuid-1',
         email: 'a@b.com',
@@ -95,6 +100,7 @@ describe('AuthService', () => {
 
     it('returns accessToken and creates refresh token on success', async () => {
       const hash = await bcrypt.hash('pass123', 10);
+
       mockPrisma.staff.findUnique.mockResolvedValue({
         id: 'uuid-1',
         email: 'a@b.com',
@@ -106,6 +112,7 @@ describe('AuthService', () => {
       mockPrisma.refreshToken.create.mockResolvedValue({});
 
       const result = await service.login({ email: 'a@b.com', password: 'pass123' });
+
       expect(result.accessToken).toBe('signed-token');
       expect(typeof result.refreshToken).toBe('string');
       expect(result.user.email).toBe('a@b.com');
@@ -114,6 +121,7 @@ describe('AuthService', () => {
 
     it('propagates error when refresh token DB write fails', async () => {
       const hash = await bcrypt.hash('pass123', 10);
+
       mockPrisma.staff.findUnique.mockResolvedValue({
         id: 'uuid-1',
         email: 'a@b.com',
@@ -172,6 +180,7 @@ describe('AuthService', () => {
       mockPrisma.refreshToken.create.mockResolvedValue({});
 
       const result = await service.refresh('uid', 'email', 'manager', 'valid-tok');
+
       expect(result.accessToken).toBe('signed-token');
       expect(typeof result.refreshToken).toBe('string');
       expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { id: 'rt-1' } });

@@ -9,6 +9,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter({ logger: process.env.NODE_ENV !== 'test' }),
   );
+
   await app.register(fastifyCookie);
   app.setGlobalPrefix('api');
   app.enableCors({ origin: 'http://localhost:5173', credentials: true });
@@ -20,6 +21,7 @@ async function bootstrap() {
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
+
     SwaggerModule.setup('api/docs', app, document, {
       jsonDocumentUrl: 'api/openapi.json',
     });
@@ -29,6 +31,7 @@ async function bootstrap() {
   }
 
   const port = process.env.PORT ?? 3001;
+
   await app.listen(port, '0.0.0.0');
   console.log(`API running on http://localhost:${port}/api`);
   console.log(`OpenAPI spec: http://localhost:${port}/api/openapi.json`);

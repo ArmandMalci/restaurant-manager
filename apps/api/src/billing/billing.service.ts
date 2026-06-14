@@ -11,9 +11,9 @@ import type { CreateBillDto } from './dto/billing.dto';
 
 @Injectable()
 export class BillingService {
-  constructor(private readonly prisma: PrismaService) {}
+  public constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateBillDto): Promise<Bill> {
+  public async create(dto: CreateBillDto): Promise<Bill> {
     const { orderId, discountPct = 0 } = dto;
 
     const order = await this.prisma.order.findUnique({
@@ -37,6 +37,7 @@ export class BillingService {
     }
 
     const billableStatuses = ['in_progress', 'ready', 'served'];
+
     if (!billableStatuses.includes(order.status)) {
       throw new UnprocessableEntityException(`Cannot bill an order with status '${order.status}'`);
     }
@@ -63,7 +64,7 @@ export class BillingService {
     });
   }
 
-  async findOne(id: string): Promise<Bill> {
+  public async findOne(id: string): Promise<Bill> {
     const bill = await this.prisma.bill.findUnique({ where: { id } });
 
     if (!bill) {
@@ -73,7 +74,7 @@ export class BillingService {
     return bill;
   }
 
-  async pay(id: string): Promise<Bill> {
+  public async pay(id: string): Promise<Bill> {
     const bill = await this.findOne(id);
 
     if (bill.paid) {

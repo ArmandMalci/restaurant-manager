@@ -1,3 +1,4 @@
+import type { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from './roles.guard';
 
@@ -6,7 +7,7 @@ function makeCtx(role: string) {
     switchToHttp: () => ({ getRequest: () => ({ user: { role } }) }),
     getHandler: () => ({}),
     getClass: () => ({}),
-  } as any;
+  } as unknown as ExecutionContext;
 }
 
 describe('RolesGuard', () => {
@@ -44,7 +45,8 @@ describe('RolesGuard', () => {
       switchToHttp: () => ({ getRequest: () => ({ user: undefined }) }),
       getHandler: () => ({}),
       getClass: () => ({}),
-    } as any;
+    } as unknown as ExecutionContext;
+
     expect(guard.canActivate(ctx)).toBe(false);
   });
 });

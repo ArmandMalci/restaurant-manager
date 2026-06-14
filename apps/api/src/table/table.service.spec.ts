@@ -29,6 +29,7 @@ describe('TableService', () => {
     const module = await Test.createTestingModule({
       providers: [TableService, { provide: PrismaService, useValue: prismaMock }],
     }).compile();
+
     service = module.get(TableService);
     jest.clearAllMocks();
   });
@@ -37,6 +38,7 @@ describe('TableService', () => {
     it('returns tables ordered by number', async () => {
       prismaMock.table.findMany.mockResolvedValue([mockTable]);
       const result = await service.findAll();
+
       expect(result).toEqual([mockTable]);
       expect(prismaMock.table.findMany).toHaveBeenCalledWith({ orderBy: { number: 'asc' } });
     });
@@ -58,6 +60,7 @@ describe('TableService', () => {
     it('creates and returns table', async () => {
       prismaMock.table.create.mockResolvedValue(mockTable);
       const result = await service.create({ number: 1, seats: 4, status: 'available' });
+
       expect(result).toEqual(mockTable);
     });
   });
@@ -67,6 +70,7 @@ describe('TableService', () => {
       prismaMock.table.findUnique.mockResolvedValue(mockTable);
       prismaMock.table.update.mockResolvedValue({ ...mockTable, seats: 6 });
       const result = await service.update('tbl-1', { seats: 6 });
+
       expect(result.seats).toBe(6);
     });
 
@@ -95,6 +99,7 @@ describe('TableService', () => {
       prismaMock.table.findUnique.mockResolvedValue(mockTable);
       prismaMock.table.update.mockResolvedValue({ ...mockTable, status: 'occupied' });
       const result = await service.setStatus('tbl-1', { status: 'occupied' });
+
       expect(result.status).toBe('occupied');
       expect(prismaMock.table.update).toHaveBeenCalledWith({
         where: { id: 'tbl-1' },

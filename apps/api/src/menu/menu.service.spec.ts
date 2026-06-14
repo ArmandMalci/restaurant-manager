@@ -39,6 +39,7 @@ describe('MenuService', () => {
     const module = await Test.createTestingModule({
       providers: [MenuService, { provide: PrismaService, useValue: prismaMock }],
     }).compile();
+
     service = module.get(MenuService);
     jest.clearAllMocks();
   });
@@ -49,6 +50,7 @@ describe('MenuService', () => {
     it('returns categories ordered by sortOrder', async () => {
       prismaMock.menuCategory.findMany.mockResolvedValue([mockCategory]);
       const result = await service.findAllCategories();
+
       expect(result).toEqual([mockCategory]);
       expect(prismaMock.menuCategory.findMany).toHaveBeenCalledWith({
         orderBy: { sortOrder: 'asc' },
@@ -72,6 +74,7 @@ describe('MenuService', () => {
     it('creates and returns category', async () => {
       prismaMock.menuCategory.create.mockResolvedValue(mockCategory);
       const result = await service.createCategory({ name: 'Starters', sortOrder: 0 });
+
       expect(result).toEqual(mockCategory);
     });
   });
@@ -81,6 +84,7 @@ describe('MenuService', () => {
       prismaMock.menuCategory.findUnique.mockResolvedValue(mockCategory);
       prismaMock.menuCategory.update.mockResolvedValue({ ...mockCategory, name: 'Mains' });
       const result = await service.updateCategory('cat-1', { name: 'Mains' });
+
       expect(result.name).toBe('Mains');
     });
 
@@ -109,6 +113,7 @@ describe('MenuService', () => {
     it('returns all items when no categoryId filter', async () => {
       prismaMock.menuItem.findMany.mockResolvedValue([mockItem]);
       const result = await service.findAllItems();
+
       expect(result).toEqual([mockItem]);
       expect(prismaMock.menuItem.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: undefined }),
@@ -146,6 +151,7 @@ describe('MenuService', () => {
         description: null,
         available: true,
       });
+
       expect(result).toEqual(mockItem);
       expect(prismaMock.menuItem.create).toHaveBeenCalledWith(
         expect.objectContaining({ data: expect.objectContaining({ name: 'Bruschetta' }) }),
@@ -158,6 +164,7 @@ describe('MenuService', () => {
       prismaMock.menuItem.findUnique.mockResolvedValue(mockItem);
       prismaMock.menuItem.update.mockResolvedValue({ ...mockItem, price: 10.0 });
       const result = await service.updateItem('item-1', { price: 10.0 });
+
       expect(result.price).toBe(10.0);
     });
 
@@ -185,6 +192,7 @@ describe('MenuService', () => {
       prismaMock.menuItem.findUnique.mockResolvedValue(mockItem);
       prismaMock.menuItem.update.mockResolvedValue({ ...mockItem, available: false });
       const result = await service.setItemAvailability('item-1', false);
+
       expect(result.available).toBe(false);
       expect(prismaMock.menuItem.update).toHaveBeenCalledWith({
         where: { id: 'item-1' },

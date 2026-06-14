@@ -11,19 +11,19 @@ import type { UpdateSettingsDto } from './dto/settings.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('settings')
 export class SettingsController {
-  constructor(private readonly settings: SettingsService) {}
+  public constructor(private readonly settings: SettingsService) {}
 
   @Get()
   @Roles('manager', 'waiter', 'kitchen', 'host')
   @ApiOperation({ summary: 'Get restaurant settings' })
-  get() {
+  public get() {
     return this.settings.get();
   }
 
   @Patch()
   @Roles('manager')
   @ApiOperation({ summary: 'Update restaurant settings' })
-  update(@Body() dto: UpdateSettingsDto) {
-    return this.settings.update(dto)
+  public update(@Body() dto: UpdateSettingsDto) {
+    return this.settings.update(dto);
   }
 }

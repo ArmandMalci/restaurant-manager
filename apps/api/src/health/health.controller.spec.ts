@@ -8,11 +8,13 @@ describe('HealthController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
     }).compile();
+
     controller = module.get<HealthController>(HealthController);
   });
 
   it('GET /health returns status ok', () => {
     const result = controller.check();
+
     expect(result.status).toBe('ok');
     expect(typeof result.timestamp).toBe('string');
   });

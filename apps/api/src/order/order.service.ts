@@ -11,12 +11,12 @@ const WITH_ITEMS = { items: { orderBy: { id: 'asc' as const } } };
 
 @Injectable()
 export class OrderService {
-  constructor(
+  public constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
   ) {}
 
-  findAll(status?: string) {
+  public findAll(status?: string) {
     return this.prisma.order.findMany({
       where: status ? { status: status as never } : undefined,
       include: WITH_ITEMS,
@@ -24,13 +24,15 @@ export class OrderService {
     });
   }
 
-  async findOne(id: string) {
+  public async findOne(id: string) {
     const order = await this.prisma.order.findUnique({ where: { id }, include: WITH_ITEMS });
+
     if (!order) throw new NotFoundException('Order not found');
+
     return order;
   }
 
-  async create(dto: CreateOrderDto, staffId: string) {
+  public async create(dto: CreateOrderDto, staffId: string) {
     const order = await this.prisma.order.create({
       data: {
         tableId: dto.tableId,
@@ -47,42 +49,50 @@ export class OrderService {
       include: WITH_ITEMS,
     });
     const table = await this.prisma.table.findUnique({ where: { id: dto.tableId } });
+
     await this.notifications.sendToRole('kitchen', {
       title: 'New Order',
       body: `New order received for Table ${table?.number ?? '?'}`,
     });
+
     return order;
   }
 
-  async updateStatus(id: string, dto: UpdateOrderStatusDto) {
+  public async updateStatus(id: string, dto: UpdateOrderStatusDto) {
     const existing = await this.findOne(id);
     const order = await this.prisma.order.update({
       where: { id },
       data: { status: dto.status as never },
       include: WITH_ITEMS,
     });
+
     if (dto.status === 'ready') {
       const table = await this.prisma.table.findUnique({ where: { id: existing.tableId } });
+
       await this.notifications.sendToStaff(existing.staffId, {
         title: 'Order Ready',
         body: `Table ${table?.number ?? '?'} order is ready to serve`,
       });
     }
+
     return order;
   }
 
-  async updateItemStatus(orderId: string, itemId: string, dto: UpdateOrderItemStatusDto) {
+  public async updateItemStatus(orderId: string, itemId: string, dto: UpdateOrderItemStatusDto) {
     await this.findOne(orderId);
     const item = await this.prisma.orderItem.findUnique({ where: { id: itemId } });
+
     if (!item || item.orderId !== orderId) throw new NotFoundException('Order item not found');
+
     return this.prisma.orderItem.update({
       where: { id: itemId },
       data: { status: dto.status as never },
     });
   }
 
-  async remove(id: string) {
+  public async remove(id: string) {
     await this.findOne(id);
+
     return this.prisma.order.delete({ where: { id } });
   }
 }

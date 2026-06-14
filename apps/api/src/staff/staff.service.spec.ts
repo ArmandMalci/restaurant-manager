@@ -43,6 +43,7 @@ describe('StaffService', () => {
     const module = await Test.createTestingModule({
       providers: [StaffService, { provide: PrismaService, useValue: prismaMock }],
     }).compile();
+
     service = module.get(StaffService);
     jest.clearAllMocks();
   });
@@ -51,6 +52,7 @@ describe('StaffService', () => {
     it('returns stripped staff ordered by name', async () => {
       prismaMock.staff.findMany.mockResolvedValue([mockRow]);
       const result = await service.findAll();
+
       expect(result[0]).not.toHaveProperty('passwordHash');
       expect(prismaMock.staff.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: undefined }),
@@ -70,6 +72,7 @@ describe('StaffService', () => {
     it('returns stripped staff when found', async () => {
       prismaMock.staff.findUnique.mockResolvedValue(mockRow);
       const result = await service.findOne('staff-1');
+
       expect(result).not.toHaveProperty('passwordHash');
     });
 
@@ -131,6 +134,7 @@ describe('StaffService', () => {
       prismaMock.staff.findUnique.mockResolvedValue(mockRow);
       prismaMock.staff.update.mockResolvedValue({ ...mockRow, active: false });
       const result = await service.setActive('staff-1', false);
+
       expect(result).not.toHaveProperty('passwordHash');
       expect(prismaMock.staff.update).toHaveBeenCalledWith({
         where: { id: 'staff-1' },

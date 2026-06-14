@@ -10,7 +10,9 @@
       "!**/*.generated.ts",
       "!**/apps/web/src/api/**",
       "!**/prisma/migrations/**",
-      "!**/*.tsbuildinfo"
+      "!**/*.tsbuildinfo",
+      "!**/apps/web/src/routeTree.gen.ts",
+      "!**/apps/web/src/index.css"
     ]
   },
   "formatter": {
@@ -21,6 +23,9 @@
     "lineEnding": "lf"
   },
   "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    },
     "formatter": {
       "quoteStyle": "single",
       "jsxQuoteStyle": "double",

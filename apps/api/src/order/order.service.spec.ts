@@ -56,6 +56,7 @@ describe('OrderService', () => {
         { provide: NotificationsService, useValue: mockNotifications },
       ],
     }).compile();
+
     service = module.get(OrderService);
     jest.clearAllMocks();
   });
@@ -64,6 +65,7 @@ describe('OrderService', () => {
     it('returns all orders when no filter', async () => {
       prismaMock.order.findMany.mockResolvedValue([mockOrder]);
       const result = await service.findAll();
+
       expect(result).toEqual([mockOrder]);
       expect(prismaMock.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: undefined }),
@@ -101,6 +103,7 @@ describe('OrderService', () => {
         items: [{ menuItemId: 'mi-1', quantity: 2, notes: null }],
       };
       const result = await service.create(dto, 'staff-1');
+
       expect(result).toEqual(mockOrder);
       expect(prismaMock.order.create).toHaveBeenCalledWith(
         expect.objectContaining({ data: expect.objectContaining({ staffId: 'staff-1' }) }),
@@ -113,6 +116,7 @@ describe('OrderService', () => {
       prismaMock.order.findUnique.mockResolvedValue(mockOrder);
       prismaMock.order.update.mockResolvedValue({ ...mockOrder, status: 'sent' });
       const result = await service.updateStatus('ord-1', { status: 'sent' });
+
       expect(result.status).toBe('sent');
     });
 
@@ -130,6 +134,7 @@ describe('OrderService', () => {
       prismaMock.orderItem.findUnique.mockResolvedValue(mockItem);
       prismaMock.orderItem.update.mockResolvedValue({ ...mockItem, status: 'in_progress' });
       const result = await service.updateItemStatus('ord-1', 'item-1', { status: 'in_progress' });
+
       expect(result.status).toBe('in_progress');
     });
 

@@ -23,35 +23,35 @@ import type { CreateShiftDto, UpdateShiftDto } from './dto/shift.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('shifts')
 export class ShiftController {
-  constructor(private readonly shifts: ShiftService) {}
+  public constructor(private readonly shifts: ShiftService) {}
 
   @Get()
   @ApiOperation({ summary: 'List shifts, optionally filtered by date range (YYYY-MM-DD)' })
   @ApiQuery({ name: 'from', required: false })
   @ApiQuery({ name: 'to', required: false })
-  getAll(@Query('from') from?: string, @Query('to') to?: string) {
+  public getAll(@Query('from') from?: string, @Query('to') to?: string) {
     return this.shifts.findAll(from, to);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a shift by id' })
-  getOne(@Param('id') id: string) {
-    return this.shifts.findOne(id)
+  public getOne(@Param('id') id: string) {
+    return this.shifts.findOne(id);
   }
 
   @Post()
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a shift' })
-  create(@Body() dto: CreateShiftDto) {
-    return this.shifts.create(dto)
+  public create(@Body() dto: CreateShiftDto) {
+    return this.shifts.create(dto);
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a shift' })
-  update(@Param('id') id: string, @Body() dto: UpdateShiftDto) {
+  public update(@Param('id') id: string, @Body() dto: UpdateShiftDto) {
     return this.shifts.update(id, dto);
   }
 
@@ -60,7 +60,7 @@ export class ShiftController {
   @Roles('manager')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a shift' })
-  remove(@Param('id') id: string) {
-    return this.shifts.remove(id)
+  public remove(@Param('id') id: string) {
+    return this.shifts.remove(id);
   }
 }

@@ -13,11 +13,11 @@
   "lint-staged": {
     "apps/api/src/**/*.ts": [
       "biome check --write --no-errors-on-unmatched",
-      "eslint --fix"
+      "pnpm --filter @restaurant/api exec eslint --fix"
     ],
     "apps/web/src/**/*.{ts,tsx}": [
       "biome check --write --no-errors-on-unmatched",
-      "eslint --fix"
+      "pnpm --filter @restaurant/web exec eslint --fix"
     ],
     "packages/**/*.ts": [
       "biome check --write --no-errors-on-unmatched"

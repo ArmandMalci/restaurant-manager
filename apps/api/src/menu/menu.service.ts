@@ -9,65 +9,74 @@ import type {
 
 @Injectable()
 export class MenuService {
-  constructor(private readonly prisma: PrismaService) {}
+  public constructor(private readonly prisma: PrismaService) {}
 
   // ── Categories ──────────────────────────────────────────────────────
 
-  findAllCategories() {
+  public findAllCategories() {
     return this.prisma.menuCategory.findMany({ orderBy: { sortOrder: 'asc' } });
   }
 
-  async findOneCategory(id: string) {
+  public async findOneCategory(id: string) {
     const cat = await this.prisma.menuCategory.findUnique({ where: { id } });
+
     if (!cat) throw new NotFoundException('Category not found');
+
     return cat;
   }
 
-  createCategory(dto: CreateMenuCategoryDto) {
+  public createCategory(dto: CreateMenuCategoryDto) {
     return this.prisma.menuCategory.create({ data: dto });
   }
 
-  async updateCategory(id: string, dto: UpdateMenuCategoryDto) {
+  public async updateCategory(id: string, dto: UpdateMenuCategoryDto) {
     await this.findOneCategory(id);
+
     return this.prisma.menuCategory.update({ where: { id }, data: dto });
   }
 
-  async removeCategory(id: string) {
+  public async removeCategory(id: string) {
     await this.findOneCategory(id);
+
     return this.prisma.menuCategory.delete({ where: { id } });
   }
 
   // ── Items ────────────────────────────────────────────────────────────
 
-  findAllItems(categoryId?: string) {
+  public findAllItems(categoryId?: string) {
     return this.prisma.menuItem.findMany({
       where: categoryId ? { categoryId } : undefined,
       orderBy: [{ category: { sortOrder: 'asc' } }, { name: 'asc' }],
     });
   }
 
-  async findOneItem(id: string) {
+  public async findOneItem(id: string) {
     const item = await this.prisma.menuItem.findUnique({ where: { id } });
+
     if (!item) throw new NotFoundException('Menu item not found');
+
     return item;
   }
 
-  createItem(dto: CreateMenuItemDto) {
+  public createItem(dto: CreateMenuItemDto) {
     return this.prisma.menuItem.create({ data: { ...dto, price: dto.price } });
   }
 
-  async updateItem(id: string, dto: UpdateMenuItemDto) {
+  public async updateItem(id: string, dto: UpdateMenuItemDto) {
     await this.findOneItem(id);
+
     return this.prisma.menuItem.update({ where: { id }, data: dto });
   }
 
-  async removeItem(id: string) {
+  public async removeItem(id: string) {
     await this.findOneItem(id);
+
     return this.prisma.menuItem.delete({ where: { id } });
   }
 
-  async setItemAvailability(id: string, available: boolean) {
+  public async setItemAvailability(id: string, available: boolean) {
     await this.findOneItem(id);
+
     return this.prisma.menuItem.update({ where: { id }, data: { available } });
   }
 }

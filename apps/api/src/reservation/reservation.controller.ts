@@ -23,30 +23,30 @@ import type { CreateReservationDto, UpdateReservationDto } from './dto/reservati
 @UseGuards(JwtAuthGuard)
 @Controller('reservations')
 export class ReservationController {
-  constructor(private readonly reservations: ReservationService) {}
+  public constructor(private readonly reservations: ReservationService) {}
 
   @Get()
   @ApiOperation({ summary: 'List reservations, optionally filtered by date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'date', required: false })
-  getAll(@Query('date') date?: string) {
-    return this.reservations.findAll(date)
+  public getAll(@Query('date') date?: string) {
+    return this.reservations.findAll(date);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a reservation by id' })
-  getOne(@Param('id') id: string) {
-    return this.reservations.findOne(id)
+  public getOne(@Param('id') id: string) {
+    return this.reservations.findOne(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a reservation' })
-  create(@Body() dto: CreateReservationDto) {
-    return this.reservations.create(dto)
+  public create(@Body() dto: CreateReservationDto) {
+    return this.reservations.create(dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a reservation' })
-  update(@Param('id') id: string, @Body() dto: UpdateReservationDto) {
+  public update(@Param('id') id: string, @Body() dto: UpdateReservationDto) {
     return this.reservations.update(id, dto);
   }
 
@@ -55,7 +55,7 @@ export class ReservationController {
   @Roles('manager')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a reservation' })
-  remove(@Param('id') id: string) {
-    return this.reservations.remove(id)
+  public remove(@Param('id') id: string) {
+    return this.reservations.remove(id);
   }
 }

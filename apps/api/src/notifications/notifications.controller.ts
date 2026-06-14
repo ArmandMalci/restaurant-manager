@@ -6,23 +6,24 @@ import type { SubscribeDtoClass } from './dto/notification.dto';
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly svc: NotificationsService) {}
+  public constructor(private readonly svc: NotificationsService) {}
 
   @Get('vapid-public-key')
-  getPublicKey() {
+  public getPublicKey() {
     return { publicKey: this.svc.getPublicKey() };
   }
 
   @Post('subscribe')
   @UseGuards(JwtAuthGuard)
-  subscribe(@CurrentUser() user: { id: string }, @Body() dto: SubscribeDtoClass) {
+  public subscribe(@CurrentUser() user: { id: string }, @Body() dto: SubscribeDtoClass) {
     return this.svc.subscribe(user.id, dto);
   }
 
   @Delete('subscribe')
   @UseGuards(JwtAuthGuard)
-  async unsubscribe(@Body() body: { endpoint: string }) {
-    await this.svc.unsubscribe(body.endpoint)
-    return { ok: true }
+  public async unsubscribe(@Body() body: { endpoint: string }) {
+    await this.svc.unsubscribe(body.endpoint);
+
+    return { ok: true };
   }
 }

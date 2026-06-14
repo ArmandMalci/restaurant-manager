@@ -19,21 +19,21 @@ import type { CreateBillDto } from './dto/billing.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('billing')
 export class BillingController {
-  constructor(private readonly billing: BillingService) {}
+  public constructor(private readonly billing: BillingService) {}
 
   @Post()
-  create(@Body() dto: CreateBillDto) {
-    return this.billing.create(dto)
+  public create(@Body() dto: CreateBillDto) {
+    return this.billing.create(dto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.billing.findOne(id)
+  public findOne(@Param('id') id: string) {
+    return this.billing.findOne(id);
   }
 
   @Patch(':id/pay')
   @HttpCode(HttpStatus.OK)
-  pay(@Param('id') id: string) {
-    return this.billing.pay(id)
+  public pay(@Param('id') id: string) {
+    return this.billing.pay(id);
   }
 }

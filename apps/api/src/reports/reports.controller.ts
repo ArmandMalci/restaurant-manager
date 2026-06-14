@@ -8,11 +8,11 @@ import type { ReportsService } from './reports.service';
 @UseGuards(JwtAuthGuard)
 @Controller('reports')
 export class ReportsController {
-  constructor(private readonly reports: ReportsService) {}
+  public constructor(private readonly reports: ReportsService) {}
 
   @Get('summary')
   @ApiOperation({ summary: 'Get operational summary: orders, tables, reservations, top items' })
-  getSummary() {
+  public getSummary() {
     return this.reports.getSummary();
   }
 }

@@ -28,6 +28,7 @@ describe('ShiftService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [ShiftService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
+
     service = module.get(ShiftService);
     jest.clearAllMocks();
   });
@@ -36,6 +37,7 @@ describe('ShiftService', () => {
     it('returns all shifts without filter', async () => {
       mockPrisma.shift.findMany.mockResolvedValue([mockShift]);
       const result = await service.findAll();
+
       expect(result).toEqual([mockShift]);
       expect(mockPrisma.shift.findMany).toHaveBeenCalledWith({
         where: undefined,
@@ -47,6 +49,7 @@ describe('ShiftService', () => {
       mockPrisma.shift.findMany.mockResolvedValue([mockShift]);
       await service.findAll('2026-06-13', '2026-06-13');
       const call = mockPrisma.shift.findMany.mock.calls[0][0];
+
       expect(call.where.startTime.gte).toEqual(new Date('2026-06-13'));
     });
   });
@@ -55,6 +58,7 @@ describe('ShiftService', () => {
     it('returns shift when found', async () => {
       mockPrisma.shift.findUnique.mockResolvedValue(mockShift);
       const result = await service.findOne('shift-uuid-1');
+
       expect(result).toEqual(mockShift);
     });
 
@@ -73,6 +77,7 @@ describe('ShiftService', () => {
         endTime: new Date('2026-06-13T16:00:00Z'),
       };
       const result = await service.create(dto);
+
       expect(result).toEqual(mockShift);
       expect(mockPrisma.shift.create).toHaveBeenCalledWith({
         data: {
@@ -88,10 +93,12 @@ describe('ShiftService', () => {
     it('updates a shift when found', async () => {
       mockPrisma.shift.findUnique.mockResolvedValue(mockShift);
       const updated = { ...mockShift, endTime: new Date('2026-06-13T18:00:00Z') };
+
       mockPrisma.shift.update.mockResolvedValue(updated);
       const result = await service.update('shift-uuid-1', {
         endTime: new Date('2026-06-13T18:00:00Z'),
       });
+
       expect(result.endTime).toEqual(new Date('2026-06-13T18:00:00Z'));
     });
 
@@ -106,6 +113,7 @@ describe('ShiftService', () => {
       mockPrisma.shift.findUnique.mockResolvedValue(mockShift);
       mockPrisma.shift.delete.mockResolvedValue(mockShift);
       const result = await service.remove('shift-uuid-1');
+
       expect(result).toEqual(mockShift);
     });
 

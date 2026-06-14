@@ -24,7 +24,9 @@ describe('AuthController', () => {
       .useValue({
         canActivate: (ctx: ExecutionContext) => {
           const req = ctx.switchToHttp().getRequest();
+
           req.user = { id: 'uid', email: 'a@b.com', role: 'manager', refreshToken: 'old-ref' };
+
           return true;
         },
       })
@@ -54,9 +56,11 @@ describe('AuthController', () => {
 
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
+
     expect(body.accessToken).toBe('tok');
     expect(body).not.toHaveProperty('refreshToken');
     const cookie = res.headers['set-cookie'] as string;
+
     expect(cookie).toMatch(/refresh_token=ref/);
   });
 
@@ -66,6 +70,7 @@ describe('AuthController', () => {
       url: '/auth/login',
       payload: { email: 'not-an-email', password: '' },
     });
+
     expect(res.statusCode).toBe(400);
   });
 
@@ -83,6 +88,7 @@ describe('AuthController', () => {
     });
 
     const cookie = res.headers['set-cookie'] as string;
+
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/Path=\/auth\/refresh/);
@@ -103,9 +109,11 @@ describe('AuthController', () => {
 
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
+
     expect(body.accessToken).toBe('new-tok');
     expect(body).not.toHaveProperty('refreshToken');
     const cookie = res.headers['set-cookie'] as string;
+
     expect(cookie).toMatch(/refresh_token=new-ref/);
     expect(mockAuthService.refresh).toHaveBeenCalledWith('uid', 'a@b.com', 'manager', 'old-ref');
   });
@@ -117,6 +125,7 @@ describe('AuthController', () => {
       url: '/auth/logout',
       cookies: { refresh_token: 'ref' },
     });
+
     expect(res.statusCode).toBe(204);
   });
 
@@ -125,6 +134,7 @@ describe('AuthController', () => {
       method: 'POST',
       url: '/auth/logout',
     });
+
     expect(res.statusCode).toBe(204);
     expect(mockAuthService.logout).not.toHaveBeenCalled();
   });
@@ -136,6 +146,7 @@ describe('AuthController', () => {
       url: '/auth/login',
       payload: { email: 'a@b.com', password: 'wrong' },
     });
+
     expect(res.statusCode).toBe(401);
   });
 
@@ -150,6 +161,7 @@ describe('AuthController', () => {
       cookies: { refresh_token: 'old-ref' },
     });
     const cookie = res.headers['set-cookie'] as string;
+
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/Path=\/auth\/refresh/);

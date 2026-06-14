@@ -27,6 +27,7 @@ const mockConfig = {
       VAPID_PRIVATE_KEY: 'test-priv',
       VAPID_SUBJECT: 'mailto:test@example.com',
     };
+
     return env[key] ?? fallback;
   }),
 };
@@ -43,6 +44,7 @@ describe('NotificationsService', () => {
         { provide: ConfigService, useValue: mockConfig },
       ],
     }).compile();
+
     service = module.get(NotificationsService);
     service.onModuleInit();
   });
@@ -63,6 +65,7 @@ describe('NotificationsService', () => {
     mockPrisma.pushSubscription.upsert.mockResolvedValue({ id: 'sub-1' });
     const dto = { endpoint: 'https://push.example.com/sub1', keys: { p256dh: 'abc', auth: 'xyz' } };
     const result = await service.subscribe('staff-1', dto);
+
     expect(mockPrisma.pushSubscription.upsert).toHaveBeenCalledWith({
       where: { endpoint: dto.endpoint },
       create: { staffId: 'staff-1', endpoint: dto.endpoint, p256dh: 'abc', auth: 'xyz' },

@@ -9,15 +9,16 @@ export class NotificationsService implements OnModuleInit {
   private readonly logger = new Logger(NotificationsService.name);
   private vapidReady = false;
 
-  constructor(
+  public constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {}
 
-  onModuleInit() {
+  public onModuleInit() {
     const publicKey = this.config.get<string>('VAPID_PUBLIC_KEY', '');
     const privateKey = this.config.get<string>('VAPID_PRIVATE_KEY', '');
     const subject = this.config.get<string>('VAPID_SUBJECT', 'mailto:admin@restaurant.local');
+
     if (publicKey && privateKey) {
       webpush.setVapidDetails(subject, publicKey, privateKey);
       this.vapidReady = true;
@@ -26,11 +27,11 @@ export class NotificationsService implements OnModuleInit {
     }
   }
 
-  getPublicKey(): string {
+  public getPublicKey(): string {
     return this.config.get<string>('VAPID_PUBLIC_KEY', '');
   }
 
-  async subscribe(staffId: string, dto: SubscribeDto) {
+  public async subscribe(staffId: string, dto: SubscribeDto) {
     return this.prisma.pushSubscription.upsert({
       where: { endpoint: dto.endpoint },
       create: {
@@ -47,18 +48,20 @@ export class NotificationsService implements OnModuleInit {
     });
   }
 
-  async unsubscribe(endpoint: string): Promise<void> {
+  public async unsubscribe(endpoint: string): Promise<void> {
     await this.prisma.pushSubscription.deleteMany({ where: { endpoint } });
   }
 
-  async sendToRole(role: string, payload: { title: string; body: string }): Promise<void> {
+  public async sendToRole(role: string, payload: { title: string; body: string }): Promise<void> {
     if (!this.vapidReady) {
       this.logger.debug('Push skipped — VAPID not configured');
+
       return;
     }
     const subs = await this.prisma.pushSubscription.findMany({
       where: { staff: { role: role as never } },
     });
+
     await Promise.allSettled(
       subs.map((sub) =>
         webpush
@@ -73,12 +76,17 @@ export class NotificationsService implements OnModuleInit {
     );
   }
 
-  async sendToStaff(staffId: string, payload: { title: string; body: string }): Promise<void> {
+  public async sendToStaff(
+    staffId: string,
+    payload: { title: string; body: string },
+  ): Promise<void> {
     if (!this.vapidReady) {
       this.logger.debug('Push skipped — VAPID not configured');
+
       return;
     }
     const subs = await this.prisma.pushSubscription.findMany({ where: { staffId } });
+
     await Promise.allSettled(
       subs.map((sub) =>
         webpush
