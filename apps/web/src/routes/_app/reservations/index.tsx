@@ -17,6 +17,7 @@ export const Route = createFileRoute('/_app/reservations/')({
 
 function toDatetimeLocal(d: Date | string) {
   const dt = new Date(d);
+
   return dt.toISOString().slice(0, 16);
 }
 
@@ -66,16 +67,16 @@ function ReservationForm({
           notes: notes || null,
         });
       }}
-      className="rounded-lg border p-4 space-y-4"
+      className="space-y-4 rounded-lg border p-4"
     >
       <div className="flex flex-wrap gap-3">
-        <label className="flex flex-col gap-1 text-sm flex-1 min-w-40">
+        <label className="flex min-w-40 flex-1 flex-col gap-1 text-sm">
           Guest name *
           <input
             value={guestName}
             onChange={(e) => setGuestName(e.target.value)}
             required
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -86,7 +87,7 @@ function ReservationForm({
             value={partySize}
             onChange={(e) => setPartySize(Number(e.target.value))}
             required
-            className="w-24 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring w-24 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -96,7 +97,7 @@ function ReservationForm({
             value={datetime}
             onChange={(e) => setDatetime(e.target.value)}
             required
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
       </div>
@@ -107,7 +108,7 @@ function ReservationForm({
             value={tableId}
             onChange={(e) => setTableId(e.target.value)}
             required
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           >
             <option value="">Select table…</option>
             {tables.map((t) => (
@@ -117,13 +118,13 @@ function ReservationForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm flex-1 min-w-32">
+        <label className="flex min-w-32 flex-1 flex-col gap-1 text-sm">
           Email
           <input
             type="email"
             value={guestEmail}
             onChange={(e) => setGuestEmail(e.target.value)}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -131,7 +132,7 @@ function ReservationForm({
           <input
             value={guestPhone}
             onChange={(e) => setGuestPhone(e.target.value)}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
       </div>
@@ -141,20 +142,20 @@ function ReservationForm({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optional"
-          className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </label>
       <div className="flex gap-2">
         <button
           type="submit"
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Cancel
         </button>
@@ -174,20 +175,21 @@ function ReservationsPage() {
   const updateRes = useUpdateReservation();
   const deleteRes = useDeleteReservation();
 
-  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
+  if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Reservations</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             {reservations.length} reservation{reservations.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setFormMode('create')}
-          className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
         >
           <Plus className="h-4 w-4" /> New
         </button>
@@ -200,13 +202,14 @@ function ReservationsPage() {
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         {dateFilter && (
           <button
+            type="button"
             onClick={() => setDateFilter('')}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground text-xs transition-colors"
           >
             Show all
           </button>
@@ -223,7 +226,7 @@ function ReservationsPage() {
       )}
 
       {reservations.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           No reservations{dateFilter ? ` for ${dateFilter}` : ''}.
         </p>
       ) : (
@@ -245,16 +248,16 @@ function ReservationsPage() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-0.5">
                     <p className="font-medium">{r.guestName}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {new Date(r.date).toLocaleString()} · {r.partySize} guests
                     </p>
                     {r.guestEmail && (
-                      <p className="text-xs text-muted-foreground">{r.guestEmail}</p>
+                      <p className="text-muted-foreground text-xs">{r.guestEmail}</p>
                     )}
                     {r.guestPhone && (
-                      <p className="text-xs text-muted-foreground">{r.guestPhone}</p>
+                      <p className="text-muted-foreground text-xs">{r.guestPhone}</p>
                     )}
-                    {r.notes && <p className="text-xs italic text-muted-foreground">{r.notes}</p>}
+                    {r.notes && <p className="text-muted-foreground text-xs italic">{r.notes}</p>}
                   </div>
                   <div className="flex items-center gap-1">
                     <span
@@ -266,19 +269,21 @@ function ReservationsPage() {
                       {r.tableId ? 'Table assigned' : 'No table'}
                     </span>
                     <button
+                      type="button"
                       onClick={() => setFormMode({ id: r.id })}
                       aria-label="Edit"
-                      className="ml-2 rounded p-1 hover:bg-accent transition-colors"
+                      className="hover:bg-accent ml-2 rounded p-1 transition-colors"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
+                      type="button"
                       onClick={() =>
                         window.confirm(`Delete reservation for ${r.guestName}?`) &&
                         deleteRes.mutate(r.id)
                       }
                       aria-label="Delete"
-                      className="rounded p-1 text-destructive hover:bg-accent transition-colors"
+                      className="text-destructive hover:bg-accent rounded p-1 transition-colors"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

@@ -16,6 +16,7 @@ export function useTables() {
 
 export function useCreateTable() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateTableDto) => apiClient.post<Table>('/tables', dto).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: tableKeys.all }),
@@ -24,6 +25,7 @@ export function useCreateTable() {
 
 export function useUpdateTable() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateTableDto }) =>
       apiClient.patch<Table>(`/tables/${id}`, dto).then((r) => r.data),
@@ -33,6 +35,7 @@ export function useUpdateTable() {
 
 export function useDeleteTable() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/tables/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: tableKeys.all }),
@@ -41,6 +44,7 @@ export function useDeleteTable() {
 
 export function useSetTableStatus() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: SetTableStatusDto }) =>
       apiClient.patch<Table>(`/tables/${id}/status`, dto).then((r) => r.data),

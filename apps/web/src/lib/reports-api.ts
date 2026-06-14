@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from './api-client';
 
-export type ReportSummary = {
+export interface ReportSummary {
   ordersByStatus: Record<string, number>;
   tablesByStatus: Record<string, number>;
   reservationsToday: number;
   topItems: { menuItemId: string; name: string; totalQuantity: number }[];
-};
+}
 
 export function useReportSummary() {
   return useQuery({

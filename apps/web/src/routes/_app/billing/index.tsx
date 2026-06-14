@@ -48,15 +48,15 @@ function BillingPage() {
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-2xl">
+    <div className="max-w-2xl space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Billing</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Create and manage bills for orders</p>
+        <p className="text-muted-foreground mt-1 text-sm">Create and manage bills for orders</p>
       </div>
 
       {/* Create Bill */}
       <form onSubmit={handleCreate} className="space-y-4 rounded-lg border p-6">
-        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+        <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
           Create Bill
         </h2>
 
@@ -68,7 +68,7 @@ function BillingPage() {
             onChange={(e) => setOrderId(e.target.value)}
             placeholder="Enter order ID"
             required
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
 
@@ -81,7 +81,7 @@ function BillingPage() {
             placeholder="0"
             min={0}
             max={100}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
 
@@ -89,7 +89,7 @@ function BillingPage() {
           <button
             type="submit"
             disabled={createBill.isPending}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60"
           >
             {createBill.isPending ? 'Creating…' : 'Create Bill'}
           </button>
@@ -105,7 +105,7 @@ function BillingPage() {
 
       {/* Find Bill */}
       <form onSubmit={handleLookup} className="space-y-4 rounded-lg border p-6">
-        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+        <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
           Find Bill
         </h2>
 
@@ -116,14 +116,14 @@ function BillingPage() {
             value={billId}
             onChange={(e) => setBillId(e.target.value)}
             placeholder="Enter bill ID"
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
 
         <button
           type="submit"
           disabled={!billId.trim()}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60"
         >
           Find Bill
         </button>
@@ -131,13 +131,13 @@ function BillingPage() {
 
       {/* Bill Details */}
       {lookupId && (
-        <div className="rounded-lg border p-6 space-y-4">
-          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+        <div className="space-y-4 rounded-lg border p-6">
+          <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
             Bill Details
           </h2>
 
-          {billLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {billError && <p className="text-sm text-destructive">Bill not found</p>}
+          {billLoading && <p className="text-muted-foreground text-sm">Loading…</p>}
+          {billError && <p className="text-destructive text-sm">Bill not found</p>}
 
           {bill && (
             <div className="space-y-3">
@@ -163,7 +163,7 @@ function BillingPage() {
                 <span className="text-muted-foreground">Status</span>
                 <span
                   className={
-                    bill.paid ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'
+                    bill.paid ? 'font-medium text-green-600' : 'font-medium text-amber-600'
                   }
                 >
                   {bill.paid ? 'Paid' : 'Unpaid'}
@@ -180,22 +180,23 @@ function BillingPage() {
               {!bill.paid && (
                 <div className="flex items-center gap-3">
                   <button
+                    type="button"
                     onClick={handlePay}
                     disabled={payBill.isPending}
-                    className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-60"
+                    className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-60"
                   >
                     {payBill.isPending ? 'Processing…' : 'Mark as Paid'}
                   </button>
                   {payBill.isSuccess && (
-                    <span className="text-sm text-green-600 font-medium">Paid!</span>
+                    <span className="text-sm font-medium text-green-600">Paid!</span>
                   )}
                   {payBill.isError && (
-                    <span className="text-sm text-destructive">Failed to mark as paid</span>
+                    <span className="text-destructive text-sm">Failed to mark as paid</span>
                   )}
                 </div>
               )}
               {payBill.isSuccess && bill.paid && (
-                <span className="text-sm text-green-600 font-medium">Payment recorded!</span>
+                <span className="text-sm font-medium text-green-600">Payment recorded!</span>
               )}
             </div>
           )}

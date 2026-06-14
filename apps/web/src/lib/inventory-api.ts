@@ -30,6 +30,7 @@ export function useInventoryItem(id: string) {
 
 export function useCreateInventoryItem() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateInventoryItemDto) =>
       apiClient.post<InventoryItemWithStatus>('/inventory', dto).then((r) => r.data),
@@ -39,6 +40,7 @@ export function useCreateInventoryItem() {
 
 export function useUpdateInventoryItem() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateInventoryItemDto }) =>
       apiClient.patch<InventoryItemWithStatus>(`/inventory/${id}`, dto).then((r) => r.data),
@@ -48,6 +50,7 @@ export function useUpdateInventoryItem() {
 
 export function useDeleteInventoryItem() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/inventory/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: inventoryKeys.all() }),
@@ -56,6 +59,7 @@ export function useDeleteInventoryItem() {
 
 export function useAdjustInventory() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: AdjustInventoryDto }) =>
       apiClient.post<InventoryItemWithStatus>(`/inventory/${id}/adjust`, dto).then((r) => r.data),

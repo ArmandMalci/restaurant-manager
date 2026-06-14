@@ -48,34 +48,40 @@ function CategoryForm({
       }}
     >
       <div className="flex-1 space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Name</label>
+        <label htmlFor="cat-name" className="text-muted-foreground text-xs font-medium">
+          Name
+        </label>
         <input
+          id="cat-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus-visible:ring-2 ring-ring/50"
+          className="bg-background ring-ring/50 w-full rounded-md border px-3 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </div>
       <div className="w-24 space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Order</label>
+        <label htmlFor="cat-sort-order" className="text-muted-foreground text-xs font-medium">
+          Order
+        </label>
         <input
+          id="cat-sort-order"
           type="number"
           min={0}
           value={sortOrder}
           onChange={(e) => setSortOrder(Number(e.target.value))}
-          className="w-full rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus-visible:ring-2 ring-ring/50"
+          className="bg-background ring-ring/50 w-full rounded-md border px-3 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </div>
       <button
         type="submit"
-        className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
       >
         Save
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
+        className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
       >
         Cancel
       </button>
@@ -123,21 +129,27 @@ function ItemForm({
       }}
     >
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Name</label>
+        <label htmlFor="item-name" className="text-muted-foreground text-xs font-medium">
+          Name
+        </label>
         <input
+          id="item-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus-visible:ring-2 ring-ring/50"
+          className="bg-background ring-ring/50 w-full rounded-md border px-3 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </div>
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Category</label>
+        <label htmlFor="item-category" className="text-muted-foreground text-xs font-medium">
+          Category
+        </label>
         <select
+          id="item-category"
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           required
-          className="w-full rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus-visible:ring-2 ring-ring/50"
+          className="bg-background ring-ring/50 w-full rounded-md border px-3 py-1.5 text-sm outline-none focus-visible:ring-2"
         >
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
@@ -147,23 +159,29 @@ function ItemForm({
         </select>
       </div>
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Price (€)</label>
+        <label htmlFor="item-price" className="text-muted-foreground text-xs font-medium">
+          Price (€)
+        </label>
         <input
+          id="item-price"
           type="number"
           step="0.01"
           min="0"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           required
-          className="w-full rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus-visible:ring-2 ring-ring/50"
+          className="bg-background ring-ring/50 w-full rounded-md border px-3 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </div>
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">Description</label>
+        <label htmlFor="item-description" className="text-muted-foreground text-xs font-medium">
+          Description
+        </label>
         <input
+          id="item-description"
           value={description ?? ''}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded-md border bg-background px-3 py-1.5 text-sm outline-none focus-visible:ring-2 ring-ring/50"
+          className="bg-background ring-ring/50 w-full rounded-md border px-3 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </div>
       <div className="col-span-2 flex items-center gap-2">
@@ -181,14 +199,14 @@ function ItemForm({
       <div className="col-span-2 flex gap-2">
         <button
           type="submit"
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Cancel
         </button>
@@ -226,12 +244,13 @@ function MenuPage() {
       <h1 className="text-2xl font-bold tracking-tight">Menu</h1>
 
       {/* Categories panel */}
-      <section className="rounded-lg border p-4 space-y-4">
+      <section className="space-y-4 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">Categories</h2>
           <button
+            type="button"
             onClick={() => setCatFormMode('create')}
-            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-accent transition-colors"
+            className="hover:bg-accent flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors"
           >
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
@@ -247,7 +266,7 @@ function MenuPage() {
         )}
 
         {loadingCats ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-muted-foreground text-sm">Loading…</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
@@ -264,9 +283,10 @@ function MenuPage() {
                     onCancel={() => setCatFormMode('none')}
                   />
                 ) : (
-                  <div
+                  <button
+                    type="button"
                     className={cn(
-                      'flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm cursor-pointer select-none transition-colors',
+                      'flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors select-none',
                       selectedCatId === cat.id
                         ? 'bg-primary text-primary-foreground border-primary'
                         : 'hover:bg-accent',
@@ -275,24 +295,26 @@ function MenuPage() {
                   >
                     {cat.name}
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setCatFormMode({ id: cat.id });
                       }}
-                      className="hover:opacity-70 transition-opacity"
+                      className="transition-opacity hover:opacity-70"
                     >
                       <Pencil className="h-3 w-3" />
                     </button>
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (confirm(`Delete "${cat.name}"?`)) deleteCat.mutate(cat.id);
                       }}
-                      className="hover:opacity-70 transition-opacity"
+                      className="transition-opacity hover:opacity-70"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
-                  </div>
+                  </button>
                 )}
               </div>
             ))}
@@ -301,18 +323,19 @@ function MenuPage() {
       </section>
 
       {/* Items panel */}
-      <section className="rounded-lg border p-4 space-y-4">
+      <section className="space-y-4 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">
             Items
             {selectedCatId && categories.find((c) => c.id === selectedCatId)
-              ? ` — ${categories.find((c) => c.id === selectedCatId)!.name}`
+              ? ` — ${categories.find((c) => c.id === selectedCatId)?.name}`
               : ' (all)'}
           </h2>
           <button
+            type="button"
             onClick={() => setItemFormMode('create')}
             disabled={categories.length === 0}
-            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-accent disabled:opacity-50 transition-colors"
+            className="hover:bg-accent flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" /> Add item
           </button>
@@ -321,7 +344,11 @@ function MenuPage() {
         {itemFormMode === 'create' && (
           <ItemForm
             categories={
-              selectedCatId ? [categories.find((c) => c.id === selectedCatId)!] : categories
+              selectedCatId
+                ? ([categories.find((c) => c.id === selectedCatId)].filter(
+                    Boolean,
+                  ) as typeof categories)
+                : categories
             }
             onSave={(data) => {
               createItem.mutate(data, { onSuccess: () => setItemFormMode('none') });
@@ -331,17 +358,17 @@ function MenuPage() {
         )}
 
         {loadingItems ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-muted-foreground text-sm">Loading…</p>
         ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No items yet.</p>
+          <p className="text-muted-foreground text-sm">No items yet.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b text-left text-muted-foreground">
+              <tr className="text-muted-foreground border-b text-left">
                 <th className="pb-2 font-medium">Name</th>
                 <th className="pb-2 font-medium">Description</th>
-                <th className="pb-2 font-medium text-right">Price</th>
-                <th className="pb-2 font-medium text-center">Available</th>
+                <th className="pb-2 text-right font-medium">Price</th>
+                <th className="pb-2 text-center font-medium">Available</th>
                 <th className="pb-2" />
               </tr>
             </thead>
@@ -365,10 +392,11 @@ function MenuPage() {
                   ) : (
                     <>
                       <td className="py-2 font-medium">{item.name}</td>
-                      <td className="py-2 text-muted-foreground">{item.description ?? '—'}</td>
+                      <td className="text-muted-foreground py-2">{item.description ?? '—'}</td>
                       <td className="py-2 text-right">€{Number(item.price).toFixed(2)}</td>
                       <td className="py-2 text-center">
                         <button
+                          type="button"
                           onClick={() =>
                             toggleAvail.mutate({ id: item.id, available: !item.available })
                           }
@@ -378,21 +406,23 @@ function MenuPage() {
                           )}
                         >
                           {item.available ? (
-                            <Eye className="h-4 w-4 inline" />
+                            <Eye className="inline h-4 w-4" />
                           ) : (
-                            <EyeOff className="h-4 w-4 inline" />
+                            <EyeOff className="inline h-4 w-4" />
                           )}
                         </button>
                       </td>
                       <td className="py-2">
                         <div className="flex justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() => setItemFormMode({ id: item.id })}
                             className="hover:text-foreground text-muted-foreground transition-colors"
                           >
                             <Pencil className="h-4 w-4" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => {
                               if (confirm(`Delete "${item.name}"?`)) deleteItem.mutate(item.id);
                             }}

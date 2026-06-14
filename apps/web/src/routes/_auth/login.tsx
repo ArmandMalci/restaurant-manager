@@ -38,7 +38,7 @@ function LoginPage() {
     <div className="w-full max-w-sm space-y-6">
       <div className="space-y-1 text-center">
         <h1 className="text-2xl font-bold">Restaurant Manager</h1>
-        <p className="text-sm text-muted-foreground">Sign in to your account</p>
+        <p className="text-muted-foreground text-sm">Sign in to your account</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +53,7 @@ function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none ring-ring/50 placeholder:text-muted-foreground focus-visible:ring-2 disabled:opacity-50"
+            className="bg-background ring-ring/50 placeholder:text-muted-foreground w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2 disabled:opacity-50"
             placeholder="admin@restaurant.local"
           />
         </div>
@@ -69,12 +69,12 @@ function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none ring-ring/50 placeholder:text-muted-foreground focus-visible:ring-2 disabled:opacity-50"
+            className="bg-background ring-ring/50 placeholder:text-muted-foreground w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2 disabled:opacity-50"
           />
         </div>
 
         {login.isError && (
-          <p className="text-sm text-destructive">
+          <p className="text-destructive text-sm">
             {(login.error as Error)?.message ?? 'Invalid credentials'}
           </p>
         )}
@@ -82,7 +82,7 @@ function LoginPage() {
         <button
           type="submit"
           disabled={login.isPending}
-          className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
         >
           {login.isPending ? 'Signing in…' : 'Sign in'}
         </button>

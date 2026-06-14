@@ -13,6 +13,7 @@ export function useSettings() {
 
 export function useUpdateSettings() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: UpdateSettingsDto) =>
       apiClient.patch<RestaurantSettings>('/settings', dto).then((r) => r.data),

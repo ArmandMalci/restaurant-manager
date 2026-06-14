@@ -58,29 +58,30 @@ function StaffForm({
           active: boolean;
           password?: string;
         } = { name, email, role, active };
+
         if (password) data.password = password;
         onSave(data);
       }}
-      className="rounded-lg border p-4 space-y-3"
+      className="space-y-3 rounded-lg border p-4"
     >
       <div className="flex flex-wrap gap-3">
-        <label className="flex flex-col gap-1 text-sm flex-1 min-w-40">
+        <label className="flex min-w-40 flex-1 flex-col gap-1 text-sm">
           Name *
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm flex-1 min-w-40">
+        <label className="flex min-w-40 flex-1 flex-col gap-1 text-sm">
           Email *
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
       </div>
@@ -90,7 +91,7 @@ function StaffForm({
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as StaffRole)}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           >
             {ROLES.map((r) => (
               <option key={r} value={r}>
@@ -108,11 +109,11 @@ function StaffForm({
             required={!isEdit}
             minLength={8}
             placeholder={isEdit ? 'Leave blank to keep' : 'Min 8 characters'}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         {isEdit && (
-          <label className="flex items-center gap-2 text-sm self-end pb-1.5">
+          <label className="flex items-center gap-2 self-end pb-1.5 text-sm">
             <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
             Active
           </label>
@@ -121,14 +122,14 @@ function StaffForm({
       <div className="flex gap-2">
         <button
           type="submit"
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Cancel
         </button>
@@ -149,20 +150,21 @@ function StaffPage() {
   const deleteStaff = useDeleteStaff();
   const setActive = useSetStaffActive();
 
-  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
+  if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Staff</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             {staff.length} member{staff.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setFormMode('create')}
-          className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
         >
           <Plus className="h-4 w-4" /> Add staff
         </button>
@@ -171,6 +173,7 @@ function StaffPage() {
       <div className="flex flex-wrap gap-2">
         {([undefined, ...ROLES] as const).map((r) => (
           <button
+            type="button"
             key={String(r)}
             onClick={() => setRoleFilter(r)}
             className={cn(
@@ -195,7 +198,7 @@ function StaffPage() {
       )}
 
       {staff.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           No staff{roleFilter ? ` with role "${roleFilter}"` : ''}.
         </p>
       ) : (
@@ -232,33 +235,36 @@ function StaffPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{s.email}</p>
+                    <p className="text-muted-foreground text-sm">{s.email}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
+                      type="button"
                       onClick={() => setActive.mutate({ id: s.id, active: !s.active })}
                       aria-label={s.active ? 'Deactivate' : 'Activate'}
-                      className="rounded p-1 hover:bg-accent transition-colors"
+                      className="hover:bg-accent rounded p-1 transition-colors"
                     >
                       {s.active ? (
-                        <UserX className="h-4 w-4 text-muted-foreground" />
+                        <UserX className="text-muted-foreground h-4 w-4" />
                       ) : (
                         <UserCheck className="h-4 w-4 text-green-600" />
                       )}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setFormMode({ id: s.id })}
                       aria-label="Edit"
-                      className="rounded p-1 hover:bg-accent transition-colors"
+                      className="hover:bg-accent rounded p-1 transition-colors"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
+                      type="button"
                       onClick={() =>
                         window.confirm(`Delete ${s.name}?`) && deleteStaff.mutate(s.id)
                       }
                       aria-label="Delete"
-                      className="rounded p-1 text-destructive hover:bg-accent transition-colors"
+                      className="text-destructive hover:bg-accent rounded p-1 transition-colors"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

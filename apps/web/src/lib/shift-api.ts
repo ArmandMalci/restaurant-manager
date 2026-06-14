@@ -19,6 +19,7 @@ export function useShifts(from?: string, to?: string) {
 
 export function useCreateShift() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateShiftDto) => apiClient.post<Shift>('/shifts', dto).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['shifts'] }),
@@ -27,6 +28,7 @@ export function useCreateShift() {
 
 export function useUpdateShift() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateShiftDto }) =>
       apiClient.patch<Shift>(`/shifts/${id}`, dto).then((r) => r.data),
@@ -36,6 +38,7 @@ export function useUpdateShift() {
 
 export function useDeleteShift() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/shifts/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['shifts'] }),

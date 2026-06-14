@@ -12,6 +12,7 @@ export interface RouterContext {
 export const router = createRouter({
   routeTree,
   context: {
+    // biome-ignore lint/style/noNonNullAssertion: required TanStack Router context initialization pattern
     auth: undefined!,
   },
 });

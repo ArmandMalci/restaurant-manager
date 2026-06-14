@@ -26,6 +26,7 @@ interface CalendarEvent {
 function weekBounds(date: Date): { from: string; to: string } {
   const start = dayjs(date).startOf('week');
   const end = dayjs(date).endOf('week');
+
   return {
     from: start.format('YYYY-MM-DD'),
     to: end.format('YYYY-MM-DD'),
@@ -43,9 +44,11 @@ function CalendarPage() {
 
   const staffById = useMemo(() => {
     const map = new Map<string, string>();
-    staff.forEach((s: { id: string; name: string; role: string }) =>
-      map.set(s.id, `${s.name} (${s.role})`),
-    );
+
+    staff.forEach((s: { id: string; name: string; role: string }) => {
+      map.set(s.id, `${s.name} (${s.role})`);
+    });
+
     return map;
   }, [staff]);
 
@@ -76,7 +79,7 @@ function CalendarPage() {
   );
 
   return (
-    <div className="flex flex-col gap-4 p-6 h-full">
+    <div className="flex h-full flex-col gap-4 p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
       </div>
@@ -84,12 +87,13 @@ function CalendarPage() {
       <div className="flex gap-2 border-b">
         {(['reservations', 'shifts'] as Tab[]).map((t) => (
           <button
+            type="button"
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium capitalize transition-colors ${
               tab === t
                 ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}
           >
             {t}
@@ -97,7 +101,7 @@ function CalendarPage() {
         ))}
       </div>
 
-      <div className="flex-1 min-h-0" style={{ height: 600 }}>
+      <div className="min-h-0 flex-1" style={{ height: 600 }}>
         <Calendar
           localizer={localizer}
           events={tab === 'reservations' ? reservationEvents : shiftEvents}

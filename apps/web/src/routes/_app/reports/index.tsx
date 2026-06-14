@@ -29,10 +29,10 @@ const TABLE_STATUS_COLORS: Record<string, string> = {
 
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
-    <div className="rounded-lg border p-5 space-y-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="space-y-1 rounded-lg border p-5">
+      <p className="text-muted-foreground text-sm">{label}</p>
       <p className="text-3xl font-bold tracking-tight">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+      {sub && <p className="text-muted-foreground text-xs">{sub}</p>}
     </div>
   );
 }
@@ -42,16 +42,17 @@ function ReportsPage() {
 
   const totalOrders = data ? Object.values(data.ordersByStatus).reduce((a, b) => a + b, 0) : 0;
   const totalTables = data ? Object.values(data.tablesByStatus).reduce((a, b) => a + b, 0) : 0;
-  const occupiedTables = data?.tablesByStatus['occupied'] ?? 0;
+  const occupiedTables = data?.tablesByStatus.occupied ?? 0;
 
   return (
     <div className="space-y-8 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
         <button
+          type="button"
           onClick={() => refetch()}
           disabled={isFetching}
-          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-accent transition-colors disabled:opacity-50"
+          className="hover:bg-accent flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
         >
           <RefreshCw className={cn('h-3.5 w-3.5', isFetching && 'animate-spin')} />
           Refresh
@@ -59,9 +60,9 @@ function ReportsPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading summary…</p>
+        <p className="text-muted-foreground text-sm">Loading summary…</p>
       ) : !data ? (
-        <p className="text-sm text-muted-foreground">No data available.</p>
+        <p className="text-muted-foreground text-sm">No data available.</p>
       ) : (
         <div className="space-y-8">
           {/* KPI row */}
@@ -88,7 +89,7 @@ function ReportsPage() {
                 <div
                   key={status}
                   className={cn(
-                    'rounded-lg px-4 py-2 text-center min-w-24',
+                    'min-w-24 rounded-lg px-4 py-2 text-center',
                     ORDER_STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-700',
                   )}
                 >
@@ -97,7 +98,7 @@ function ReportsPage() {
                 </div>
               ))}
               {Object.keys(data.ordersByStatus).length === 0 && (
-                <p className="text-sm text-muted-foreground">No orders yet.</p>
+                <p className="text-muted-foreground text-sm">No orders yet.</p>
               )}
             </div>
           </section>
@@ -119,7 +120,7 @@ function ReportsPage() {
                 </div>
               ))}
               {Object.keys(data.tablesByStatus).length === 0 && (
-                <p className="text-sm text-muted-foreground">No tables yet.</p>
+                <p className="text-muted-foreground text-sm">No tables yet.</p>
               )}
             </div>
           </section>
@@ -128,23 +129,24 @@ function ReportsPage() {
           <section className="space-y-3">
             <h2 className="font-semibold">Top ordered items</h2>
             {data.topItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No order data yet.</p>
+              <p className="text-muted-foreground text-sm">No order data yet.</p>
             ) : (
               <div className="space-y-2">
                 {data.topItems.map((item, i) => {
                   const maxQty = data.topItems[0].totalQuantity;
                   const pct = maxQty > 0 ? Math.round((item.totalQuantity / maxQty) * 100) : 0;
+
                   return (
                     <div key={item.menuItemId} className="flex items-center gap-3">
-                      <span className="w-4 text-sm text-muted-foreground font-mono">{i + 1}</span>
+                      <span className="text-muted-foreground w-4 font-mono text-sm">{i + 1}</span>
                       <div className="flex-1 space-y-0.5">
                         <div className="flex items-center justify-between text-sm">
                           <span className="font-medium">{item.name}</span>
                           <span className="text-muted-foreground">{item.totalQuantity} served</span>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-muted">
+                        <div className="bg-muted h-1.5 w-full rounded-full">
                           <div
-                            className="h-1.5 rounded-full bg-primary transition-all"
+                            className="bg-primary h-1.5 rounded-full transition-all"
                             style={{ width: `${pct}%` }}
                           />
                         </div>

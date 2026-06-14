@@ -21,11 +21,14 @@ export default [
     settings: {
       tailwindcss: {
         callees: ['cn', 'clsx', 'cva', 'cx'],
+        cssFiles: ['src/index.css', 'src/**/*.css'],
       },
     },
     rules: {
       'tailwindcss/classnames-order': 'warn',
-      'tailwindcss/no-custom-classname': 'error',
+      // no-custom-classname has false positives with Tailwind v4 CSS-variable-based themes
+      // (bg-primary, text-muted-foreground etc. are defined via @theme in index.css)
+      'tailwindcss/no-custom-classname': 'warn',
       'tailwindcss/no-contradicting-classname': 'error',
       '@stylistic/padding-line-between-statements': [
         'error',

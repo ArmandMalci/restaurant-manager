@@ -26,7 +26,7 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   return (
-    <aside className="flex h-full w-56 flex-col border-r bg-background px-3 py-4">
+    <aside className="bg-background flex h-full w-56 flex-col border-r px-3 py-4">
       <div className="mb-6 px-3">
         <span className="text-lg font-semibold tracking-tight">Restaurant</span>
       </div>
@@ -36,7 +36,7 @@ export function Sidebar() {
             key={to}
             to={to}
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+              'text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
               '[&.active]:bg-accent [&.active]:text-accent-foreground',
             )}
           >

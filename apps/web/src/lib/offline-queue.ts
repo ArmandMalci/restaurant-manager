@@ -24,6 +24,7 @@ function writeQueue(queue: QueuedRequest[]): void {
 
 export function enqueueRequest(method: string, url: string, body: unknown): void {
   const queue = readQueue();
+
   queue.push({ id: crypto.randomUUID(), method, url, body, timestamp: Date.now() });
   writeQueue(queue);
 }
@@ -34,9 +35,11 @@ export function getQueueLength(): number {
 
 export async function drainQueue(): Promise<void> {
   const queue = readQueue();
+
   if (queue.length === 0) return;
 
   const failed: QueuedRequest[] = [];
+
   for (const req of queue) {
     try {
       await axios({ method: req.method, url: req.url, data: req.body });

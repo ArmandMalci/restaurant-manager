@@ -18,7 +18,9 @@ export function useInstallPrompt(): UseInstallPromptResult {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
+
     window.addEventListener('beforeinstallprompt', handler);
+
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
@@ -26,7 +28,9 @@ export function useInstallPrompt(): UseInstallPromptResult {
     if (!deferredPrompt) return false;
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
+
     if (outcome === 'accepted') setDeferredPrompt(null);
+
     return outcome === 'accepted';
   }
 

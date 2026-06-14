@@ -24,6 +24,7 @@ export function useOrders(status?: string) {
 
 export function useCreateOrder() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateOrderDto) => apiClient.post<Order>('/orders', dto).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['orders'] }),
@@ -32,6 +33,7 @@ export function useCreateOrder() {
 
 export function useUpdateOrderStatus() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateOrderStatusDto }) =>
       apiClient.patch<Order>(`/orders/${id}/status`, dto).then((r) => r.data),
@@ -41,6 +43,7 @@ export function useUpdateOrderStatus() {
 
 export function useUpdateItemStatus() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       orderId,
@@ -57,6 +60,7 @@ export function useUpdateItemStatus() {
 
 export function useDeleteOrder() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/orders/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['orders'] }),

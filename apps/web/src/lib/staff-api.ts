@@ -17,6 +17,7 @@ export function useStaff(role?: string) {
 
 export function useCreateStaff() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateStaffDto) => apiClient.post<Staff>('/staff', dto).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
@@ -25,6 +26,7 @@ export function useCreateStaff() {
 
 export function useUpdateStaff() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateStaffDto }) =>
       apiClient.patch<Staff>(`/staff/${id}`, dto).then((r) => r.data),
@@ -34,6 +36,7 @@ export function useUpdateStaff() {
 
 export function useDeleteStaff() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/staff/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
@@ -42,6 +45,7 @@ export function useDeleteStaff() {
 
 export function useSetStaffActive() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, active }: { id: string; active: boolean }) =>
       apiClient.patch<Staff>(`/staff/${id}/active`, { active }).then((r) => r.data),

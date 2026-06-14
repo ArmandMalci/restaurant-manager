@@ -18,6 +18,7 @@ export function setupAxiosOfflineInterceptor(): void {
           error.config.data ? JSON.parse(error.config.data as string) : undefined,
         );
       }
+
       return Promise.reject(error);
     },
   );

@@ -14,6 +14,7 @@ export function useBill(id: string) {
 
 export function useCreateBill() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateBillDto) => apiClient.post<Bill>('/billing', dto).then((r) => r.data),
     onSuccess: (bill) => {
@@ -25,6 +26,7 @@ export function useCreateBill() {
 
 export function usePayBill() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.patch<Bill>(`/billing/${id}/pay`).then((r) => r.data),
     onSuccess: (bill) => qc.setQueryData(billKey(bill.id), bill),

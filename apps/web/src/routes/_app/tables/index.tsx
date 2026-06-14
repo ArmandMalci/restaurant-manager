@@ -68,7 +68,7 @@ function TableForm({
           value={number}
           onChange={(e) => setNumber(Number(e.target.value))}
           required
-          className="w-20 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="focus-visible:ring-ring w-20 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm">
@@ -79,7 +79,7 @@ function TableForm({
           value={seats}
           onChange={(e) => setSeats(Number(e.target.value))}
           required
-          className="w-20 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="focus-visible:ring-ring w-20 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm">
@@ -87,7 +87,7 @@ function TableForm({
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as TableStatus)}
-          className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
         >
           <option value="available">Available</option>
           <option value="occupied">Occupied</option>
@@ -97,14 +97,14 @@ function TableForm({
       <div className="flex gap-2">
         <button
           type="submit"
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Cancel
         </button>
@@ -126,7 +126,7 @@ function TablesPage() {
   const setStatus = useSetTableStatus();
 
   if (isLoading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading tables…</div>;
+    return <div className="text-muted-foreground p-6 text-sm">Loading tables…</div>;
   }
 
   return (
@@ -134,13 +134,14 @@ function TablesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Tables</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             {tables.length} table{tables.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setFormMode('create')}
-          className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
         >
           <Plus className="h-4 w-4" /> Add table
         </button>
@@ -156,11 +157,11 @@ function TablesPage() {
       )}
 
       {tables.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No tables yet. Add one above.</p>
+        <p className="text-muted-foreground text-sm">No tables yet. Add one above.</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tables.map((table) => (
-            <div key={table.id} className="rounded-lg border p-4 space-y-3">
+            <div key={table.id} className="space-y-3 rounded-lg border p-4">
               {typeof formMode === 'object' && formMode.id === table.id ? (
                 <TableForm
                   initial={table}
@@ -177,30 +178,33 @@ function TablesPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-lg font-semibold">Table {table.number}</p>
-                      <p className="text-sm text-muted-foreground">{table.seats} seats</p>
+                      <p className="text-muted-foreground text-sm">{table.seats} seats</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
+                        type="button"
                         onClick={() => setFormMode({ id: table.id })}
                         aria-label="Edit"
-                        className="rounded p-1 hover:bg-accent transition-colors"
+                        className="hover:bg-accent rounded p-1 transition-colors"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
                           if (confirm(`Delete Table ${table.number}?`)) {
                             deleteTable.mutate(table.id);
                           }
                         }}
                         aria-label="Delete"
-                        className="rounded p-1 text-destructive hover:bg-accent transition-colors"
+                        className="text-destructive hover:bg-accent rounded p-1 transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() =>
                       setStatus.mutate({ id: table.id, dto: { status: NEXT_STATUS[table.status] } })
                     }

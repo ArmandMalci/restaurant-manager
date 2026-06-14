@@ -27,6 +27,7 @@ export function useCategories() {
 
 export function useCreateCategory() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateMenuCategoryDto) =>
       apiClient.post<MenuCategory>('/menu/categories', dto).then((r) => r.data),
@@ -36,6 +37,7 @@ export function useCreateCategory() {
 
 export function useUpdateCategory() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateMenuCategoryDto }) =>
       apiClient.patch<MenuCategory>(`/menu/categories/${id}`, dto).then((r) => r.data),
@@ -45,6 +47,7 @@ export function useUpdateCategory() {
 
 export function useDeleteCategory() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/menu/categories/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: menuKeys.categories }),
@@ -65,6 +68,7 @@ export function useItems(categoryId?: string) {
 
 export function useCreateItem() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (dto: CreateMenuItemDto) =>
       apiClient.post<MenuItem>('/menu/items', dto).then((r) => r.data),
@@ -77,6 +81,7 @@ export function useCreateItem() {
 
 export function useUpdateItem() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, dto }: { id: string; dto: UpdateMenuItemDto }) =>
       apiClient.patch<MenuItem>(`/menu/items/${id}`, dto).then((r) => r.data),
@@ -88,6 +93,7 @@ export function useUpdateItem() {
 
 export function useDeleteItem() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/menu/items/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['menu', 'items'] }),
@@ -96,6 +102,7 @@ export function useDeleteItem() {
 
 export function useToggleAvailability() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, available }: { id: string; available: boolean }) =>
       apiClient

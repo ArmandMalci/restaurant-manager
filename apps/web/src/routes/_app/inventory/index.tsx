@@ -48,16 +48,16 @@ function InventoryForm({
         e.preventDefault();
         onSave({ name, unit, quantity, minStock });
       }}
-      className="rounded-lg border p-4 space-y-3"
+      className="space-y-3 rounded-lg border p-4"
     >
       <div className="flex flex-wrap gap-3">
-        <label className="flex flex-col gap-1 text-sm flex-1 min-w-40">
+        <label className="flex min-w-40 flex-1 flex-col gap-1 text-sm">
           Name *
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -65,7 +65,7 @@ function InventoryForm({
           <select
             value={unit}
             onChange={(e) => setUnit(e.target.value as InventoryUnit)}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           >
             {UNITS.map((u) => (
               <option key={u} value={u}>
@@ -84,7 +84,7 @@ function InventoryForm({
             step="any"
             value={quantity}
             onChange={(e) => setQuantity(Number(e.target.value))}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring w-32"
+            className="focus-visible:ring-ring w-32 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -95,21 +95,21 @@ function InventoryForm({
             step="any"
             value={minStock}
             onChange={(e) => setMinStock(Number(e.target.value))}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring w-32"
+            className="focus-visible:ring-ring w-32 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
       </div>
       <div className="flex gap-2">
         <button
           type="submit"
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Cancel
         </button>
@@ -136,7 +136,7 @@ function AdjustForm({
         e.preventDefault();
         onSave({ delta, reason });
       }}
-      className="mt-2 rounded-md border bg-muted/30 p-3 space-y-3"
+      className="bg-muted/30 mt-2 space-y-3 rounded-md border p-3"
     >
       <div className="flex flex-wrap gap-3">
         <label className="flex flex-col gap-1 text-sm">
@@ -146,7 +146,7 @@ function AdjustForm({
             step="any"
             value={delta}
             onChange={(e) => setDelta(Number(e.target.value))}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring w-28"
+            className="focus-visible:ring-ring w-28 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -154,7 +154,7 @@ function AdjustForm({
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value as AdjustInventoryDto['reason'])}
-            className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
           >
             {ADJUST_REASONS.map((r) => (
               <option key={r} value={r}>
@@ -167,14 +167,14 @@ function AdjustForm({
       <div className="flex gap-2">
         <button
           type="submit"
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Apply
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
+          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Cancel
         </button>
@@ -195,20 +195,21 @@ function InventoryPage() {
   const deleteItem = useDeleteInventoryItem();
   const adjustItem = useAdjustInventory();
 
-  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
+  if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             {items.length} item{items.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setFormMode('create')}
-          className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
         >
           <Plus className="h-4 w-4" /> Add item
         </button>
@@ -222,7 +223,7 @@ function InventoryPage() {
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No inventory items yet.</p>
+        <p className="text-muted-foreground text-sm">No inventory items yet.</p>
       ) : (
         <div className="space-y-2">
           {(items as InventoryItemWithStatus[]).map((item) => (
@@ -253,7 +254,7 @@ function InventoryPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         Qty:{' '}
                         <span className={cn('font-medium', item.lowStock && 'text-amber-700')}>
                           {item.quantity}
@@ -263,25 +264,28 @@ function InventoryPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <button
+                        type="button"
                         onClick={() => setAdjustingId(adjustingId === item.id ? null : item.id)}
                         aria-label="Adjust stock"
-                        className="rounded p-1 hover:bg-accent transition-colors"
+                        className="hover:bg-accent rounded p-1 transition-colors"
                       >
-                        <PackageMinus className="h-4 w-4 text-muted-foreground" />
+                        <PackageMinus className="text-muted-foreground h-4 w-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => setFormMode({ id: item.id })}
                         aria-label="Edit"
-                        className="rounded p-1 hover:bg-accent transition-colors"
+                        className="hover:bg-accent rounded p-1 transition-colors"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() =>
                           window.confirm(`Delete "${item.name}"?`) && deleteItem.mutate(item.id)
                         }
                         aria-label="Delete"
-                        className="rounded p-1 text-destructive hover:bg-accent transition-colors"
+                        className="text-destructive hover:bg-accent rounded p-1 transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
