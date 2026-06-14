@@ -1,6 +1,7 @@
 import stylistic from '@stylistic/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 
+// biome-ignore lint/style/noDefaultExport: ESLint flat config requires default export
 export default [
   {
     files: ['src/**/*.ts'],

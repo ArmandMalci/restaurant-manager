@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 import path from 'path';
 
+// biome-ignore lint/style/noDefaultExport: Vite requires default export
 export default defineConfig({
   plugins: [
     TanStackRouterVite({

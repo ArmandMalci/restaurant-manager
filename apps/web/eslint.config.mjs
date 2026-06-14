@@ -2,6 +2,7 @@ import stylistic from '@stylistic/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import tailwind from 'eslint-plugin-tailwindcss';
 
+// biome-ignore lint/style/noDefaultExport: ESLint flat config requires default export
 export default [
   ...tailwind.configs['flat/recommended'],
   {
