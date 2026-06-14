@@ -21,5 +21,6 @@
     "paths": {
       "@restaurant/shared": ["../../packages/shared/dist/index.d.ts"]
     }
-  }
+  },
+  "include": ["src"]
 }
