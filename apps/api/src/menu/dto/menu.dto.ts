@@ -1,10 +1,10 @@
-import { createZodDto } from 'nestjs-zod'
+import { createZodDto } from 'nestjs-zod';
 import {
   CreateMenuCategorySchema,
   UpdateMenuCategorySchema,
   CreateMenuItemSchema,
   UpdateMenuItemSchema,
-} from '@restaurant/shared'
+} from '@restaurant/shared';
 
 export class CreateMenuCategoryDto extends createZodDto(CreateMenuCategorySchema) {}
 export class UpdateMenuCategoryDto extends createZodDto(UpdateMenuCategorySchema) {}

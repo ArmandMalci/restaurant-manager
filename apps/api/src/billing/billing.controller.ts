@@ -8,11 +8,11 @@ import {
   Patch,
   Post,
   UseGuards,
-} from '@nestjs/common'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { BillingService } from './billing.service'
-import { CreateBillDto } from './dto/billing.dto'
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import type { BillingService } from './billing.service';
+import type { CreateBillDto } from './dto/billing.dto';
 
 @ApiTags('billing')
 @ApiBearerAuth()

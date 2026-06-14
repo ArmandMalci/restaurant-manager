@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { CurrentUser } from '../auth/decorators/current-user.decorator'
-import { NotificationsService } from './notifications.service'
-import { SubscribeDtoClass } from './dto/notification.dto'
+import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { NotificationsService } from './notifications.service';
+import type { SubscribeDtoClass } from './dto/notification.dto';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -10,13 +10,13 @@ export class NotificationsController {
 
   @Get('vapid-public-key')
   getPublicKey() {
-    return { publicKey: this.svc.getPublicKey() }
+    return { publicKey: this.svc.getPublicKey() };
   }
 
   @Post('subscribe')
   @UseGuards(JwtAuthGuard)
   subscribe(@CurrentUser() user: { id: string }, @Body() dto: SubscribeDtoClass) {
-    return this.svc.subscribe(user.id, dto)
+    return this.svc.subscribe(user.id, dto);
   }
 
   @Delete('subscribe')

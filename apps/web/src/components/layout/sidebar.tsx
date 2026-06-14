@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router';
 import {
   LayoutDashboard,
   Table2,
@@ -9,8 +9,8 @@ import {
   Users,
   BarChart3,
   Package,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { to: '/staff', label: 'Staff', icon: Users },
   { to: '/inventory', label: 'Inventory', icon: Package },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
-] as const
+] as const;
 
 export function Sidebar() {
   return (
@@ -46,5 +46,5 @@ export function Sidebar() {
         ))}
       </nav>
     </aside>
-  )
+  );
 }

@@ -1,5 +1,5 @@
-import { createZodDto } from 'nestjs-zod'
-import { CreateStaffSchema, UpdateStaffSchema, SetActiveSchema } from '@restaurant/shared'
+import { createZodDto } from 'nestjs-zod';
+import { CreateStaffSchema, UpdateStaffSchema, SetActiveSchema } from '@restaurant/shared';
 
 export class CreateStaffDto extends createZodDto(CreateStaffSchema) {}
 export class UpdateStaffDto extends createZodDto(UpdateStaffSchema) {}

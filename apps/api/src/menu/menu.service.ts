@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from '../prisma/prisma.service'
-import type { CreateMenuCategoryDto, UpdateMenuCategoryDto, CreateMenuItemDto, UpdateMenuItemDto } from '@restaurant/shared'
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type { PrismaService } from '../prisma/prisma.service';
+import type {
+  CreateMenuCategoryDto,
+  UpdateMenuCategoryDto,
+  CreateMenuItemDto,
+  UpdateMenuItemDto,
+} from '@restaurant/shared';
 
 @Injectable()
 export class MenuService {
@@ -9,27 +14,27 @@ export class MenuService {
   // ── Categories ──────────────────────────────────────────────────────
 
   findAllCategories() {
-    return this.prisma.menuCategory.findMany({ orderBy: { sortOrder: 'asc' } })
+    return this.prisma.menuCategory.findMany({ orderBy: { sortOrder: 'asc' } });
   }
 
   async findOneCategory(id: string) {
-    const cat = await this.prisma.menuCategory.findUnique({ where: { id } })
-    if (!cat) throw new NotFoundException('Category not found')
-    return cat
+    const cat = await this.prisma.menuCategory.findUnique({ where: { id } });
+    if (!cat) throw new NotFoundException('Category not found');
+    return cat;
   }
 
   createCategory(dto: CreateMenuCategoryDto) {
-    return this.prisma.menuCategory.create({ data: dto })
+    return this.prisma.menuCategory.create({ data: dto });
   }
 
   async updateCategory(id: string, dto: UpdateMenuCategoryDto) {
-    await this.findOneCategory(id)
-    return this.prisma.menuCategory.update({ where: { id }, data: dto })
+    await this.findOneCategory(id);
+    return this.prisma.menuCategory.update({ where: { id }, data: dto });
   }
 
   async removeCategory(id: string) {
-    await this.findOneCategory(id)
-    return this.prisma.menuCategory.delete({ where: { id } })
+    await this.findOneCategory(id);
+    return this.prisma.menuCategory.delete({ where: { id } });
   }
 
   // ── Items ────────────────────────────────────────────────────────────
@@ -38,31 +43,31 @@ export class MenuService {
     return this.prisma.menuItem.findMany({
       where: categoryId ? { categoryId } : undefined,
       orderBy: [{ category: { sortOrder: 'asc' } }, { name: 'asc' }],
-    })
+    });
   }
 
   async findOneItem(id: string) {
-    const item = await this.prisma.menuItem.findUnique({ where: { id } })
-    if (!item) throw new NotFoundException('Menu item not found')
-    return item
+    const item = await this.prisma.menuItem.findUnique({ where: { id } });
+    if (!item) throw new NotFoundException('Menu item not found');
+    return item;
   }
 
   createItem(dto: CreateMenuItemDto) {
-    return this.prisma.menuItem.create({ data: { ...dto, price: dto.price } })
+    return this.prisma.menuItem.create({ data: { ...dto, price: dto.price } });
   }
 
   async updateItem(id: string, dto: UpdateMenuItemDto) {
-    await this.findOneItem(id)
-    return this.prisma.menuItem.update({ where: { id }, data: dto })
+    await this.findOneItem(id);
+    return this.prisma.menuItem.update({ where: { id }, data: dto });
   }
 
   async removeItem(id: string) {
-    await this.findOneItem(id)
-    return this.prisma.menuItem.delete({ where: { id } })
+    await this.findOneItem(id);
+    return this.prisma.menuItem.delete({ where: { id } });
   }
 
   async setItemAvailability(id: string, available: boolean) {
-    await this.findOneItem(id)
-    return this.prisma.menuItem.update({ where: { id }, data: { available } })
+    await this.findOneItem(id);
+    return this.prisma.menuItem.update({ where: { id }, data: { available } });
   }
 }

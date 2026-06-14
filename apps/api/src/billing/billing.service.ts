@@ -3,18 +3,18 @@ import {
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
-} from '@nestjs/common'
-import { Prisma } from '@prisma/client'
-import { PrismaService } from '../prisma/prisma.service'
-import type { Bill } from '@prisma/client'
-import type { CreateBillDto } from './dto/billing.dto'
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import type { PrismaService } from '../prisma/prisma.service';
+import type { Bill } from '@prisma/client';
+import type { CreateBillDto } from './dto/billing.dto';
 
 @Injectable()
 export class BillingService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateBillDto): Promise<Bill> {
-    const { orderId, discountPct = 0 } = dto
+    const { orderId, discountPct = 0 } = dto;
 
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -26,31 +26,31 @@ export class BillingService {
           },
         },
       },
-    })
+    });
 
     if (!order) {
-      throw new NotFoundException(`Order ${orderId} not found`)
+      throw new NotFoundException(`Order ${orderId} not found`);
     }
 
     if (order.bill) {
-      throw new ConflictException(`Order ${orderId} already has a bill`)
+      throw new ConflictException(`Order ${orderId} already has a bill`);
     }
 
-    const billableStatuses = ['in_progress', 'ready', 'served']
+    const billableStatuses = ['in_progress', 'ready', 'served'];
     if (!billableStatuses.includes(order.status)) {
-      throw new UnprocessableEntityException(
-        `Cannot bill an order with status '${order.status}'`,
-      )
+      throw new UnprocessableEntityException(`Cannot bill an order with status '${order.status}'`);
     }
 
     const subtotal = order.items.reduce((sum, item) => {
-      return sum.plus(new Prisma.Decimal(item.quantity).times(item.menuItem.price))
-    }, new Prisma.Decimal(0))
+      return sum.plus(new Prisma.Decimal(item.quantity).times(item.menuItem.price));
+    }, new Prisma.Decimal(0));
 
-    const discountPctDecimal = new Prisma.Decimal(discountPct)
-    const afterDiscount = subtotal.times(new Prisma.Decimal(1).minus(discountPctDecimal.dividedBy(100)))
-    const tax = afterDiscount.times(new Prisma.Decimal('0.1'))
-    const total = afterDiscount.plus(tax)
+    const discountPctDecimal = new Prisma.Decimal(discountPct);
+    const afterDiscount = subtotal.times(
+      new Prisma.Decimal(1).minus(discountPctDecimal.dividedBy(100)),
+    );
+    const tax = afterDiscount.times(new Prisma.Decimal('0.1'));
+    const total = afterDiscount.plus(tax);
 
     return this.prisma.bill.create({
       data: {
@@ -60,29 +60,29 @@ export class BillingService {
         tax,
         total,
       },
-    })
+    });
   }
 
   async findOne(id: string): Promise<Bill> {
-    const bill = await this.prisma.bill.findUnique({ where: { id } })
+    const bill = await this.prisma.bill.findUnique({ where: { id } });
 
     if (!bill) {
-      throw new NotFoundException(`Bill ${id} not found`)
+      throw new NotFoundException(`Bill ${id} not found`);
     }
 
-    return bill
+    return bill;
   }
 
   async pay(id: string): Promise<Bill> {
-    const bill = await this.findOne(id)
+    const bill = await this.findOne(id);
 
     if (bill.paid) {
-      throw new ConflictException(`Bill ${id} is already paid`)
+      throw new ConflictException(`Bill ${id} is already paid`);
     }
 
     return this.prisma.bill.update({
       where: { id },
       data: { paid: true, paidAt: new Date() },
-    })
+    });
   }
 }

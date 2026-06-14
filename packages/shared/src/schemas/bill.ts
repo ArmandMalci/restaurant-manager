@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const BillSchema = z.object({
   id: z.string().uuid(),
@@ -11,18 +11,18 @@ export const BillSchema = z.object({
   paidAt: z.coerce.date().nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-})
-export type Bill = z.infer<typeof BillSchema>
+});
+export type Bill = z.infer<typeof BillSchema>;
 
 export const CreateBillSchema = z.object({
   orderId: z.string().uuid(),
   discountPct: z.number().min(0).max(100).optional().default(0),
-})
-export type CreateBillDto = z.infer<typeof CreateBillSchema>
+});
+export type CreateBillDto = z.infer<typeof CreateBillSchema>;
 
 export const BillSplitSchema = z.object({
   guestLabel: z.string().min(1),
   itemIds: z.array(z.string().uuid()),
   subtotal: z.number().nonnegative(),
-})
-export type BillSplit = z.infer<typeof BillSplitSchema>
+});
+export type BillSplit = z.infer<typeof BillSplitSchema>;

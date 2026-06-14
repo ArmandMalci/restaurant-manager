@@ -1,37 +1,37 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
-import { apiClient } from '@/lib/api-client'
-import { useAuthStore } from '@/stores/auth.store'
-import type { AuthUser } from '@/stores/auth.store'
+import { createFileRoute, useRouter } from '@tanstack/react-router';
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { apiClient } from '@/lib/api-client';
+import { useAuthStore } from '@/stores/auth.store';
+import type { AuthUser } from '@/stores/auth.store';
 
 export const Route = createFileRoute('/_auth/login')({
   component: LoginPage,
-})
+});
 
 interface LoginResponse {
-  accessToken: string
-  user: AuthUser
+  accessToken: string;
+  user: AuthUser;
 }
 
 function LoginPage() {
-  const router = useRouter()
-  const setAuth = useAuthStore((s) => s.setAuth)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const router = useRouter();
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const login = useMutation({
     mutationFn: (creds: { email: string; password: string }) =>
       apiClient.post<LoginResponse>('/auth/login', creds).then((r) => r.data),
     onSuccess: ({ user, accessToken }) => {
-      setAuth(user, accessToken)
-      router.navigate({ to: '/dashboard' })
+      setAuth(user, accessToken);
+      router.navigate({ to: '/dashboard' });
     },
-  })
+  });
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    login.mutate({ email, password })
+    e.preventDefault();
+    login.mutate({ email, password });
   }
 
   return (
@@ -88,5 +88,5 @@ function LoginPage() {
         </button>
       </form>
     </div>
-  )
+  );
 }

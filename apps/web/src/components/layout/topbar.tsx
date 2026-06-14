@@ -1,18 +1,18 @@
-import { useRouter } from '@tanstack/react-router'
-import { LogOut } from 'lucide-react'
-import { useAuthStore } from '@/stores/auth.store'
-import { apiClient } from '@/lib/api-client'
+import { useRouter } from '@tanstack/react-router';
+import { LogOut } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth.store';
+import { apiClient } from '@/lib/api-client';
 
 export function Topbar() {
-  const { user, clearAuth } = useAuthStore()
-  const router = useRouter()
+  const { user, clearAuth } = useAuthStore();
+  const router = useRouter();
 
   async function handleLogout() {
     try {
-      await apiClient.post('/auth/logout')
+      await apiClient.post('/auth/logout');
     } finally {
-      clearAuth()
-      router.navigate({ to: '/login' })
+      clearAuth();
+      router.navigate({ to: '/login' });
     }
   }
 
@@ -20,9 +20,7 @@ export function Topbar() {
     <header className="flex h-14 items-center justify-between border-b px-6">
       <div />
       <div className="flex items-center gap-3">
-        {user && (
-          <span className="text-sm text-muted-foreground">{user.email}</span>
-        )}
+        {user && <span className="text-sm text-muted-foreground">{user.email}</span>}
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -32,5 +30,5 @@ export function Topbar() {
         </button>
       </div>
     </header>
-  )
+  );
 }

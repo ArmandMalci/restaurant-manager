@@ -1,4 +1,4 @@
-import { WifiOff } from 'lucide-react'
+import { WifiOff } from 'lucide-react';
 
 export function OfflineBanner() {
   return (
@@ -10,5 +10,5 @@ export function OfflineBanner() {
       <WifiOff className="h-4 w-4 shrink-0" />
       You're offline — changes will be queued and sent when reconnected.
     </div>
-  )
+  );
 }

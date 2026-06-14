@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common'
-import { PrismaService } from '../prisma/prisma.service'
-import type { UpdateSettingsDto } from '@restaurant/shared'
+import { Injectable } from '@nestjs/common';
+import type { PrismaService } from '../prisma/prisma.service';
+import type { UpdateSettingsDto } from '@restaurant/shared';
 
-const SETTINGS_ID = 'default'
+const SETTINGS_ID = 'default';
 
 @Injectable()
 export class SettingsService {
@@ -13,7 +13,7 @@ export class SettingsService {
       where: { id: SETTINGS_ID },
       create: { id: SETTINGS_ID },
       update: {},
-    })
+    });
   }
 
   async update(dto: UpdateSettingsDto) {
@@ -21,6 +21,6 @@ export class SettingsService {
       where: { id: SETTINGS_ID },
       create: { id: SETTINGS_ID, ...dto },
       update: dto,
-    })
+    });
   }
 }

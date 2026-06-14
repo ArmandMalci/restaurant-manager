@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const ShiftSchema = z.object({
   id: z.string().uuid(),
@@ -6,15 +6,15 @@ export const ShiftSchema = z.object({
   startTime: z.coerce.date(),
   endTime: z.coerce.date().nullable(),
   createdAt: z.coerce.date(),
-})
-export type Shift = z.infer<typeof ShiftSchema>
+});
+export type Shift = z.infer<typeof ShiftSchema>;
 
 export const CreateShiftSchema = z.object({
   staffId: z.string().uuid(),
   startTime: z.coerce.date(),
   endTime: z.coerce.date().optional().nullable(),
-})
-export type CreateShiftDto = z.infer<typeof CreateShiftSchema>
+});
+export type CreateShiftDto = z.infer<typeof CreateShiftSchema>;
 
-export const UpdateShiftSchema = CreateShiftSchema.partial()
-export type UpdateShiftDto = z.infer<typeof UpdateShiftSchema>
+export const UpdateShiftSchema = CreateShiftSchema.partial();
+export type UpdateShiftDto = z.infer<typeof UpdateShiftSchema>;

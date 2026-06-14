@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const ReservationSchema = z.object({
   id: z.string().uuid(),
@@ -11,8 +11,8 @@ export const ReservationSchema = z.object({
   notes: z.string().max(500).nullable(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-})
-export type Reservation = z.infer<typeof ReservationSchema>
+});
+export type Reservation = z.infer<typeof ReservationSchema>;
 
 export const CreateReservationSchema = z.object({
   tableId: z.string().uuid(),
@@ -22,8 +22,8 @@ export const CreateReservationSchema = z.object({
   partySize: z.number().int().positive(),
   date: z.coerce.date(),
   notes: z.string().max(500).nullable().optional(),
-})
-export type CreateReservationDto = z.infer<typeof CreateReservationSchema>
+});
+export type CreateReservationDto = z.infer<typeof CreateReservationSchema>;
 
-export const UpdateReservationSchema = CreateReservationSchema.partial()
-export type UpdateReservationDto = z.infer<typeof UpdateReservationSchema>
+export const UpdateReservationSchema = CreateReservationSchema.partial();
+export type UpdateReservationDto = z.infer<typeof UpdateReservationSchema>;

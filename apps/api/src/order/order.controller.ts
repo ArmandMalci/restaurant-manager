@@ -1,14 +1,27 @@
 import {
-  Controller, Get, Post, Patch, Delete,
-  Param, Body, Query, HttpCode, HttpStatus, UseGuards,
-} from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../auth/guards/roles.guard'
-import { Roles } from '../auth/decorators/roles.decorator'
-import { CurrentUser } from '../auth/decorators/current-user.decorator'
-import { OrderService } from './order.service'
-import { CreateOrderDto, UpdateOrderStatusDto, UpdateOrderItemStatusDto } from './dto/order.dto'
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { OrderService } from './order.service';
+import type {
+  CreateOrderDto,
+  UpdateOrderStatusDto,
+  UpdateOrderItemStatusDto,
+} from './dto/order.dto';
 
 @ApiTags('orders')
 @ApiBearerAuth()
@@ -33,13 +46,13 @@ export class OrderController {
   @Post()
   @ApiOperation({ summary: 'Create an order with items' })
   create(@Body() dto: CreateOrderDto, @CurrentUser('id') staffId: string) {
-    return this.orders.create(dto, staffId)
+    return this.orders.create(dto, staffId);
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update order status' })
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
-    return this.orders.updateStatus(id, dto)
+    return this.orders.updateStatus(id, dto);
   }
 
   @Patch(':id/items/:itemId/status')
@@ -49,7 +62,7 @@ export class OrderController {
     @Param('itemId') itemId: string,
     @Body() dto: UpdateOrderItemStatusDto,
   ) {
-    return this.orders.updateItemStatus(id, itemId, dto)
+    return this.orders.updateItemStatus(id, itemId, dto);
   }
 
   @Delete(':id')

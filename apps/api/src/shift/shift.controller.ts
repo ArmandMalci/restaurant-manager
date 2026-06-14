@@ -1,13 +1,22 @@
 import {
-  Controller, Get, Post, Patch, Delete,
-  Param, Body, Query, HttpCode, HttpStatus, UseGuards,
-} from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../auth/guards/roles.guard'
-import { Roles } from '../auth/decorators/roles.decorator'
-import { ShiftService } from './shift.service'
-import { CreateShiftDto, UpdateShiftDto } from './dto/shift.dto'
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import type { ShiftService } from './shift.service';
+import type { CreateShiftDto, UpdateShiftDto } from './dto/shift.dto';
 
 @ApiTags('shifts')
 @ApiBearerAuth()
@@ -21,7 +30,7 @@ export class ShiftController {
   @ApiQuery({ name: 'from', required: false })
   @ApiQuery({ name: 'to', required: false })
   getAll(@Query('from') from?: string, @Query('to') to?: string) {
-    return this.shifts.findAll(from, to)
+    return this.shifts.findAll(from, to);
   }
 
   @Get(':id')
@@ -43,7 +52,7 @@ export class ShiftController {
   @Roles('manager')
   @ApiOperation({ summary: 'Update a shift' })
   update(@Param('id') id: string, @Body() dto: UpdateShiftDto) {
-    return this.shifts.update(id, dto)
+    return this.shifts.update(id, dto);
   }
 
   @Delete(':id')

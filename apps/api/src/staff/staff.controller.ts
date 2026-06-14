@@ -1,13 +1,22 @@
 import {
-  Controller, Get, Post, Patch, Delete,
-  Param, Body, Query, HttpCode, HttpStatus, UseGuards,
-} from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../auth/guards/roles.guard'
-import { Roles } from '../auth/decorators/roles.decorator'
-import { StaffService } from './staff.service'
-import { CreateStaffDto, UpdateStaffDto, SetActiveDto } from './dto/staff.dto'
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import type { StaffService } from './staff.service';
+import type { CreateStaffDto, UpdateStaffDto, SetActiveDto } from './dto/staff.dto';
 
 @ApiTags('staff')
 @ApiBearerAuth()
@@ -39,7 +48,7 @@ export class StaffController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update a staff member' })
   update(@Param('id') id: string, @Body() dto: UpdateStaffDto) {
-    return this.staff.update(id, dto)
+    return this.staff.update(id, dto);
   }
 
   @Delete(':id')
@@ -52,6 +61,6 @@ export class StaffController {
   @Patch(':id/active')
   @ApiOperation({ summary: 'Set staff active status' })
   setActive(@Param('id') id: string, @Body() dto: SetActiveDto) {
-    return this.staff.setActive(id, dto.active)
+    return this.staff.setActive(id, dto.active);
   }
 }

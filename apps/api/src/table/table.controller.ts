@@ -1,13 +1,21 @@
 import {
-  Controller, Get, Post, Patch, Delete,
-  Param, Body, HttpCode, HttpStatus, UseGuards,
-} from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../auth/guards/roles.guard'
-import { Roles } from '../auth/decorators/roles.decorator'
-import { TableService } from './table.service'
-import { CreateTableDto, UpdateTableDto, SetTableStatusDto } from './dto/table.dto'
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import type { TableService } from './table.service';
+import type { CreateTableDto, UpdateTableDto, SetTableStatusDto } from './dto/table.dto';
 
 @ApiTags('tables')
 @ApiBearerAuth()
@@ -19,7 +27,7 @@ export class TableController {
   @Get()
   @ApiOperation({ summary: 'List all tables' })
   getAll() {
-    return this.tables.findAll()
+    return this.tables.findAll();
   }
 
   @Get(':id')
@@ -41,7 +49,7 @@ export class TableController {
   @Roles('manager')
   @ApiOperation({ summary: 'Update a table' })
   update(@Param('id') id: string, @Body() dto: UpdateTableDto) {
-    return this.tables.update(id, dto)
+    return this.tables.update(id, dto);
   }
 
   @Delete(':id')
@@ -56,6 +64,6 @@ export class TableController {
   @Patch(':id/status')
   @ApiOperation({ summary: 'Set table status' })
   setStatus(@Param('id') id: string, @Body() dto: SetTableStatusDto) {
-    return this.tables.setStatus(id, dto)
+    return this.tables.setStatus(id, dto);
   }
 }

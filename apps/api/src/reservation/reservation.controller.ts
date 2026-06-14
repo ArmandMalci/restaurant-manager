@@ -1,13 +1,22 @@
 import {
-  Controller, Get, Post, Patch, Delete,
-  Param, Body, Query, HttpCode, HttpStatus, UseGuards,
-} from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { RolesGuard } from '../auth/guards/roles.guard'
-import { Roles } from '../auth/decorators/roles.decorator'
-import { ReservationService } from './reservation.service'
-import { CreateReservationDto, UpdateReservationDto } from './dto/reservation.dto'
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import type { ReservationService } from './reservation.service';
+import type { CreateReservationDto, UpdateReservationDto } from './dto/reservation.dto';
 
 @ApiTags('reservations')
 @ApiBearerAuth()
@@ -38,7 +47,7 @@ export class ReservationController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update a reservation' })
   update(@Param('id') id: string, @Body() dto: UpdateReservationDto) {
-    return this.reservations.update(id, dto)
+    return this.reservations.update(id, dto);
   }
 
   @Delete(':id')

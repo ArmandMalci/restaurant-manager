@@ -1,5 +1,5 @@
-import { SetMetadata } from '@nestjs/common'
-import { StaffRole } from '@restaurant/shared'
+import { SetMetadata } from '@nestjs/common';
+import type { StaffRole } from '@restaurant/shared';
 
-export const ROLES_KEY = 'roles'
-export const Roles = (...roles: StaffRole[]) => SetMetadata(ROLES_KEY, roles)
+export const ROLES_KEY = 'roles';
+export const Roles = (...roles: StaffRole[]) => SetMetadata(ROLES_KEY, roles);

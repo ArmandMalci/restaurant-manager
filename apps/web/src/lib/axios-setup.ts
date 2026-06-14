@@ -1,10 +1,10 @@
-import axios from 'axios'
-import { enqueueRequest } from './offline-queue'
+import axios from 'axios';
+import { enqueueRequest } from './offline-queue';
 
 export function setupAxiosOfflineInterceptor(): void {
   axios.interceptors.response.use(
-    response => response,
-    error => {
+    (response) => response,
+    (error) => {
       // Only queue when offline (not for auth/server errors)
       if (
         !navigator.onLine &&
@@ -16,9 +16,9 @@ export function setupAxiosOfflineInterceptor(): void {
           error.config.method.toUpperCase(),
           error.config.url as string,
           error.config.data ? JSON.parse(error.config.data as string) : undefined,
-        )
+        );
       }
-      return Promise.reject(error)
+      return Promise.reject(error);
     },
-  )
+  );
 }

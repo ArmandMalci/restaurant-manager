@@ -1,8 +1,8 @@
-import { Test } from '@nestjs/testing'
-import { ConflictException, NotFoundException } from '@nestjs/common'
-import { BillingService } from './billing.service'
-import { PrismaService } from '../prisma/prisma.service'
-import { Prisma } from '@prisma/client'
+import { Test } from '@nestjs/testing';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BillingService } from './billing.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 const prismaMock = {
   order: {
@@ -13,21 +13,18 @@ const prismaMock = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
-}
+};
 
 describe('BillingService', () => {
-  let service: BillingService
+  let service: BillingService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [
-        BillingService,
-        { provide: PrismaService, useValue: prismaMock },
-      ],
-    }).compile()
-    service = module.get(BillingService)
-    jest.clearAllMocks()
-  })
+      providers: [BillingService, { provide: PrismaService, useValue: prismaMock }],
+    }).compile();
+    service = module.get(BillingService);
+    jest.clearAllMocks();
+  });
 
   describe('create', () => {
     it('calculates totals correctly', async () => {
@@ -53,7 +50,7 @@ describe('BillingService', () => {
             },
           },
         ],
-      }
+      };
 
       const fakeBill = {
         id: 'bill-1',
@@ -66,18 +63,18 @@ describe('BillingService', () => {
         paidAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      prismaMock.order.findUnique.mockResolvedValue(mockOrder)
-      prismaMock.bill.create.mockResolvedValue(fakeBill)
+      prismaMock.order.findUnique.mockResolvedValue(mockOrder);
+      prismaMock.bill.create.mockResolvedValue(fakeBill);
 
-      await service.create({ orderId: 'order-1', discountPct: 20 })
+      await service.create({ orderId: 'order-1', discountPct: 20 });
 
-      expect(prismaMock.bill.create).toHaveBeenCalled()
-      const callData = prismaMock.bill.create.mock.calls[0][0].data
-      expect(callData.orderId).toBe('order-1')
-      expect(callData.discountPct).toBe(20)
-    })
+      expect(prismaMock.bill.create).toHaveBeenCalled();
+      const callData = prismaMock.bill.create.mock.calls[0][0].data;
+      expect(callData.orderId).toBe('order-1');
+      expect(callData.discountPct).toBe(20);
+    });
 
     it('throws ConflictException if bill already exists', async () => {
       const mockOrder = {
@@ -85,27 +82,25 @@ describe('BillingService', () => {
         status: 'in_progress',
         bill: { id: 'existing-bill' },
         items: [],
-      }
+      };
 
-      prismaMock.order.findUnique.mockResolvedValue(mockOrder)
+      prismaMock.order.findUnique.mockResolvedValue(mockOrder);
 
-      await expect(
-        service.create({ orderId: 'order-1', discountPct: 0 }),
-      ).rejects.toThrow(ConflictException)
+      await expect(service.create({ orderId: 'order-1', discountPct: 0 })).rejects.toThrow(
+        ConflictException,
+      );
 
-      expect(prismaMock.bill.create).not.toHaveBeenCalled()
-    })
-  })
+      expect(prismaMock.bill.create).not.toHaveBeenCalled();
+    });
+  });
 
   describe('findOne', () => {
     it('throws NotFoundException for unknown id', async () => {
-      prismaMock.bill.findUnique.mockResolvedValue(null)
+      prismaMock.bill.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent-id')).rejects.toThrow(
-        NotFoundException,
-      )
-    })
-  })
+      await expect(service.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+    });
+  });
 
   describe('pay', () => {
     it('throws ConflictException when bill is already paid', async () => {
@@ -120,13 +115,13 @@ describe('BillingService', () => {
         paidAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      prismaMock.bill.findUnique.mockResolvedValue(paidBill)
+      prismaMock.bill.findUnique.mockResolvedValue(paidBill);
 
-      await expect(service.pay('bill-1')).rejects.toThrow(ConflictException)
+      await expect(service.pay('bill-1')).rejects.toThrow(ConflictException);
 
-      expect(prismaMock.bill.update).not.toHaveBeenCalled()
-    })
-  })
-})
+      expect(prismaMock.bill.update).not.toHaveBeenCalled();
+    });
+  });
+});

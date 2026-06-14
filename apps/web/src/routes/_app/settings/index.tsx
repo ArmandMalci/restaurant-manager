@@ -1,13 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { Save, Bell, BellOff, Download } from 'lucide-react'
-import { useSettings, useUpdateSettings } from '@/lib/settings-api'
-import { subscribe, unsubscribe, isSubscribed } from '@/lib/notifications'
-import { useInstallPrompt } from '@/hooks/use-install-prompt'
+import { createFileRoute } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { Save, Bell, BellOff, Download } from 'lucide-react';
+import { useSettings, useUpdateSettings } from '@/lib/settings-api';
+import { subscribe, unsubscribe, isSubscribed } from '@/lib/notifications';
+import { useInstallPrompt } from '@/hooks/use-install-prompt';
 
 export const Route = createFileRoute('/_app/settings/')({
   component: SettingsPage,
-})
+});
 
 function Field({
   label,
@@ -16,11 +16,11 @@ function Field({
   type = 'text',
   placeholder,
 }: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  type?: string
-  placeholder?: string
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  placeholder?: string;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -28,69 +28,69 @@ function Field({
       <input
         type={type}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
     </label>
-  )
+  );
 }
 
 function SettingsPage() {
-  const { data, isLoading } = useSettings()
-  const update = useUpdateSettings()
+  const { data, isLoading } = useSettings();
+  const update = useUpdateSettings();
 
-  const [notifEnabled, setNotifEnabled] = useState(false)
-  const [notifLoading, setNotifLoading] = useState(false)
+  const [notifEnabled, setNotifEnabled] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
 
-  const { canInstall, install } = useInstallPrompt()
-  const [installed, setInstalled] = useState(false)
+  const { canInstall, install } = useInstallPrompt();
+  const [installed, setInstalled] = useState(false);
 
   async function handleInstall() {
-    const accepted = await install()
-    if (accepted) setInstalled(true)
+    const accepted = await install();
+    if (accepted) setInstalled(true);
   }
 
   useEffect(() => {
-    isSubscribed().then(setNotifEnabled)
-  }, [])
+    isSubscribed().then(setNotifEnabled);
+  }, []);
 
   async function toggleNotifications() {
-    setNotifLoading(true)
+    setNotifLoading(true);
     try {
       if (notifEnabled) {
-        await unsubscribe()
-        setNotifEnabled(false)
+        await unsubscribe();
+        setNotifEnabled(false);
       } else {
-        const ok = await subscribe()
-        setNotifEnabled(ok)
+        const ok = await subscribe();
+        setNotifEnabled(ok);
       }
     } finally {
-      setNotifLoading(false)
+      setNotifLoading(false);
     }
   }
 
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
-  const [address, setAddress] = useState('')
-  const [openingHours, setOpeningHours] = useState('')
-  const [saved, setSaved] = useState(false)
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [openingHours, setOpeningHours] = useState('');
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (data) {
-      setName(data.name ?? '')
-      setDescription(data.description ?? '')
-      setPhone(data.phone ?? '')
-      setEmail(data.email ?? '')
-      setAddress(data.address ?? '')
-      setOpeningHours(data.openingHours ?? '')
+      setName(data.name ?? '');
+      setDescription(data.description ?? '');
+      setPhone(data.phone ?? '');
+      setEmail(data.email ?? '');
+      setAddress(data.address ?? '');
+      setOpeningHours(data.openingHours ?? '');
     }
-  }, [data])
+  }, [data]);
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
     update.mutate(
       {
         name: name || undefined,
@@ -102,14 +102,14 @@ function SettingsPage() {
       },
       {
         onSuccess: () => {
-          setSaved(true)
-          setTimeout(() => setSaved(false), 2000)
+          setSaved(true);
+          setTimeout(() => setSaved(false), 2000);
         },
       },
-    )
+    );
   }
 
-  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>
+  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
 
   return (
     <div className="space-y-6 p-6 max-w-2xl">
@@ -119,23 +119,47 @@ function SettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border p-6">
-        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Restaurant Info</h2>
+        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+          Restaurant Info
+        </h2>
 
         <Field label="Name *" value={name} onChange={setName} placeholder="My Restaurant" />
-        <Field label="Description" value={description} onChange={setDescription} placeholder="A short description…" />
+        <Field
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          placeholder="A short description…"
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Phone" value={phone} onChange={setPhone} type="tel" placeholder="+1 555 0100" />
-          <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="hello@restaurant.com" />
+          <Field
+            label="Phone"
+            value={phone}
+            onChange={setPhone}
+            type="tel"
+            placeholder="+1 555 0100"
+          />
+          <Field
+            label="Email"
+            value={email}
+            onChange={setEmail}
+            type="email"
+            placeholder="hello@restaurant.com"
+          />
         </div>
 
-        <Field label="Address" value={address} onChange={setAddress} placeholder="123 Main St, City, Country" />
+        <Field
+          label="Address"
+          value={address}
+          onChange={setAddress}
+          placeholder="123 Main St, City, Country"
+        />
 
         <label className="flex flex-col gap-1 text-sm">
           Opening Hours
           <textarea
             value={openingHours}
-            onChange={e => setOpeningHours(e.target.value)}
+            onChange={(e) => setOpeningHours(e.target.value)}
             rows={3}
             placeholder="Mon–Fri 11:00–22:00&#10;Sat–Sun 10:00–23:00"
             className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
@@ -197,5 +221,5 @@ function SettingsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

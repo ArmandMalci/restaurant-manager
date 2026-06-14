@@ -1,49 +1,49 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useBill, useCreateBill, usePayBill } from '@/lib/billing-api'
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import { useBill, useCreateBill, usePayBill } from '@/lib/billing-api';
 
 export const Route = createFileRoute('/_app/billing/')({
   component: BillingPage,
-})
+});
 
 function BillingPage() {
-  const [orderId, setOrderId] = useState('')
-  const [discountPct, setDiscountPct] = useState('')
-  const [billId, setBillId] = useState('')
-  const [lookupId, setLookupId] = useState('')
-  const [createMsg, setCreateMsg] = useState('')
+  const [orderId, setOrderId] = useState('');
+  const [discountPct, setDiscountPct] = useState('');
+  const [billId, setBillId] = useState('');
+  const [lookupId, setLookupId] = useState('');
+  const [createMsg, setCreateMsg] = useState('');
 
-  const createBill = useCreateBill()
-  const payBill = usePayBill()
-  const { data: bill, isLoading: billLoading, isError: billError } = useBill(lookupId)
+  const createBill = useCreateBill();
+  const payBill = usePayBill();
+  const { data: bill, isLoading: billLoading, isError: billError } = useBill(lookupId);
 
   function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    setCreateMsg('')
+    e.preventDefault();
+    setCreateMsg('');
     createBill.mutate(
       {
         orderId,
         discountPct: discountPct !== '' ? Number(discountPct) : 0,
       },
       {
-        onSuccess: created => {
-          setCreateMsg(`Bill created: ${created.id}`)
-          setOrderId('')
-          setDiscountPct('')
+        onSuccess: (created) => {
+          setCreateMsg(`Bill created: ${created.id}`);
+          setOrderId('');
+          setDiscountPct('');
         },
         onError: () => setCreateMsg('Failed to create bill'),
       },
-    )
+    );
   }
 
   function handleLookup(e: React.FormEvent) {
-    e.preventDefault()
-    setLookupId(billId.trim())
+    e.preventDefault();
+    setLookupId(billId.trim());
   }
 
   function handlePay() {
     if (bill) {
-      payBill.mutate(bill.id)
+      payBill.mutate(bill.id);
     }
   }
 
@@ -56,14 +56,16 @@ function BillingPage() {
 
       {/* Create Bill */}
       <form onSubmit={handleCreate} className="space-y-4 rounded-lg border p-6">
-        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Create Bill</h2>
+        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+          Create Bill
+        </h2>
 
         <label className="flex flex-col gap-1 text-sm">
           Order ID *
           <input
             type="text"
             value={orderId}
-            onChange={e => setOrderId(e.target.value)}
+            onChange={(e) => setOrderId(e.target.value)}
             placeholder="Enter order ID"
             required
             className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -75,7 +77,7 @@ function BillingPage() {
           <input
             type="number"
             value={discountPct}
-            onChange={e => setDiscountPct(e.target.value)}
+            onChange={(e) => setDiscountPct(e.target.value)}
             placeholder="0"
             min={0}
             max={100}
@@ -92,7 +94,9 @@ function BillingPage() {
             {createBill.isPending ? 'Creating…' : 'Create Bill'}
           </button>
           {createMsg && (
-            <span className={`text-sm font-medium ${createMsg.startsWith('Failed') ? 'text-destructive' : 'text-green-600'}`}>
+            <span
+              className={`text-sm font-medium ${createMsg.startsWith('Failed') ? 'text-destructive' : 'text-green-600'}`}
+            >
               {createMsg}
             </span>
           )}
@@ -101,14 +105,16 @@ function BillingPage() {
 
       {/* Find Bill */}
       <form onSubmit={handleLookup} className="space-y-4 rounded-lg border p-6">
-        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Find Bill</h2>
+        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+          Find Bill
+        </h2>
 
         <label className="flex flex-col gap-1 text-sm">
           Bill ID
           <input
             type="text"
             value={billId}
-            onChange={e => setBillId(e.target.value)}
+            onChange={(e) => setBillId(e.target.value)}
             placeholder="Enter bill ID"
             className="rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
@@ -126,7 +132,9 @@ function BillingPage() {
       {/* Bill Details */}
       {lookupId && (
         <div className="rounded-lg border p-6 space-y-4">
-          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Bill Details</h2>
+          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+            Bill Details
+          </h2>
 
           {billLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {billError && <p className="text-sm text-destructive">Bill not found</p>}
@@ -153,7 +161,11 @@ function BillingPage() {
                 <span className="font-semibold">${Number(bill.total).toFixed(2)}</span>
 
                 <span className="text-muted-foreground">Status</span>
-                <span className={bill.paid ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
+                <span
+                  className={
+                    bill.paid ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'
+                  }
+                >
                   {bill.paid ? 'Paid' : 'Unpaid'}
                 </span>
 
@@ -174,8 +186,12 @@ function BillingPage() {
                   >
                     {payBill.isPending ? 'Processing…' : 'Mark as Paid'}
                   </button>
-                  {payBill.isSuccess && <span className="text-sm text-green-600 font-medium">Paid!</span>}
-                  {payBill.isError && <span className="text-sm text-destructive">Failed to mark as paid</span>}
+                  {payBill.isSuccess && (
+                    <span className="text-sm text-green-600 font-medium">Paid!</span>
+                  )}
+                  {payBill.isError && (
+                    <span className="text-sm text-destructive">Failed to mark as paid</span>
+                  )}
                 </div>
               )}
               {payBill.isSuccess && bill.paid && (
@@ -186,5 +202,5 @@ function BillingPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
