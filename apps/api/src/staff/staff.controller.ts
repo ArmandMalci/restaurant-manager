@@ -11,7 +11,8 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { StaffDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -29,24 +30,28 @@ export class StaffController {
   @Get()
   @ApiOperation({ summary: 'List all staff, optionally filtered by role' })
   @ApiQuery({ name: 'role', required: false })
+  @ApiResponse({ status: 200, type: [StaffDto] })
   public getAll(@Query('role') role?: string) {
     return this.staff.findAll(role);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a staff member by id' })
+  @ApiResponse({ status: 200, type: StaffDto })
   public getOne(@Param('id') id: string) {
     return this.staff.findOne(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a staff member' })
+  @ApiResponse({ status: 201, type: StaffDto })
   public create(@Body() dto: CreateStaffDto) {
     return this.staff.create(dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a staff member' })
+  @ApiResponse({ status: 200, type: StaffDto })
   public update(@Param('id') id: string, @Body() dto: UpdateStaffDto) {
     return this.staff.update(id, dto);
   }
@@ -60,6 +65,7 @@ export class StaffController {
 
   @Patch(':id/active')
   @ApiOperation({ summary: 'Set staff active status' })
+  @ApiResponse({ status: 200, type: StaffDto })
   public setActive(@Param('id') id: string, @Body() dto: SetActiveDto) {
     return this.staff.setActive(id, dto.active);
   }

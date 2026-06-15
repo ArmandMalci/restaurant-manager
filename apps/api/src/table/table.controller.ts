@@ -10,7 +10,8 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { TableDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -26,12 +27,14 @@ export class TableController {
 
   @Get()
   @ApiOperation({ summary: 'List all tables' })
+  @ApiResponse({ status: 200, type: [TableDto] })
   public getAll() {
     return this.tables.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a table by id' })
+  @ApiResponse({ status: 200, type: TableDto })
   public getOne(@Param('id') id: string) {
     return this.tables.findOne(id);
   }
@@ -40,6 +43,7 @@ export class TableController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a table' })
+  @ApiResponse({ status: 201, type: TableDto })
   public create(@Body() dto: CreateTableDto) {
     return this.tables.create(dto);
   }
@@ -48,6 +52,7 @@ export class TableController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a table' })
+  @ApiResponse({ status: 200, type: TableDto })
   public update(@Param('id') id: string, @Body() dto: UpdateTableDto) {
     return this.tables.update(id, dto);
   }
@@ -63,6 +68,7 @@ export class TableController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Set table status' })
+  @ApiResponse({ status: 200, type: TableDto })
   public setStatus(@Param('id') id: string, @Body() dto: SetTableStatusDto) {
     return this.tables.setStatus(id, dto);
   }

@@ -11,7 +11,8 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ReservationDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -28,24 +29,28 @@ export class ReservationController {
   @Get()
   @ApiOperation({ summary: 'List reservations, optionally filtered by date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'date', required: false })
+  @ApiResponse({ status: 200, type: [ReservationDto] })
   public getAll(@Query('date') date?: string) {
     return this.reservations.findAll(date);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a reservation by id' })
+  @ApiResponse({ status: 200, type: ReservationDto })
   public getOne(@Param('id') id: string) {
     return this.reservations.findOne(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a reservation' })
+  @ApiResponse({ status: 201, type: ReservationDto })
   public create(@Body() dto: CreateReservationDto) {
     return this.reservations.create(dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a reservation' })
+  @ApiResponse({ status: 200, type: ReservationDto })
   public update(@Param('id') id: string, @Body() dto: UpdateReservationDto) {
     return this.reservations.update(id, dto);
   }

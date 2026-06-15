@@ -11,7 +11,15 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { MenuCategoryDto, MenuItemDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -34,12 +42,14 @@ export class MenuController {
 
   @Get('categories')
   @ApiOperation({ summary: 'List all menu categories' })
+  @ApiResponse({ status: 200, type: [MenuCategoryDto] })
   public getCategories() {
     return this.menu.findAllCategories();
   }
 
   @Get('categories/:id')
   @ApiOperation({ summary: 'Get a category by id' })
+  @ApiResponse({ status: 200, type: MenuCategoryDto })
   public getCategory(@Param('id') id: string) {
     return this.menu.findOneCategory(id);
   }
@@ -48,6 +58,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a menu category' })
+  @ApiResponse({ status: 201, type: MenuCategoryDto })
   public createCategory(@Body() dto: CreateMenuCategoryDto) {
     return this.menu.createCategory(dto);
   }
@@ -56,6 +67,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a menu category' })
+  @ApiResponse({ status: 200, type: MenuCategoryDto })
   public updateCategory(@Param('id') id: string, @Body() dto: UpdateMenuCategoryDto) {
     return this.menu.updateCategory(id, dto);
   }
@@ -74,12 +86,14 @@ export class MenuController {
   @Get('items')
   @ApiOperation({ summary: 'List menu items, optionally filtered by category' })
   @ApiQuery({ name: 'categoryId', required: false })
+  @ApiResponse({ status: 200, type: [MenuItemDto] })
   public getItems(@Query('categoryId') categoryId?: string) {
     return this.menu.findAllItems(categoryId);
   }
 
   @Get('items/:id')
   @ApiOperation({ summary: 'Get a menu item by id' })
+  @ApiResponse({ status: 200, type: MenuItemDto })
   public getItem(@Param('id') id: string) {
     return this.menu.findOneItem(id);
   }
@@ -88,6 +102,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a menu item' })
+  @ApiResponse({ status: 201, type: MenuItemDto })
   public createItem(@Body() dto: CreateMenuItemDto) {
     return this.menu.createItem(dto);
   }
@@ -96,6 +111,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a menu item' })
+  @ApiResponse({ status: 200, type: MenuItemDto })
   public updateItem(@Param('id') id: string, @Body() dto: UpdateMenuItemDto) {
     return this.menu.updateItem(id, dto);
   }
@@ -113,6 +129,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager', 'kitchen')
   @ApiOperation({ summary: 'Toggle item availability' })
+  @ApiResponse({ status: 200, type: MenuItemDto })
   @ApiBody({
     schema: {
       type: 'object',
