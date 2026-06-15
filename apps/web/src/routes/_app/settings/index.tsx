@@ -1,7 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { Save, Bell, BellOff, Download } from 'lucide-react';
-import { useSettings, useUpdateSettings } from '@/lib/settings-api';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  useSettingsControllerGet,
+  useSettingsControllerUpdate,
+  invalidateSettingsControllerGet,
+} from '@/api/settings/settings';
 import { subscribe, unsubscribe, isSubscribed } from '@/lib/notifications';
 import { useInstallPrompt } from '@/hooks/use-install-prompt';
 
@@ -37,8 +42,13 @@ function Field({
 }
 
 function SettingsPage() {
-  const { data, isLoading } = useSettings();
-  const update = useUpdateSettings();
+  const qc = useQueryClient();
+  const { data, isLoading } = useSettingsControllerGet();
+  const update = useSettingsControllerUpdate({
+    mutation: {
+      onSuccess: () => invalidateSettingsControllerGet(qc),
+    },
+  });
 
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
@@ -95,12 +105,14 @@ function SettingsPage() {
     e.preventDefault();
     update.mutate(
       {
-        name: name || undefined,
-        description: description || undefined,
-        phone: phone || undefined,
-        email: email || undefined,
-        address: address || undefined,
-        openingHours: openingHours || undefined,
+        data: {
+          name: name || undefined,
+          description: description || undefined,
+          phone: phone || undefined,
+          email: email || undefined,
+          address: address || undefined,
+          openingHours: openingHours || undefined,
+        },
       },
       {
         onSuccess: () => {
