@@ -43,7 +43,7 @@ const ITEM_STATUSES: OrderItemStatus[] = ['pending', 'in_progress', 'ready'];
 
 function CreateOrderForm({ onClose }: { onClose: () => void }) {
   const { data: tables = [] } = useTables();
-  const { data: menuItems = [] } = useMenuControllerGetItems({ query: {} });
+  const { data: menuItems = [] } = useMenuControllerGetItems();
   const createOrder = useCreateOrder();
   const [tableId, setTableId] = useState('');
   const [notes, setNotes] = useState('');
