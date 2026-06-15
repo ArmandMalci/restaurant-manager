@@ -15,6 +15,16 @@ export default defineConfig({
           path: './src/lib/api-client.ts',
           name: 'default',
         },
+        query: {
+          signal: true,
+          // Generates getXxxQueryKey() factories alongside every hook.
+          // Use these for cache invalidation:
+          //   queryClient.invalidateQueries({ queryKey: getMenuControllerGetCategoriesQueryKey() })
+          // No boilerplate needed at the call site — import key + call invalidateQueries.
+          options: {
+            staleTime: 10_000,
+          },
+        },
       },
     },
   },

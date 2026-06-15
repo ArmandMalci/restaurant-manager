@@ -13,6 +13,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   public async onModuleInit() {
+    // Skip DB connection during OpenAPI spec generation (no real DB available).
+    // Real connection failures surface via the health-check endpoint at runtime.
+    if (process.env.DATABASE_URL?.includes('placeholder')) return;
     await this.$connect();
   }
 }

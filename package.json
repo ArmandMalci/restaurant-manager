@@ -8,7 +8,8 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "format": "biome format --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "gen:api": "pnpm --filter @restaurant/api gen:spec && pnpm --filter @restaurant/web gen:api"
   },
   "lint-staged": {
     "apps/api/src/**/*.ts": [

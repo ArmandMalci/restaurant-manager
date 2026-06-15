@@ -9,7 +9,7 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main",
-    "gen:spec": "tsx scripts/generate-spec.ts",
+    "gen:spec": "nest build && tsx --tsconfig tsconfig.scripts.json scripts/generate-spec.ts",
     "lint": "biome check src && eslint src",
     "test": "jest",
     "typecheck": "tsc --noEmit"
