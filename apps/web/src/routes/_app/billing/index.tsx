@@ -1,6 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { useBill, useCreateBill, usePayBill } from '@/lib/billing-api';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  useBillingControllerFindOne,
+  useBillingControllerCreate,
+  useBillingControllerPay,
+  invalidateBillingControllerFindOne,
+} from '@/api/billing/billing';
+import { invalidateOrderControllerGetAll } from '@/api/orders/orders';
 
 export const Route = createFileRoute('/_app/billing/')({
   component: BillingPage,
@@ -13,17 +20,40 @@ function BillingPage() {
   const [lookupId, setLookupId] = useState('');
   const [createMsg, setCreateMsg] = useState('');
 
-  const createBill = useCreateBill();
-  const payBill = usePayBill();
-  const { data: bill, isLoading: billLoading, isError: billError } = useBill(lookupId);
+  const qc = useQueryClient();
+
+  const createBill = useBillingControllerCreate({
+    mutation: {
+      onSuccess: (newBill) => {
+        if (newBill?.id) invalidateBillingControllerFindOne(qc, newBill.id);
+        invalidateOrderControllerGetAll(qc);
+      },
+    },
+  });
+
+  const payBill = useBillingControllerPay({
+    mutation: {
+      onSuccess: () => {
+        if (bill?.id) invalidateBillingControllerFindOne(qc, bill.id);
+      },
+    },
+  });
+
+  const {
+    data: bill,
+    isLoading: billLoading,
+    isError: billError,
+  } = useBillingControllerFindOne(lookupId ?? '', { query: { enabled: !!lookupId } });
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setCreateMsg('');
     createBill.mutate(
       {
-        orderId,
-        discountPct: discountPct !== '' ? Number(discountPct) : 0,
+        data: {
+          orderId,
+          discountPct: discountPct !== '' ? Number(discountPct) : 0,
+        },
       },
       {
         onSuccess: (created) => {
@@ -43,7 +73,7 @@ function BillingPage() {
 
   function handlePay() {
     if (bill) {
-      payBill.mutate(bill.id);
+      payBill.mutate({ id: bill.id });
     }
   }
 
