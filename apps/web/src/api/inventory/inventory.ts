@@ -21,7 +21,12 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { Function, InventoryItemWithStatusDto } from '../restaurantManagerAPI.schemas';
+import type {
+  AdjustInventoryDto,
+  CreateInventoryItemDto,
+  InventoryItemWithStatusDto,
+  UpdateInventoryItemDto,
+} from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
@@ -159,12 +164,15 @@ export const invalidateInventoryControllerFindAll = async (
 /**
  * @summary Create an inventory item
  */
-export const inventoryControllerCreate = (_function: Function, signal?: AbortSignal) => {
+export const inventoryControllerCreate = (
+  createInventoryItemDto: CreateInventoryItemDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<InventoryItemWithStatusDto>({
     url: `/api/inventory`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createInventoryItemDto,
     signal,
   });
 };
@@ -176,13 +184,13 @@ export const getInventoryControllerCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof inventoryControllerCreate>>,
     TError,
-    { data: Function },
+    { data: CreateInventoryItemDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof inventoryControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateInventoryItemDto },
   TContext
 > => {
   const mutationKey = ['inventoryControllerCreate'];
@@ -194,7 +202,7 @@ export const getInventoryControllerCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof inventoryControllerCreate>>,
-    { data: Function }
+    { data: CreateInventoryItemDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -207,7 +215,7 @@ export const getInventoryControllerCreateMutationOptions = <
 export type InventoryControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof inventoryControllerCreate>>
 >;
-export type InventoryControllerCreateMutationBody = Function;
+export type InventoryControllerCreateMutationBody = CreateInventoryItemDto;
 export type InventoryControllerCreateMutationError = unknown;
 
 /**
@@ -218,7 +226,7 @@ export const useInventoryControllerCreate = <TError = unknown, TContext = unknow
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof inventoryControllerCreate>>,
       TError,
-      { data: Function },
+      { data: CreateInventoryItemDto },
       TContext
     >;
   },
@@ -226,7 +234,7 @@ export const useInventoryControllerCreate = <TError = unknown, TContext = unknow
 ): UseMutationResult<
   Awaited<ReturnType<typeof inventoryControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateInventoryItemDto },
   TContext
 > => {
   return useMutation(getInventoryControllerCreateMutationOptions(options), queryClient);
@@ -378,14 +386,14 @@ export const invalidateInventoryControllerFindOne = async (
  */
 export const inventoryControllerUpdate = (
   id: string,
-  _function: Function,
+  updateInventoryItemDto: UpdateInventoryItemDto,
   signal?: AbortSignal,
 ) => {
   return customInstance<InventoryItemWithStatusDto>({
     url: `/api/inventory/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateInventoryItemDto,
     signal,
   });
 };
@@ -397,13 +405,13 @@ export const getInventoryControllerUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof inventoryControllerUpdate>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateInventoryItemDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof inventoryControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateInventoryItemDto },
   TContext
 > => {
   const mutationKey = ['inventoryControllerUpdate'];
@@ -415,7 +423,7 @@ export const getInventoryControllerUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof inventoryControllerUpdate>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateInventoryItemDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -428,7 +436,7 @@ export const getInventoryControllerUpdateMutationOptions = <
 export type InventoryControllerUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof inventoryControllerUpdate>>
 >;
-export type InventoryControllerUpdateMutationBody = Function;
+export type InventoryControllerUpdateMutationBody = UpdateInventoryItemDto;
 export type InventoryControllerUpdateMutationError = unknown;
 
 /**
@@ -439,7 +447,7 @@ export const useInventoryControllerUpdate = <TError = unknown, TContext = unknow
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof inventoryControllerUpdate>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateInventoryItemDto },
       TContext
     >;
   },
@@ -447,7 +455,7 @@ export const useInventoryControllerUpdate = <TError = unknown, TContext = unknow
 ): UseMutationResult<
   Awaited<ReturnType<typeof inventoryControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateInventoryItemDto },
   TContext
 > => {
   return useMutation(getInventoryControllerUpdateMutationOptions(options), queryClient);
@@ -526,14 +534,14 @@ export const useInventoryControllerRemove = <TError = unknown, TContext = unknow
  */
 export const inventoryControllerAdjust = (
   id: string,
-  _function: Function,
+  adjustInventoryDto: AdjustInventoryDto,
   signal?: AbortSignal,
 ) => {
   return customInstance<InventoryItemWithStatusDto>({
     url: `/api/inventory/${id}/adjust`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: adjustInventoryDto,
     signal,
   });
 };
@@ -545,13 +553,13 @@ export const getInventoryControllerAdjustMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof inventoryControllerAdjust>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: AdjustInventoryDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof inventoryControllerAdjust>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: AdjustInventoryDto },
   TContext
 > => {
   const mutationKey = ['inventoryControllerAdjust'];
@@ -563,7 +571,7 @@ export const getInventoryControllerAdjustMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof inventoryControllerAdjust>>,
-    { id: string; data: Function }
+    { id: string; data: AdjustInventoryDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -576,7 +584,7 @@ export const getInventoryControllerAdjustMutationOptions = <
 export type InventoryControllerAdjustMutationResult = NonNullable<
   Awaited<ReturnType<typeof inventoryControllerAdjust>>
 >;
-export type InventoryControllerAdjustMutationBody = Function;
+export type InventoryControllerAdjustMutationBody = AdjustInventoryDto;
 export type InventoryControllerAdjustMutationError = unknown;
 
 /**
@@ -587,7 +595,7 @@ export const useInventoryControllerAdjust = <TError = unknown, TContext = unknow
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof inventoryControllerAdjust>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: AdjustInventoryDto },
       TContext
     >;
   },
@@ -595,7 +603,7 @@ export const useInventoryControllerAdjust = <TError = unknown, TContext = unknow
 ): UseMutationResult<
   Awaited<ReturnType<typeof inventoryControllerAdjust>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: AdjustInventoryDto },
   TContext
 > => {
   return useMutation(getInventoryControllerAdjustMutationOptions(options), queryClient);

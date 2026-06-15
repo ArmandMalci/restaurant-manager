@@ -9,11 +9,11 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BillDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BillingService } from './billing.service';
-import type { CreateBillDto } from './dto/billing.dto';
+import { CreateBillDto } from './dto/billing.dto';
 
 @ApiTags('billing')
 @ApiBearerAuth()
@@ -23,6 +23,7 @@ export class BillingController {
   public constructor(private readonly billing: BillingService) {}
 
   @Post()
+  @ApiBody({ type: CreateBillDto })
   @ApiResponse({ status: 201, type: BillDto })
   public create(@Body() dto: CreateBillDto) {
     return this.billing.create(dto);

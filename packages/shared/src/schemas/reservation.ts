@@ -20,7 +20,7 @@ export const CreateReservationSchema = z.object({
   guestEmail: z.string().email().nullable().optional(),
   guestPhone: z.string().max(20).nullable().optional(),
   partySize: z.number().int().positive(),
-  date: z.coerce.date(),
+  date: z.string(),
   notes: z.string().max(500).nullable().optional(),
 });
 export type CreateReservationDto = z.infer<typeof CreateReservationSchema>;

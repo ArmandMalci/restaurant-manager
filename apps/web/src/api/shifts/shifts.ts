@@ -22,9 +22,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Function,
+  CreateShiftDto,
   ShiftControllerGetAllParams,
   ShiftDto,
+  UpdateShiftDto,
 } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
@@ -169,12 +170,12 @@ export const invalidateShiftControllerGetAll = async (
 /**
  * @summary Create a shift
  */
-export const shiftControllerCreate = (_function: Function, signal?: AbortSignal) => {
+export const shiftControllerCreate = (createShiftDto: CreateShiftDto, signal?: AbortSignal) => {
   return customInstance<ShiftDto>({
     url: `/api/shifts`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createShiftDto,
     signal,
   });
 };
@@ -186,13 +187,13 @@ export const getShiftControllerCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof shiftControllerCreate>>,
     TError,
-    { data: Function },
+    { data: CreateShiftDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof shiftControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateShiftDto },
   TContext
 > => {
   const mutationKey = ['shiftControllerCreate'];
@@ -204,7 +205,7 @@ export const getShiftControllerCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof shiftControllerCreate>>,
-    { data: Function }
+    { data: CreateShiftDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -217,7 +218,7 @@ export const getShiftControllerCreateMutationOptions = <
 export type ShiftControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof shiftControllerCreate>>
 >;
-export type ShiftControllerCreateMutationBody = Function;
+export type ShiftControllerCreateMutationBody = CreateShiftDto;
 export type ShiftControllerCreateMutationError = unknown;
 
 /**
@@ -228,7 +229,7 @@ export const useShiftControllerCreate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof shiftControllerCreate>>,
       TError,
-      { data: Function },
+      { data: CreateShiftDto },
       TContext
     >;
   },
@@ -236,7 +237,7 @@ export const useShiftControllerCreate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof shiftControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateShiftDto },
   TContext
 > => {
   return useMutation(getShiftControllerCreateMutationOptions(options), queryClient);
@@ -378,12 +379,16 @@ export const invalidateShiftControllerGetOne = async (
 /**
  * @summary Update a shift
  */
-export const shiftControllerUpdate = (id: string, _function: Function, signal?: AbortSignal) => {
+export const shiftControllerUpdate = (
+  id: string,
+  updateShiftDto: UpdateShiftDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<ShiftDto>({
     url: `/api/shifts/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateShiftDto,
     signal,
   });
 };
@@ -395,13 +400,13 @@ export const getShiftControllerUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof shiftControllerUpdate>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateShiftDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof shiftControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateShiftDto },
   TContext
 > => {
   const mutationKey = ['shiftControllerUpdate'];
@@ -413,7 +418,7 @@ export const getShiftControllerUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof shiftControllerUpdate>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateShiftDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -426,7 +431,7 @@ export const getShiftControllerUpdateMutationOptions = <
 export type ShiftControllerUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof shiftControllerUpdate>>
 >;
-export type ShiftControllerUpdateMutationBody = Function;
+export type ShiftControllerUpdateMutationBody = UpdateShiftDto;
 export type ShiftControllerUpdateMutationError = unknown;
 
 /**
@@ -437,7 +442,7 @@ export const useShiftControllerUpdate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof shiftControllerUpdate>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateShiftDto },
       TContext
     >;
   },
@@ -445,7 +450,7 @@ export const useShiftControllerUpdate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof shiftControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateShiftDto },
   TContext
 > => {
   return useMutation(getShiftControllerUpdateMutationOptions(options), queryClient);

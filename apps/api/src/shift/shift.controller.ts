@@ -11,13 +11,20 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ShiftDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ShiftService } from './shift.service';
-import type { CreateShiftDto, UpdateShiftDto } from './dto/shift.dto';
+import { CreateShiftDto, UpdateShiftDto } from './dto/shift.dto';
 
 @ApiTags('shifts')
 @ApiBearerAuth()
@@ -46,6 +53,7 @@ export class ShiftController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a shift' })
+  @ApiBody({ type: CreateShiftDto })
   @ApiResponse({ status: 201, type: ShiftDto })
   public create(@Body() dto: CreateShiftDto) {
     return this.shifts.create(dto);
@@ -55,6 +63,7 @@ export class ShiftController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a shift' })
+  @ApiBody({ type: UpdateShiftDto })
   @ApiResponse({ status: 200, type: ShiftDto })
   public update(@Param('id') id: string, @Body() dto: UpdateShiftDto) {
     return this.shifts.update(id, dto);

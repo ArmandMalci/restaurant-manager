@@ -22,9 +22,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Function,
+  CreateReservationDto,
   ReservationControllerGetAllParams,
   ReservationDto,
+  UpdateReservationDto,
 } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
@@ -177,12 +178,15 @@ export const invalidateReservationControllerGetAll = async (
 /**
  * @summary Create a reservation
  */
-export const reservationControllerCreate = (_function: Function, signal?: AbortSignal) => {
+export const reservationControllerCreate = (
+  createReservationDto: CreateReservationDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<ReservationDto>({
     url: `/api/reservations`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createReservationDto,
     signal,
   });
 };
@@ -194,13 +198,13 @@ export const getReservationControllerCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof reservationControllerCreate>>,
     TError,
-    { data: Function },
+    { data: CreateReservationDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof reservationControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateReservationDto },
   TContext
 > => {
   const mutationKey = ['reservationControllerCreate'];
@@ -212,7 +216,7 @@ export const getReservationControllerCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof reservationControllerCreate>>,
-    { data: Function }
+    { data: CreateReservationDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -225,7 +229,7 @@ export const getReservationControllerCreateMutationOptions = <
 export type ReservationControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof reservationControllerCreate>>
 >;
-export type ReservationControllerCreateMutationBody = Function;
+export type ReservationControllerCreateMutationBody = CreateReservationDto;
 export type ReservationControllerCreateMutationError = unknown;
 
 /**
@@ -236,7 +240,7 @@ export const useReservationControllerCreate = <TError = unknown, TContext = unkn
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof reservationControllerCreate>>,
       TError,
-      { data: Function },
+      { data: CreateReservationDto },
       TContext
     >;
   },
@@ -244,7 +248,7 @@ export const useReservationControllerCreate = <TError = unknown, TContext = unkn
 ): UseMutationResult<
   Awaited<ReturnType<typeof reservationControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateReservationDto },
   TContext
 > => {
   return useMutation(getReservationControllerCreateMutationOptions(options), queryClient);
@@ -392,14 +396,14 @@ export const invalidateReservationControllerGetOne = async (
  */
 export const reservationControllerUpdate = (
   id: string,
-  _function: Function,
+  updateReservationDto: UpdateReservationDto,
   signal?: AbortSignal,
 ) => {
   return customInstance<ReservationDto>({
     url: `/api/reservations/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateReservationDto,
     signal,
   });
 };
@@ -411,13 +415,13 @@ export const getReservationControllerUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof reservationControllerUpdate>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateReservationDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof reservationControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateReservationDto },
   TContext
 > => {
   const mutationKey = ['reservationControllerUpdate'];
@@ -429,7 +433,7 @@ export const getReservationControllerUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof reservationControllerUpdate>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateReservationDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -442,7 +446,7 @@ export const getReservationControllerUpdateMutationOptions = <
 export type ReservationControllerUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof reservationControllerUpdate>>
 >;
-export type ReservationControllerUpdateMutationBody = Function;
+export type ReservationControllerUpdateMutationBody = UpdateReservationDto;
 export type ReservationControllerUpdateMutationError = unknown;
 
 /**
@@ -453,7 +457,7 @@ export const useReservationControllerUpdate = <TError = unknown, TContext = unkn
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof reservationControllerUpdate>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateReservationDto },
       TContext
     >;
   },
@@ -461,7 +465,7 @@ export const useReservationControllerUpdate = <TError = unknown, TContext = unkn
 ): UseMutationResult<
   Awaited<ReturnType<typeof reservationControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateReservationDto },
   TContext
 > => {
   return useMutation(getReservationControllerUpdateMutationOptions(options), queryClient);

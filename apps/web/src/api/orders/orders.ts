@@ -22,9 +22,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Function,
+  CreateOrderDto,
   OrderControllerGetAllParams,
   OrderDto,
+  UpdateOrderItemStatusDto,
+  UpdateOrderStatusDto,
 } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
@@ -169,12 +171,12 @@ export const invalidateOrderControllerGetAll = async (
 /**
  * @summary Create an order with items
  */
-export const orderControllerCreate = (_function: Function, signal?: AbortSignal) => {
+export const orderControllerCreate = (createOrderDto: CreateOrderDto, signal?: AbortSignal) => {
   return customInstance<OrderDto>({
     url: `/api/orders`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createOrderDto,
     signal,
   });
 };
@@ -186,13 +188,13 @@ export const getOrderControllerCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof orderControllerCreate>>,
     TError,
-    { data: Function },
+    { data: CreateOrderDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof orderControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateOrderDto },
   TContext
 > => {
   const mutationKey = ['orderControllerCreate'];
@@ -204,7 +206,7 @@ export const getOrderControllerCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof orderControllerCreate>>,
-    { data: Function }
+    { data: CreateOrderDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -217,7 +219,7 @@ export const getOrderControllerCreateMutationOptions = <
 export type OrderControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof orderControllerCreate>>
 >;
-export type OrderControllerCreateMutationBody = Function;
+export type OrderControllerCreateMutationBody = CreateOrderDto;
 export type OrderControllerCreateMutationError = unknown;
 
 /**
@@ -228,7 +230,7 @@ export const useOrderControllerCreate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof orderControllerCreate>>,
       TError,
-      { data: Function },
+      { data: CreateOrderDto },
       TContext
     >;
   },
@@ -236,7 +238,7 @@ export const useOrderControllerCreate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof orderControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateOrderDto },
   TContext
 > => {
   return useMutation(getOrderControllerCreateMutationOptions(options), queryClient);
@@ -449,14 +451,14 @@ export const useOrderControllerRemove = <TError = unknown, TContext = unknown>(
  */
 export const orderControllerUpdateStatus = (
   id: string,
-  _function: Function,
+  updateOrderStatusDto: UpdateOrderStatusDto,
   signal?: AbortSignal,
 ) => {
   return customInstance<OrderDto>({
     url: `/api/orders/${id}/status`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateOrderStatusDto,
     signal,
   });
 };
@@ -468,13 +470,13 @@ export const getOrderControllerUpdateStatusMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof orderControllerUpdateStatus>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateOrderStatusDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof orderControllerUpdateStatus>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateOrderStatusDto },
   TContext
 > => {
   const mutationKey = ['orderControllerUpdateStatus'];
@@ -486,7 +488,7 @@ export const getOrderControllerUpdateStatusMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof orderControllerUpdateStatus>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateOrderStatusDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -499,7 +501,7 @@ export const getOrderControllerUpdateStatusMutationOptions = <
 export type OrderControllerUpdateStatusMutationResult = NonNullable<
   Awaited<ReturnType<typeof orderControllerUpdateStatus>>
 >;
-export type OrderControllerUpdateStatusMutationBody = Function;
+export type OrderControllerUpdateStatusMutationBody = UpdateOrderStatusDto;
 export type OrderControllerUpdateStatusMutationError = unknown;
 
 /**
@@ -510,7 +512,7 @@ export const useOrderControllerUpdateStatus = <TError = unknown, TContext = unkn
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof orderControllerUpdateStatus>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateOrderStatusDto },
       TContext
     >;
   },
@@ -518,7 +520,7 @@ export const useOrderControllerUpdateStatus = <TError = unknown, TContext = unkn
 ): UseMutationResult<
   Awaited<ReturnType<typeof orderControllerUpdateStatus>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateOrderStatusDto },
   TContext
 > => {
   return useMutation(getOrderControllerUpdateStatusMutationOptions(options), queryClient);
@@ -529,14 +531,14 @@ export const useOrderControllerUpdateStatus = <TError = unknown, TContext = unkn
 export const orderControllerUpdateItemStatus = (
   id: string,
   itemId: string,
-  _function: Function,
+  updateOrderItemStatusDto: UpdateOrderItemStatusDto,
   signal?: AbortSignal,
 ) => {
   return customInstance<OrderDto>({
     url: `/api/orders/${id}/items/${itemId}/status`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateOrderItemStatusDto,
     signal,
   });
 };
@@ -548,13 +550,13 @@ export const getOrderControllerUpdateItemStatusMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof orderControllerUpdateItemStatus>>,
     TError,
-    { id: string; itemId: string; data: Function },
+    { id: string; itemId: string; data: UpdateOrderItemStatusDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof orderControllerUpdateItemStatus>>,
   TError,
-  { id: string; itemId: string; data: Function },
+  { id: string; itemId: string; data: UpdateOrderItemStatusDto },
   TContext
 > => {
   const mutationKey = ['orderControllerUpdateItemStatus'];
@@ -566,7 +568,7 @@ export const getOrderControllerUpdateItemStatusMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof orderControllerUpdateItemStatus>>,
-    { id: string; itemId: string; data: Function }
+    { id: string; itemId: string; data: UpdateOrderItemStatusDto }
   > = (props) => {
     const { id, itemId, data } = props ?? {};
 
@@ -579,7 +581,7 @@ export const getOrderControllerUpdateItemStatusMutationOptions = <
 export type OrderControllerUpdateItemStatusMutationResult = NonNullable<
   Awaited<ReturnType<typeof orderControllerUpdateItemStatus>>
 >;
-export type OrderControllerUpdateItemStatusMutationBody = Function;
+export type OrderControllerUpdateItemStatusMutationBody = UpdateOrderItemStatusDto;
 export type OrderControllerUpdateItemStatusMutationError = unknown;
 
 /**
@@ -590,7 +592,7 @@ export const useOrderControllerUpdateItemStatus = <TError = unknown, TContext = 
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof orderControllerUpdateItemStatus>>,
       TError,
-      { id: string; itemId: string; data: Function },
+      { id: string; itemId: string; data: UpdateOrderItemStatusDto },
       TContext
     >;
   },
@@ -598,7 +600,7 @@ export const useOrderControllerUpdateItemStatus = <TError = unknown, TContext = 
 ): UseMutationResult<
   Awaited<ReturnType<typeof orderControllerUpdateItemStatus>>,
   TError,
-  { id: string; itemId: string; data: Function },
+  { id: string; itemId: string; data: UpdateOrderItemStatusDto },
   TContext
 > => {
   return useMutation(getOrderControllerUpdateItemStatusMutationOptions(options), queryClient);

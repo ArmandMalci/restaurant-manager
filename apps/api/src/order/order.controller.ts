@@ -11,18 +11,21 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { OrderDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { OrderService } from './order.service';
-import type {
-  CreateOrderDto,
-  UpdateOrderStatusDto,
-  UpdateOrderItemStatusDto,
-} from './dto/order.dto';
+import { CreateOrderDto, UpdateOrderStatusDto, UpdateOrderItemStatusDto } from './dto/order.dto';
 
 @ApiTags('orders')
 @ApiBearerAuth()
@@ -48,6 +51,7 @@ export class OrderController {
 
   @Post()
   @ApiOperation({ summary: 'Create an order with items' })
+  @ApiBody({ type: CreateOrderDto })
   @ApiResponse({ status: 201, type: OrderDto })
   public create(@Body() dto: CreateOrderDto, @CurrentUser('id') staffId: string) {
     return this.orders.create(dto, staffId);
@@ -55,6 +59,7 @@ export class OrderController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update order status' })
+  @ApiBody({ type: UpdateOrderStatusDto })
   @ApiResponse({ status: 200, type: OrderDto })
   public updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.orders.updateStatus(id, dto);
@@ -62,6 +67,7 @@ export class OrderController {
 
   @Patch(':id/items/:itemId/status')
   @ApiOperation({ summary: 'Update order item status' })
+  @ApiBody({ type: UpdateOrderItemStatusDto })
   @ApiResponse({ status: 200, type: OrderDto })
   public updateItemStatus(
     @Param('id') id: string,

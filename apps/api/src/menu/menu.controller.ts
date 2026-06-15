@@ -24,7 +24,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { MenuService } from './menu.service';
-import type {
+import {
   CreateMenuCategoryDto,
   UpdateMenuCategoryDto,
   CreateMenuItemDto,
@@ -58,6 +58,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a menu category' })
+  @ApiBody({ type: CreateMenuCategoryDto })
   @ApiResponse({ status: 201, type: MenuCategoryDto })
   public createCategory(@Body() dto: CreateMenuCategoryDto) {
     return this.menu.createCategory(dto);
@@ -67,6 +68,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a menu category' })
+  @ApiBody({ type: UpdateMenuCategoryDto })
   @ApiResponse({ status: 200, type: MenuCategoryDto })
   public updateCategory(@Param('id') id: string, @Body() dto: UpdateMenuCategoryDto) {
     return this.menu.updateCategory(id, dto);
@@ -102,6 +104,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Create a menu item' })
+  @ApiBody({ type: CreateMenuItemDto })
   @ApiResponse({ status: 201, type: MenuItemDto })
   public createItem(@Body() dto: CreateMenuItemDto) {
     return this.menu.createItem(dto);
@@ -111,6 +114,7 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager')
   @ApiOperation({ summary: 'Update a menu item' })
+  @ApiBody({ type: UpdateMenuItemDto })
   @ApiResponse({ status: 200, type: MenuItemDto })
   public updateItem(@Param('id') id: string, @Body() dto: UpdateMenuItemDto) {
     return this.menu.updateItem(id, dto);

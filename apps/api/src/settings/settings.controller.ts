@@ -1,11 +1,11 @@
 import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RestaurantSettingsDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { SettingsService } from './settings.service';
-import type { UpdateSettingsDto } from './dto/settings.dto';
+import { UpdateSettingsDto } from './dto/settings.dto';
 
 @ApiTags('settings')
 @ApiBearerAuth()
@@ -25,6 +25,7 @@ export class SettingsController {
   @Patch()
   @Roles('manager')
   @ApiOperation({ summary: 'Update restaurant settings' })
+  @ApiBody({ type: UpdateSettingsDto })
   @ApiResponse({ status: 200, type: RestaurantSettingsDto })
   public update(@Body() dto: UpdateSettingsDto) {
     return this.settings.update(dto);

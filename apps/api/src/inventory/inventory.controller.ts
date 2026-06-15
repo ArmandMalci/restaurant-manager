@@ -10,13 +10,13 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InventoryItemWithStatusDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { InventoryService } from './inventory.service';
-import type {
+import {
   CreateInventoryItemDto,
   UpdateInventoryItemDto,
   AdjustInventoryDto,
@@ -46,6 +46,7 @@ export class InventoryController {
 
   @Post()
   @ApiOperation({ summary: 'Create an inventory item' })
+  @ApiBody({ type: CreateInventoryItemDto })
   @ApiResponse({ status: 201, type: InventoryItemWithStatusDto })
   public create(@Body() dto: CreateInventoryItemDto) {
     return this.inventory.create(dto);
@@ -53,6 +54,7 @@ export class InventoryController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an inventory item' })
+  @ApiBody({ type: UpdateInventoryItemDto })
   @ApiResponse({ status: 200, type: InventoryItemWithStatusDto })
   public update(@Param('id') id: string, @Body() dto: UpdateInventoryItemDto) {
     return this.inventory.update(id, dto);
@@ -67,6 +69,7 @@ export class InventoryController {
 
   @Post(':id/adjust')
   @ApiOperation({ summary: 'Adjust stock level' })
+  @ApiBody({ type: AdjustInventoryDto })
   @ApiResponse({ status: 201, type: InventoryItemWithStatusDto })
   public adjust(@Param('id') id: string, @Body() dto: AdjustInventoryDto) {
     return this.inventory.adjust(id, dto);

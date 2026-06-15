@@ -22,11 +22,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Function,
+  CreateMenuCategoryDto,
+  CreateMenuItemDto,
   MenuCategoryDto,
   MenuControllerGetItemsParams,
   MenuControllerSetAvailabilityBody,
   MenuItemDto,
+  UpdateMenuCategoryDto,
+  UpdateMenuItemDto,
 } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
@@ -161,12 +164,15 @@ export const invalidateMenuControllerGetCategories = async (
 /**
  * @summary Create a menu category
  */
-export const menuControllerCreateCategory = (_function: Function, signal?: AbortSignal) => {
+export const menuControllerCreateCategory = (
+  createMenuCategoryDto: CreateMenuCategoryDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<MenuCategoryDto>({
     url: `/api/menu/categories`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createMenuCategoryDto,
     signal,
   });
 };
@@ -178,13 +184,13 @@ export const getMenuControllerCreateCategoryMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof menuControllerCreateCategory>>,
     TError,
-    { data: Function },
+    { data: CreateMenuCategoryDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof menuControllerCreateCategory>>,
   TError,
-  { data: Function },
+  { data: CreateMenuCategoryDto },
   TContext
 > => {
   const mutationKey = ['menuControllerCreateCategory'];
@@ -196,7 +202,7 @@ export const getMenuControllerCreateCategoryMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof menuControllerCreateCategory>>,
-    { data: Function }
+    { data: CreateMenuCategoryDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -209,7 +215,7 @@ export const getMenuControllerCreateCategoryMutationOptions = <
 export type MenuControllerCreateCategoryMutationResult = NonNullable<
   Awaited<ReturnType<typeof menuControllerCreateCategory>>
 >;
-export type MenuControllerCreateCategoryMutationBody = Function;
+export type MenuControllerCreateCategoryMutationBody = CreateMenuCategoryDto;
 export type MenuControllerCreateCategoryMutationError = unknown;
 
 /**
@@ -220,7 +226,7 @@ export const useMenuControllerCreateCategory = <TError = unknown, TContext = unk
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof menuControllerCreateCategory>>,
       TError,
-      { data: Function },
+      { data: CreateMenuCategoryDto },
       TContext
     >;
   },
@@ -228,7 +234,7 @@ export const useMenuControllerCreateCategory = <TError = unknown, TContext = unk
 ): UseMutationResult<
   Awaited<ReturnType<typeof menuControllerCreateCategory>>,
   TError,
-  { data: Function },
+  { data: CreateMenuCategoryDto },
   TContext
 > => {
   return useMutation(getMenuControllerCreateCategoryMutationOptions(options), queryClient);
@@ -380,14 +386,14 @@ export const invalidateMenuControllerGetCategory = async (
  */
 export const menuControllerUpdateCategory = (
   id: string,
-  _function: Function,
+  updateMenuCategoryDto: UpdateMenuCategoryDto,
   signal?: AbortSignal,
 ) => {
   return customInstance<MenuCategoryDto>({
     url: `/api/menu/categories/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateMenuCategoryDto,
     signal,
   });
 };
@@ -399,13 +405,13 @@ export const getMenuControllerUpdateCategoryMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof menuControllerUpdateCategory>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateMenuCategoryDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof menuControllerUpdateCategory>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateMenuCategoryDto },
   TContext
 > => {
   const mutationKey = ['menuControllerUpdateCategory'];
@@ -417,7 +423,7 @@ export const getMenuControllerUpdateCategoryMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof menuControllerUpdateCategory>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateMenuCategoryDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -430,7 +436,7 @@ export const getMenuControllerUpdateCategoryMutationOptions = <
 export type MenuControllerUpdateCategoryMutationResult = NonNullable<
   Awaited<ReturnType<typeof menuControllerUpdateCategory>>
 >;
-export type MenuControllerUpdateCategoryMutationBody = Function;
+export type MenuControllerUpdateCategoryMutationBody = UpdateMenuCategoryDto;
 export type MenuControllerUpdateCategoryMutationError = unknown;
 
 /**
@@ -441,7 +447,7 @@ export const useMenuControllerUpdateCategory = <TError = unknown, TContext = unk
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof menuControllerUpdateCategory>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateMenuCategoryDto },
       TContext
     >;
   },
@@ -449,7 +455,7 @@ export const useMenuControllerUpdateCategory = <TError = unknown, TContext = unk
 ): UseMutationResult<
   Awaited<ReturnType<typeof menuControllerUpdateCategory>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateMenuCategoryDto },
   TContext
 > => {
   return useMutation(getMenuControllerUpdateCategoryMutationOptions(options), queryClient);
@@ -663,12 +669,15 @@ export const invalidateMenuControllerGetItems = async (
 /**
  * @summary Create a menu item
  */
-export const menuControllerCreateItem = (_function: Function, signal?: AbortSignal) => {
+export const menuControllerCreateItem = (
+  createMenuItemDto: CreateMenuItemDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<MenuItemDto>({
     url: `/api/menu/items`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createMenuItemDto,
     signal,
   });
 };
@@ -680,13 +689,13 @@ export const getMenuControllerCreateItemMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof menuControllerCreateItem>>,
     TError,
-    { data: Function },
+    { data: CreateMenuItemDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof menuControllerCreateItem>>,
   TError,
-  { data: Function },
+  { data: CreateMenuItemDto },
   TContext
 > => {
   const mutationKey = ['menuControllerCreateItem'];
@@ -698,7 +707,7 @@ export const getMenuControllerCreateItemMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof menuControllerCreateItem>>,
-    { data: Function }
+    { data: CreateMenuItemDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -711,7 +720,7 @@ export const getMenuControllerCreateItemMutationOptions = <
 export type MenuControllerCreateItemMutationResult = NonNullable<
   Awaited<ReturnType<typeof menuControllerCreateItem>>
 >;
-export type MenuControllerCreateItemMutationBody = Function;
+export type MenuControllerCreateItemMutationBody = CreateMenuItemDto;
 export type MenuControllerCreateItemMutationError = unknown;
 
 /**
@@ -722,7 +731,7 @@ export const useMenuControllerCreateItem = <TError = unknown, TContext = unknown
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof menuControllerCreateItem>>,
       TError,
-      { data: Function },
+      { data: CreateMenuItemDto },
       TContext
     >;
   },
@@ -730,7 +739,7 @@ export const useMenuControllerCreateItem = <TError = unknown, TContext = unknown
 ): UseMutationResult<
   Awaited<ReturnType<typeof menuControllerCreateItem>>,
   TError,
-  { data: Function },
+  { data: CreateMenuItemDto },
   TContext
 > => {
   return useMutation(getMenuControllerCreateItemMutationOptions(options), queryClient);
@@ -872,12 +881,16 @@ export const invalidateMenuControllerGetItem = async (
 /**
  * @summary Update a menu item
  */
-export const menuControllerUpdateItem = (id: string, _function: Function, signal?: AbortSignal) => {
+export const menuControllerUpdateItem = (
+  id: string,
+  updateMenuItemDto: UpdateMenuItemDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<MenuItemDto>({
     url: `/api/menu/items/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateMenuItemDto,
     signal,
   });
 };
@@ -889,13 +902,13 @@ export const getMenuControllerUpdateItemMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof menuControllerUpdateItem>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateMenuItemDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof menuControllerUpdateItem>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateMenuItemDto },
   TContext
 > => {
   const mutationKey = ['menuControllerUpdateItem'];
@@ -907,7 +920,7 @@ export const getMenuControllerUpdateItemMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof menuControllerUpdateItem>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateMenuItemDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -920,7 +933,7 @@ export const getMenuControllerUpdateItemMutationOptions = <
 export type MenuControllerUpdateItemMutationResult = NonNullable<
   Awaited<ReturnType<typeof menuControllerUpdateItem>>
 >;
-export type MenuControllerUpdateItemMutationBody = Function;
+export type MenuControllerUpdateItemMutationBody = UpdateMenuItemDto;
 export type MenuControllerUpdateItemMutationError = unknown;
 
 /**
@@ -931,7 +944,7 @@ export const useMenuControllerUpdateItem = <TError = unknown, TContext = unknown
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof menuControllerUpdateItem>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateMenuItemDto },
       TContext
     >;
   },
@@ -939,7 +952,7 @@ export const useMenuControllerUpdateItem = <TError = unknown, TContext = unknown
 ): UseMutationResult<
   Awaited<ReturnType<typeof menuControllerUpdateItem>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateMenuItemDto },
   TContext
 > => {
   return useMutation(getMenuControllerUpdateItemMutationOptions(options), queryClient);

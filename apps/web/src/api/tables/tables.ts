@@ -21,7 +21,12 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { Function, TableDto } from '../restaurantManagerAPI.schemas';
+import type {
+  CreateTableDto,
+  SetTableStatusDto,
+  TableDto,
+  UpdateTableDto,
+} from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
@@ -151,12 +156,12 @@ export const invalidateTableControllerGetAll = async (
 /**
  * @summary Create a table
  */
-export const tableControllerCreate = (_function: Function, signal?: AbortSignal) => {
+export const tableControllerCreate = (createTableDto: CreateTableDto, signal?: AbortSignal) => {
   return customInstance<TableDto>({
     url: `/api/tables`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createTableDto,
     signal,
   });
 };
@@ -168,13 +173,13 @@ export const getTableControllerCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof tableControllerCreate>>,
     TError,
-    { data: Function },
+    { data: CreateTableDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof tableControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateTableDto },
   TContext
 > => {
   const mutationKey = ['tableControllerCreate'];
@@ -186,7 +191,7 @@ export const getTableControllerCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof tableControllerCreate>>,
-    { data: Function }
+    { data: CreateTableDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -199,7 +204,7 @@ export const getTableControllerCreateMutationOptions = <
 export type TableControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof tableControllerCreate>>
 >;
-export type TableControllerCreateMutationBody = Function;
+export type TableControllerCreateMutationBody = CreateTableDto;
 export type TableControllerCreateMutationError = unknown;
 
 /**
@@ -210,7 +215,7 @@ export const useTableControllerCreate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof tableControllerCreate>>,
       TError,
-      { data: Function },
+      { data: CreateTableDto },
       TContext
     >;
   },
@@ -218,7 +223,7 @@ export const useTableControllerCreate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof tableControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateTableDto },
   TContext
 > => {
   return useMutation(getTableControllerCreateMutationOptions(options), queryClient);
@@ -360,12 +365,16 @@ export const invalidateTableControllerGetOne = async (
 /**
  * @summary Update a table
  */
-export const tableControllerUpdate = (id: string, _function: Function, signal?: AbortSignal) => {
+export const tableControllerUpdate = (
+  id: string,
+  updateTableDto: UpdateTableDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<TableDto>({
     url: `/api/tables/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateTableDto,
     signal,
   });
 };
@@ -377,13 +386,13 @@ export const getTableControllerUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof tableControllerUpdate>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateTableDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof tableControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateTableDto },
   TContext
 > => {
   const mutationKey = ['tableControllerUpdate'];
@@ -395,7 +404,7 @@ export const getTableControllerUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof tableControllerUpdate>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateTableDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -408,7 +417,7 @@ export const getTableControllerUpdateMutationOptions = <
 export type TableControllerUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof tableControllerUpdate>>
 >;
-export type TableControllerUpdateMutationBody = Function;
+export type TableControllerUpdateMutationBody = UpdateTableDto;
 export type TableControllerUpdateMutationError = unknown;
 
 /**
@@ -419,7 +428,7 @@ export const useTableControllerUpdate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof tableControllerUpdate>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateTableDto },
       TContext
     >;
   },
@@ -427,7 +436,7 @@ export const useTableControllerUpdate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof tableControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateTableDto },
   TContext
 > => {
   return useMutation(getTableControllerUpdateMutationOptions(options), queryClient);
@@ -504,12 +513,16 @@ export const useTableControllerRemove = <TError = unknown, TContext = unknown>(
 /**
  * @summary Set table status
  */
-export const tableControllerSetStatus = (id: string, _function: Function, signal?: AbortSignal) => {
+export const tableControllerSetStatus = (
+  id: string,
+  setTableStatusDto: SetTableStatusDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<TableDto>({
     url: `/api/tables/${id}/status`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: setTableStatusDto,
     signal,
   });
 };
@@ -521,13 +534,13 @@ export const getTableControllerSetStatusMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof tableControllerSetStatus>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: SetTableStatusDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof tableControllerSetStatus>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: SetTableStatusDto },
   TContext
 > => {
   const mutationKey = ['tableControllerSetStatus'];
@@ -539,7 +552,7 @@ export const getTableControllerSetStatusMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof tableControllerSetStatus>>,
-    { id: string; data: Function }
+    { id: string; data: SetTableStatusDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -552,7 +565,7 @@ export const getTableControllerSetStatusMutationOptions = <
 export type TableControllerSetStatusMutationResult = NonNullable<
   Awaited<ReturnType<typeof tableControllerSetStatus>>
 >;
-export type TableControllerSetStatusMutationBody = Function;
+export type TableControllerSetStatusMutationBody = SetTableStatusDto;
 export type TableControllerSetStatusMutationError = unknown;
 
 /**
@@ -563,7 +576,7 @@ export const useTableControllerSetStatus = <TError = unknown, TContext = unknown
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof tableControllerSetStatus>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: SetTableStatusDto },
       TContext
     >;
   },
@@ -571,7 +584,7 @@ export const useTableControllerSetStatus = <TError = unknown, TContext = unknown
 ): UseMutationResult<
   Awaited<ReturnType<typeof tableControllerSetStatus>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: SetTableStatusDto },
   TContext
 > => {
   return useMutation(getTableControllerSetStatusMutationOptions(options), queryClient);

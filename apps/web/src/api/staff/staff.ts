@@ -22,9 +22,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Function,
+  CreateStaffDto,
+  SetActiveDto,
   StaffControllerGetAllParams,
   StaffDto,
+  UpdateStaffDto,
 } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
@@ -169,12 +171,12 @@ export const invalidateStaffControllerGetAll = async (
 /**
  * @summary Create a staff member
  */
-export const staffControllerCreate = (_function: Function, signal?: AbortSignal) => {
+export const staffControllerCreate = (createStaffDto: CreateStaffDto, signal?: AbortSignal) => {
   return customInstance<StaffDto>({
     url: `/api/staff`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createStaffDto,
     signal,
   });
 };
@@ -186,13 +188,13 @@ export const getStaffControllerCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof staffControllerCreate>>,
     TError,
-    { data: Function },
+    { data: CreateStaffDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof staffControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateStaffDto },
   TContext
 > => {
   const mutationKey = ['staffControllerCreate'];
@@ -204,7 +206,7 @@ export const getStaffControllerCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof staffControllerCreate>>,
-    { data: Function }
+    { data: CreateStaffDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -217,7 +219,7 @@ export const getStaffControllerCreateMutationOptions = <
 export type StaffControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof staffControllerCreate>>
 >;
-export type StaffControllerCreateMutationBody = Function;
+export type StaffControllerCreateMutationBody = CreateStaffDto;
 export type StaffControllerCreateMutationError = unknown;
 
 /**
@@ -228,7 +230,7 @@ export const useStaffControllerCreate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof staffControllerCreate>>,
       TError,
-      { data: Function },
+      { data: CreateStaffDto },
       TContext
     >;
   },
@@ -236,7 +238,7 @@ export const useStaffControllerCreate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof staffControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateStaffDto },
   TContext
 > => {
   return useMutation(getStaffControllerCreateMutationOptions(options), queryClient);
@@ -378,12 +380,16 @@ export const invalidateStaffControllerGetOne = async (
 /**
  * @summary Update a staff member
  */
-export const staffControllerUpdate = (id: string, _function: Function, signal?: AbortSignal) => {
+export const staffControllerUpdate = (
+  id: string,
+  updateStaffDto: UpdateStaffDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<StaffDto>({
     url: `/api/staff/${id}`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateStaffDto,
     signal,
   });
 };
@@ -395,13 +401,13 @@ export const getStaffControllerUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof staffControllerUpdate>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: UpdateStaffDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof staffControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateStaffDto },
   TContext
 > => {
   const mutationKey = ['staffControllerUpdate'];
@@ -413,7 +419,7 @@ export const getStaffControllerUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof staffControllerUpdate>>,
-    { id: string; data: Function }
+    { id: string; data: UpdateStaffDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -426,7 +432,7 @@ export const getStaffControllerUpdateMutationOptions = <
 export type StaffControllerUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof staffControllerUpdate>>
 >;
-export type StaffControllerUpdateMutationBody = Function;
+export type StaffControllerUpdateMutationBody = UpdateStaffDto;
 export type StaffControllerUpdateMutationError = unknown;
 
 /**
@@ -437,7 +443,7 @@ export const useStaffControllerUpdate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof staffControllerUpdate>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: UpdateStaffDto },
       TContext
     >;
   },
@@ -445,7 +451,7 @@ export const useStaffControllerUpdate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof staffControllerUpdate>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: UpdateStaffDto },
   TContext
 > => {
   return useMutation(getStaffControllerUpdateMutationOptions(options), queryClient);
@@ -522,12 +528,16 @@ export const useStaffControllerRemove = <TError = unknown, TContext = unknown>(
 /**
  * @summary Set staff active status
  */
-export const staffControllerSetActive = (id: string, _function: Function, signal?: AbortSignal) => {
+export const staffControllerSetActive = (
+  id: string,
+  setActiveDto: SetActiveDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<StaffDto>({
     url: `/api/staff/${id}/active`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: setActiveDto,
     signal,
   });
 };
@@ -539,13 +549,13 @@ export const getStaffControllerSetActiveMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof staffControllerSetActive>>,
     TError,
-    { id: string; data: Function },
+    { id: string; data: SetActiveDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof staffControllerSetActive>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: SetActiveDto },
   TContext
 > => {
   const mutationKey = ['staffControllerSetActive'];
@@ -557,7 +567,7 @@ export const getStaffControllerSetActiveMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof staffControllerSetActive>>,
-    { id: string; data: Function }
+    { id: string; data: SetActiveDto }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -570,7 +580,7 @@ export const getStaffControllerSetActiveMutationOptions = <
 export type StaffControllerSetActiveMutationResult = NonNullable<
   Awaited<ReturnType<typeof staffControllerSetActive>>
 >;
-export type StaffControllerSetActiveMutationBody = Function;
+export type StaffControllerSetActiveMutationBody = SetActiveDto;
 export type StaffControllerSetActiveMutationError = unknown;
 
 /**
@@ -581,7 +591,7 @@ export const useStaffControllerSetActive = <TError = unknown, TContext = unknown
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof staffControllerSetActive>>,
       TError,
-      { id: string; data: Function },
+      { id: string; data: SetActiveDto },
       TContext
     >;
   },
@@ -589,7 +599,7 @@ export const useStaffControllerSetActive = <TError = unknown, TContext = unknown
 ): UseMutationResult<
   Awaited<ReturnType<typeof staffControllerSetActive>>,
   TError,
-  { id: string; data: Function },
+  { id: string; data: SetActiveDto },
   TContext
 > => {
   return useMutation(getStaffControllerSetActiveMutationOptions(options), queryClient);

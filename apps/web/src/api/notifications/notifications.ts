@@ -21,7 +21,7 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { Function } from '../restaurantManagerAPI.schemas';
+import type { SubscribeDtoClass } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
@@ -163,12 +163,15 @@ export const invalidateNotificationsControllerGetPublicKey = async (
   return queryClient;
 };
 
-export const notificationsControllerSubscribe = (_function: Function, signal?: AbortSignal) => {
+export const notificationsControllerSubscribe = (
+  subscribeDtoClass: SubscribeDtoClass,
+  signal?: AbortSignal,
+) => {
   return customInstance<void>({
     url: `/api/notifications/subscribe`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: subscribeDtoClass,
     signal,
   });
 };
@@ -180,13 +183,13 @@ export const getNotificationsControllerSubscribeMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof notificationsControllerSubscribe>>,
     TError,
-    { data: Function },
+    { data: SubscribeDtoClass },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof notificationsControllerSubscribe>>,
   TError,
-  { data: Function },
+  { data: SubscribeDtoClass },
   TContext
 > => {
   const mutationKey = ['notificationsControllerSubscribe'];
@@ -198,7 +201,7 @@ export const getNotificationsControllerSubscribeMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof notificationsControllerSubscribe>>,
-    { data: Function }
+    { data: SubscribeDtoClass }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -211,7 +214,7 @@ export const getNotificationsControllerSubscribeMutationOptions = <
 export type NotificationsControllerSubscribeMutationResult = NonNullable<
   Awaited<ReturnType<typeof notificationsControllerSubscribe>>
 >;
-export type NotificationsControllerSubscribeMutationBody = Function;
+export type NotificationsControllerSubscribeMutationBody = SubscribeDtoClass;
 export type NotificationsControllerSubscribeMutationError = unknown;
 
 export const useNotificationsControllerSubscribe = <TError = unknown, TContext = unknown>(
@@ -219,7 +222,7 @@ export const useNotificationsControllerSubscribe = <TError = unknown, TContext =
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof notificationsControllerSubscribe>>,
       TError,
-      { data: Function },
+      { data: SubscribeDtoClass },
       TContext
     >;
   },
@@ -227,7 +230,7 @@ export const useNotificationsControllerSubscribe = <TError = unknown, TContext =
 ): UseMutationResult<
   Awaited<ReturnType<typeof notificationsControllerSubscribe>>,
   TError,
-  { data: Function },
+  { data: SubscribeDtoClass },
   TContext
 > => {
   return useMutation(getNotificationsControllerSubscribeMutationOptions(options), queryClient);

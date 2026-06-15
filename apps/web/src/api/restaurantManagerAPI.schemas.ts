@@ -10,8 +10,30 @@ export interface MenuCategoryDto {
   sortOrder: number;
 }
 
-export interface Function {
-  [key: string]: unknown;
+export interface CreateMenuCategoryDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  /**
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
+  sortOrder?: number;
+}
+
+export interface UpdateMenuCategoryDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name?: string;
+  /**
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
+  sortOrder?: number;
 }
 
 export interface MenuItemDto {
@@ -26,6 +48,42 @@ export interface MenuItemDto {
   updatedAt: string;
 }
 
+export interface CreateMenuItemDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  categoryId: string;
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name: string;
+  /**
+   * @maxLength 1000
+   * @nullable
+   */
+  description?: string | null;
+  /** @exclusiveMinimum 0 */
+  price: number;
+  available?: boolean;
+}
+
+export interface UpdateMenuItemDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  categoryId?: string;
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name?: string;
+  /**
+   * @maxLength 1000
+   * @nullable
+   */
+  description?: string | null;
+  /** @exclusiveMinimum 0 */
+  price?: number;
+  available?: boolean;
+}
+
 export interface TableDto {
   id: string;
   number: number;
@@ -33,6 +91,63 @@ export interface TableDto {
   status: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export type CreateTableDtoStatus = (typeof CreateTableDtoStatus)[keyof typeof CreateTableDtoStatus];
+
+export const CreateTableDtoStatus = {
+  available: 'available',
+  occupied: 'occupied',
+  reserved: 'reserved',
+} as const;
+
+export interface CreateTableDto {
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  number: number;
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  seats: number;
+  status: CreateTableDtoStatus;
+}
+
+export type UpdateTableDtoStatus = (typeof UpdateTableDtoStatus)[keyof typeof UpdateTableDtoStatus];
+
+export const UpdateTableDtoStatus = {
+  available: 'available',
+  occupied: 'occupied',
+  reserved: 'reserved',
+} as const;
+
+export interface UpdateTableDto {
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  number?: number;
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  seats?: number;
+  status?: UpdateTableDtoStatus;
+}
+
+export type SetTableStatusDtoStatus =
+  (typeof SetTableStatusDtoStatus)[keyof typeof SetTableStatusDtoStatus];
+
+export const SetTableStatusDtoStatus = {
+  available: 'available',
+  occupied: 'occupied',
+  reserved: 'reserved',
+} as const;
+
+export interface SetTableStatusDto {
+  status: SetTableStatusDtoStatus;
 }
 
 export interface OrderItemDto {
@@ -57,6 +172,73 @@ export interface OrderDto {
   updatedAt: string;
 }
 
+export type CreateOrderDtoItemsItem = {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  menuItemId: string;
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  quantity: number;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  notes?: string | null;
+};
+
+export interface CreateOrderDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  tableId: string;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  notes?: string | null;
+  /** @minItems 1 */
+  items: CreateOrderDtoItemsItem[];
+}
+
+export type UpdateOrderStatusDtoStatus =
+  (typeof UpdateOrderStatusDtoStatus)[keyof typeof UpdateOrderStatusDtoStatus];
+
+export const UpdateOrderStatusDtoStatus = {
+  draft: 'draft',
+  sent: 'sent',
+  in_progress: 'in_progress',
+  ready: 'ready',
+  served: 'served',
+} as const;
+
+export interface UpdateOrderStatusDto {
+  status: UpdateOrderStatusDtoStatus;
+}
+
+export type UpdateOrderItemStatusDtoStatus =
+  (typeof UpdateOrderItemStatusDtoStatus)[keyof typeof UpdateOrderItemStatusDtoStatus];
+
+export const UpdateOrderItemStatusDtoStatus = {
+  pending: 'pending',
+  in_progress: 'in_progress',
+  ready: 'ready',
+} as const;
+
+export interface UpdateOrderItemStatusDto {
+  status: UpdateOrderItemStatusDtoStatus;
+}
+
+export type SubscribeDtoClassKeys = {
+  /** @minLength 1 */
+  p256dh: string;
+  /** @minLength 1 */
+  auth: string;
+};
+
+export interface SubscribeDtoClass {
+  endpoint: string;
+  keys: SubscribeDtoClassKeys;
+}
+
 export interface ReservationDto {
   id: string;
   /** @nullable */
@@ -74,6 +256,68 @@ export interface ReservationDto {
   updatedAt: string;
 }
 
+export interface CreateReservationDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  tableId: string;
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  guestName: string;
+  /**
+   * @nullable
+   * @pattern ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   */
+  guestEmail?: string | null;
+  /**
+   * @maxLength 20
+   * @nullable
+   */
+  guestPhone?: string | null;
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  partySize: number;
+  date: string;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  notes?: string | null;
+}
+
+export interface UpdateReservationDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  tableId?: string;
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  guestName?: string;
+  /**
+   * @nullable
+   * @pattern ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   */
+  guestEmail?: string | null;
+  /**
+   * @maxLength 20
+   * @nullable
+   */
+  guestPhone?: string | null;
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  partySize?: number;
+  date?: string;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  notes?: string | null;
+}
+
 export interface StaffDto {
   id: string;
   name: string;
@@ -82,6 +326,56 @@ export interface StaffDto {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export type CreateStaffDtoRole = (typeof CreateStaffDtoRole)[keyof typeof CreateStaffDtoRole];
+
+export const CreateStaffDtoRole = {
+  manager: 'manager',
+  waiter: 'waiter',
+  kitchen: 'kitchen',
+  host: 'host',
+} as const;
+
+export interface CreateStaffDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  /** @pattern ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$ */
+  email: string;
+  role: CreateStaffDtoRole;
+  active?: boolean;
+  /** @minLength 8 */
+  password: string;
+}
+
+export type UpdateStaffDtoRole = (typeof UpdateStaffDtoRole)[keyof typeof UpdateStaffDtoRole];
+
+export const UpdateStaffDtoRole = {
+  manager: 'manager',
+  waiter: 'waiter',
+  kitchen: 'kitchen',
+  host: 'host',
+} as const;
+
+export interface UpdateStaffDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name?: string;
+  /** @pattern ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$ */
+  email?: string;
+  role?: UpdateStaffDtoRole;
+  active?: boolean;
+  /** @minLength 8 */
+  password?: string;
+}
+
+export interface SetActiveDto {
+  active: boolean;
 }
 
 export interface TopItemDto {
@@ -117,6 +411,43 @@ export interface RestaurantSettingsDto {
   updatedAt: string;
 }
 
+export interface UpdateSettingsDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name?: string;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  description?: string | null;
+  /**
+   * @maxLength 50
+   * @nullable
+   */
+  phone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /**
+   * @maxLength 200
+   * @nullable
+   */
+  address?: string | null;
+  /** @nullable */
+  openingHours?: string | null;
+}
+
+export interface CreateBillDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  orderId: string;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  discountPct?: number;
+}
+
 export interface BillDto {
   id: string;
   orderId: string;
@@ -142,6 +473,64 @@ export interface InventoryItemWithStatusDto {
   lowStock: boolean;
 }
 
+export type CreateInventoryItemDtoUnit =
+  (typeof CreateInventoryItemDtoUnit)[keyof typeof CreateInventoryItemDtoUnit];
+
+export const CreateInventoryItemDtoUnit = {
+  kg: 'kg',
+  litre: 'litre',
+  unit: 'unit',
+} as const;
+
+export interface CreateInventoryItemDto {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name: string;
+  unit: CreateInventoryItemDtoUnit;
+  /** @minimum 0 */
+  quantity: number;
+  /** @minimum 0 */
+  minStock: number;
+}
+
+export type UpdateInventoryItemDtoUnit =
+  (typeof UpdateInventoryItemDtoUnit)[keyof typeof UpdateInventoryItemDtoUnit];
+
+export const UpdateInventoryItemDtoUnit = {
+  kg: 'kg',
+  litre: 'litre',
+  unit: 'unit',
+} as const;
+
+export interface UpdateInventoryItemDto {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  name?: string;
+  unit?: UpdateInventoryItemDtoUnit;
+  /** @minimum 0 */
+  quantity?: number;
+  /** @minimum 0 */
+  minStock?: number;
+}
+
+export type AdjustInventoryDtoReason =
+  (typeof AdjustInventoryDtoReason)[keyof typeof AdjustInventoryDtoReason];
+
+export const AdjustInventoryDtoReason = {
+  delivery: 'delivery',
+  waste: 'waste',
+  correction: 'correction',
+} as const;
+
+export interface AdjustInventoryDto {
+  delta: number;
+  reason: AdjustInventoryDtoReason;
+}
+
 export interface ShiftDto {
   id: string;
   staffId: string;
@@ -149,6 +538,22 @@ export interface ShiftDto {
   /** @nullable */
   endTime?: string | null;
   createdAt: string;
+}
+
+export interface CreateShiftDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  staffId: string;
+  startTime: string;
+  /** @nullable */
+  endTime?: string | null;
+}
+
+export interface UpdateShiftDto {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  staffId?: string;
+  startTime?: string;
+  /** @nullable */
+  endTime?: string | null;
 }
 
 export type MenuControllerGetItemsParams = {

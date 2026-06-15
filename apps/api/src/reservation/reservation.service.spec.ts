@@ -83,7 +83,7 @@ describe('ReservationService', () => {
         guestEmail: 'alice@test.com',
         guestPhone: null,
         partySize: 2,
-        date: new Date('2026-08-01T19:00:00Z'),
+        date: '2026-08-01T19:00:00.000Z',
         notes: null,
       };
       const result = await service.create(dto);

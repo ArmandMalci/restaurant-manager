@@ -21,7 +21,7 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { Function, RestaurantSettingsDto } from '../restaurantManagerAPI.schemas';
+import type { RestaurantSettingsDto, UpdateSettingsDto } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
@@ -151,12 +151,15 @@ export const invalidateSettingsControllerGet = async (
 /**
  * @summary Update restaurant settings
  */
-export const settingsControllerUpdate = (_function: Function, signal?: AbortSignal) => {
+export const settingsControllerUpdate = (
+  updateSettingsDto: UpdateSettingsDto,
+  signal?: AbortSignal,
+) => {
   return customInstance<RestaurantSettingsDto>({
     url: `/api/settings`,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: updateSettingsDto,
     signal,
   });
 };
@@ -168,13 +171,13 @@ export const getSettingsControllerUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof settingsControllerUpdate>>,
     TError,
-    { data: Function },
+    { data: UpdateSettingsDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof settingsControllerUpdate>>,
   TError,
-  { data: Function },
+  { data: UpdateSettingsDto },
   TContext
 > => {
   const mutationKey = ['settingsControllerUpdate'];
@@ -186,7 +189,7 @@ export const getSettingsControllerUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof settingsControllerUpdate>>,
-    { data: Function }
+    { data: UpdateSettingsDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -199,7 +202,7 @@ export const getSettingsControllerUpdateMutationOptions = <
 export type SettingsControllerUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof settingsControllerUpdate>>
 >;
-export type SettingsControllerUpdateMutationBody = Function;
+export type SettingsControllerUpdateMutationBody = UpdateSettingsDto;
 export type SettingsControllerUpdateMutationError = unknown;
 
 /**
@@ -210,7 +213,7 @@ export const useSettingsControllerUpdate = <TError = unknown, TContext = unknown
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof settingsControllerUpdate>>,
       TError,
-      { data: Function },
+      { data: UpdateSettingsDto },
       TContext
     >;
   },
@@ -218,7 +221,7 @@ export const useSettingsControllerUpdate = <TError = unknown, TContext = unknown
 ): UseMutationResult<
   Awaited<ReturnType<typeof settingsControllerUpdate>>,
   TError,
-  { data: Function },
+  { data: UpdateSettingsDto },
   TContext
 > => {
   return useMutation(getSettingsControllerUpdateMutationOptions(options), queryClient);

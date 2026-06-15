@@ -11,8 +11,8 @@ export type Shift = z.infer<typeof ShiftSchema>;
 
 export const CreateShiftSchema = z.object({
   staffId: z.string().uuid(),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date().optional().nullable(),
+  startTime: z.string(),
+  endTime: z.string().optional().nullable(),
 });
 export type CreateShiftDto = z.infer<typeof CreateShiftSchema>;
 

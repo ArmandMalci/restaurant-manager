@@ -73,8 +73,8 @@ describe('ShiftService', () => {
       mockPrisma.shift.create.mockResolvedValue(mockShift);
       const dto = {
         staffId: 'staff-uuid-1',
-        startTime: new Date('2026-06-13T08:00:00Z'),
-        endTime: new Date('2026-06-13T16:00:00Z'),
+        startTime: '2026-06-13T08:00:00.000Z',
+        endTime: '2026-06-13T16:00:00.000Z',
       };
       const result = await service.create(dto);
 
@@ -96,7 +96,7 @@ describe('ShiftService', () => {
 
       mockPrisma.shift.update.mockResolvedValue(updated);
       const result = await service.update('shift-uuid-1', {
-        endTime: new Date('2026-06-13T18:00:00Z'),
+        endTime: '2026-06-13T18:00:00.000Z',
       });
 
       expect(result.endTime).toEqual(new Date('2026-06-13T18:00:00Z'));

@@ -21,16 +21,16 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { BillDto, Function } from '../restaurantManagerAPI.schemas';
+import type { BillDto, CreateBillDto } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
-export const billingControllerCreate = (_function: Function, signal?: AbortSignal) => {
+export const billingControllerCreate = (createBillDto: CreateBillDto, signal?: AbortSignal) => {
   return customInstance<BillDto>({
     url: `/api/billing`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    data: _function,
+    data: createBillDto,
     signal,
   });
 };
@@ -42,13 +42,13 @@ export const getBillingControllerCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof billingControllerCreate>>,
     TError,
-    { data: Function },
+    { data: CreateBillDto },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof billingControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateBillDto },
   TContext
 > => {
   const mutationKey = ['billingControllerCreate'];
@@ -60,7 +60,7 @@ export const getBillingControllerCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof billingControllerCreate>>,
-    { data: Function }
+    { data: CreateBillDto }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -73,7 +73,7 @@ export const getBillingControllerCreateMutationOptions = <
 export type BillingControllerCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof billingControllerCreate>>
 >;
-export type BillingControllerCreateMutationBody = Function;
+export type BillingControllerCreateMutationBody = CreateBillDto;
 export type BillingControllerCreateMutationError = unknown;
 
 export const useBillingControllerCreate = <TError = unknown, TContext = unknown>(
@@ -81,7 +81,7 @@ export const useBillingControllerCreate = <TError = unknown, TContext = unknown>
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof billingControllerCreate>>,
       TError,
-      { data: Function },
+      { data: CreateBillDto },
       TContext
     >;
   },
@@ -89,7 +89,7 @@ export const useBillingControllerCreate = <TError = unknown, TContext = unknown>
 ): UseMutationResult<
   Awaited<ReturnType<typeof billingControllerCreate>>,
   TError,
-  { data: Function },
+  { data: CreateBillDto },
   TContext
 > => {
   return useMutation(getBillingControllerCreateMutationOptions(options), queryClient);

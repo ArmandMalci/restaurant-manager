@@ -84,7 +84,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateMenuCategoryDto"
               }
             }
           }
@@ -160,7 +160,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateMenuCategoryDto"
               }
             }
           }
@@ -255,7 +255,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateMenuItemDto"
               }
             }
           }
@@ -331,7 +331,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateMenuItemDto"
               }
             }
           }
@@ -467,7 +467,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateTableDto"
               }
             }
           }
@@ -543,7 +543,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateTableDto"
               }
             }
           }
@@ -612,7 +612,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/SetTableStatusDto"
               }
             }
           }
@@ -682,7 +682,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateOrderDto"
               }
             }
           }
@@ -785,7 +785,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateOrderStatusDto"
               }
             }
           }
@@ -837,7 +837,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateOrderItemStatusDto"
               }
             }
           }
@@ -872,7 +872,7 @@
             "description": ""
           }
         },
-        "tags": ["Notifications"]
+        "tags": ["notifications"]
       }
     },
     "/api/notifications/subscribe": {
@@ -884,7 +884,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/SubscribeDtoClass"
               }
             }
           }
@@ -894,7 +894,12 @@
             "description": ""
           }
         },
-        "tags": ["Notifications"]
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["notifications"]
       },
       "delete": {
         "operationId": "NotificationsController_unsubscribe",
@@ -904,7 +909,7 @@
             "description": ""
           }
         },
-        "tags": ["Notifications"]
+        "tags": ["notifications"]
       }
     },
     "/api/reservations": {
@@ -951,7 +956,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateReservationDto"
               }
             }
           }
@@ -1027,7 +1032,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateReservationDto"
               }
             }
           }
@@ -1122,7 +1127,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateStaffDto"
               }
             }
           }
@@ -1198,7 +1203,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateStaffDto"
               }
             }
           }
@@ -1267,7 +1272,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/SetActiveDto"
               }
             }
           }
@@ -1350,7 +1355,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateSettingsDto"
               }
             }
           }
@@ -1385,7 +1390,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateBillDto"
               }
             }
           }
@@ -1511,7 +1516,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateInventoryItemDto"
               }
             }
           }
@@ -1587,7 +1592,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateInventoryItemDto"
               }
             }
           }
@@ -1656,7 +1661,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/AdjustInventoryDto"
               }
             }
           }
@@ -1734,7 +1739,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/CreateShiftDto"
               }
             }
           }
@@ -1810,7 +1815,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Function"
+                "$ref": "#/components/schemas/UpdateShiftDto"
               }
             }
           }
@@ -1894,9 +1899,38 @@
         },
         "required": ["id", "name", "sortOrder"]
       },
-      "Function": {
+      "CreateMenuCategoryDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["name"]
+      },
+      "UpdateMenuCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
       },
       "MenuItemDto": {
         "type": "object",
@@ -1929,6 +1963,79 @@
         },
         "required": ["id", "categoryId", "name", "price", "available", "createdAt", "updatedAt"]
       },
+      "CreateMenuItemDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "description": {
+            "default": null,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "available": {
+            "default": true,
+            "type": "boolean",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          }
+        },
+        "required": ["categoryId", "name", "price"]
+      },
+      "UpdateMenuItemDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "description": {
+            "default": null,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "available": {
+            "default": true,
+            "type": "boolean",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          }
+        }
+      },
       "TableDto": {
         "type": "object",
         "properties": {
@@ -1952,6 +2059,65 @@
           }
         },
         "required": ["id", "number", "seats", "status", "createdAt", "updatedAt"]
+      },
+      "CreateTableDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "seats": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["available", "occupied", "reserved"],
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          }
+        },
+        "required": ["number", "seats", "status"]
+      },
+      "UpdateTableDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "seats": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["available", "occupied", "reserved"],
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          }
+        }
+      },
+      "SetTableStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["available", "occupied", "reserved"]
+          }
+        },
+        "required": ["status"]
       },
       "OrderItemDto": {
         "type": "object",
@@ -2012,6 +2178,97 @@
         },
         "required": ["id", "tableId", "staffId", "status", "items", "createdAt", "updatedAt"]
       },
+      "CreateOrderDto": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "notes": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "items": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "menuItemId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "exclusiveMinimum": true
+                },
+                "notes": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "nullable": true
+                }
+              },
+              "required": ["menuItemId", "quantity"]
+            },
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          }
+        },
+        "required": ["tableId", "items"]
+      },
+      "UpdateOrderStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["draft", "sent", "in_progress", "ready", "served"]
+          }
+        },
+        "required": ["status"]
+      },
+      "UpdateOrderItemStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "ready"]
+          }
+        },
+        "required": ["status"]
+      },
+      "SubscribeDtoClass": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "keys": {
+            "type": "object",
+            "properties": {
+              "p256dh": {
+                "type": "string",
+                "minLength": 1
+              },
+              "auth": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["p256dh", "auth"],
+            "x-nestjs_zod-self-required": true
+          }
+        },
+        "required": ["endpoint", "keys"]
+      },
       "ReservationDto": {
         "type": "object",
         "properties": {
@@ -2052,6 +2309,107 @@
         },
         "required": ["id", "guestName", "partySize", "date", "createdAt", "updatedAt"]
       },
+      "CreateReservationDto": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "guestName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "guestEmail": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "nullable": true
+          },
+          "guestPhone": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "partySize": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "date": {
+            "type": "string",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "notes": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          }
+        },
+        "required": ["tableId", "guestName", "partySize", "date"]
+      },
+      "UpdateReservationDto": {
+        "type": "object",
+        "properties": {
+          "tableId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "guestName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "guestEmail": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "nullable": true
+          },
+          "guestPhone": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "partySize": {
+            "type": "integer",
+            "maximum": 9007199254740991,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "date": {
+            "type": "string",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "notes": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          }
+        }
+      },
       "StaffDto": {
         "type": "object",
         "properties": {
@@ -2078,6 +2436,70 @@
           }
         },
         "required": ["id", "name", "email", "role", "active", "createdAt", "updatedAt"]
+      },
+      "CreateStaffDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["manager", "waiter", "kitchen", "host"]
+          },
+          "active": {
+            "default": true,
+            "type": "boolean"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "required": ["name", "email", "role", "password"]
+      },
+      "UpdateStaffDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["manager", "waiter", "kitchen", "host"]
+          },
+          "active": {
+            "default": true,
+            "type": "boolean"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          }
+        }
+      },
+      "SetActiveDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": ["active"]
       },
       "TopItemDto": {
         "type": "object",
@@ -2155,6 +2577,67 @@
           }
         },
         "required": ["id", "name", "updatedAt"]
+      },
+      "UpdateSettingsDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "description": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "phone": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "email": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "openingHours": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateBillDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "discountPct": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "required": ["orderId"]
       },
       "BillDto": {
         "type": "object",
@@ -2242,6 +2725,64 @@
           "lowStock"
         ]
       },
+      "CreateInventoryItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "unit": {
+            "type": "string",
+            "enum": ["kg", "litre", "unit"]
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minStock": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": ["name", "unit", "quantity", "minStock"]
+      },
+      "UpdateInventoryItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "unit": {
+            "type": "string",
+            "enum": ["kg", "litre", "unit"]
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minStock": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      },
+      "AdjustInventoryDto": {
+        "type": "object",
+        "properties": {
+          "delta": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string",
+            "enum": ["delivery", "waste", "correction"]
+          }
+        },
+        "required": ["delta", "reason"]
+      },
       "ShiftDto": {
         "type": "object",
         "properties": {
@@ -2263,6 +2804,49 @@
           }
         },
         "required": ["id", "staffId", "startTime", "createdAt"]
+      },
+      "CreateShiftDto": {
+        "type": "object",
+        "properties": {
+          "staffId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "startTime": {
+            "type": "string",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "endTime": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["staffId", "startTime"]
+      },
+      "UpdateShiftDto": {
+        "type": "object",
+        "properties": {
+          "staffId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "startTime": {
+            "type": "string",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "endTime": {
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "nullable": true
+          }
+        }
       }
     }
   }
