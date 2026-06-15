@@ -3,9 +3,9 @@ import { useState, useMemo } from 'react';
 import { Calendar, dayjsLocalizer, Views } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useReservations } from '@/lib/reservation-api';
-import { useShifts } from '@/lib/shift-api';
-import { useStaff } from '@/lib/staff-api';
+import { useReservationControllerGetAll } from '@/api/reservations/reservations';
+import { useShiftControllerGetAll } from '@/api/shifts/shifts';
+import { useStaffControllerGetAll } from '@/api/staff/staff';
 
 export const Route = createFileRoute('/_app/calendar/')({
   component: CalendarPage,
@@ -38,9 +38,9 @@ function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { from, to } = weekBounds(currentDate);
 
-  const { data: reservations = [] } = useReservations();
-  const { data: shifts = [] } = useShifts(from, to);
-  const { data: staff = [] } = useStaff();
+  const { data: reservations = [] } = useReservationControllerGetAll();
+  const { data: shifts = [] } = useShiftControllerGetAll(from || to ? { from, to } : undefined);
+  const { data: staff = [] } = useStaffControllerGetAll();
 
   const staffById = useMemo(() => {
     const map = new Map<string, string>();
