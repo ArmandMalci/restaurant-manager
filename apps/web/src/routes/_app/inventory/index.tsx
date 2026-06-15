@@ -1,14 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, PackageMinus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  useInventory,
-  useCreateInventoryItem,
-  useUpdateInventoryItem,
-  useDeleteInventoryItem,
-  useAdjustInventory,
-} from '@/lib/inventory-api';
+  useInventoryControllerFindAll,
+  useInventoryControllerCreate,
+  useInventoryControllerUpdate,
+  useInventoryControllerRemove,
+  useInventoryControllerAdjust,
+  invalidateInventoryControllerFindAll,
+} from '@/api/inventory/inventory';
 import type {
   InventoryItem,
   CreateInventoryItemDto,
@@ -189,11 +191,20 @@ function InventoryPage() {
   const [formMode, setFormMode] = useState<'none' | 'create' | { id: string }>('none');
   const [adjustingId, setAdjustingId] = useState<string | null>(null);
 
-  const { data: items = [], isLoading } = useInventory();
-  const createItem = useCreateInventoryItem();
-  const updateItem = useUpdateInventoryItem();
-  const deleteItem = useDeleteInventoryItem();
-  const adjustItem = useAdjustInventory();
+  const qc = useQueryClient();
+  const { data: items = [], isLoading } = useInventoryControllerFindAll();
+  const createItem = useInventoryControllerCreate({
+    mutation: { onSuccess: () => invalidateInventoryControllerFindAll(qc) },
+  });
+  const updateItem = useInventoryControllerUpdate({
+    mutation: { onSuccess: () => invalidateInventoryControllerFindAll(qc) },
+  });
+  const deleteItem = useInventoryControllerRemove({
+    mutation: { onSuccess: () => invalidateInventoryControllerFindAll(qc) },
+  });
+  const adjustItem = useInventoryControllerAdjust({
+    mutation: { onSuccess: () => invalidateInventoryControllerFindAll(qc) },
+  });
 
   if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
 
@@ -217,7 +228,7 @@ function InventoryPage() {
 
       {formMode === 'create' && (
         <InventoryForm
-          onSave={(data) => createItem.mutate(data, { onSuccess: () => setFormMode('none') })}
+          onSave={(data) => createItem.mutate({ data }, { onSuccess: () => setFormMode('none') })}
           onCancel={() => setFormMode('none')}
         />
       )}
@@ -233,7 +244,7 @@ function InventoryPage() {
                   initial={item}
                   onSave={(data) =>
                     updateItem.mutate(
-                      { id: item.id, dto: data as UpdateInventoryItemDto },
+                      { id: item.id, data: data as UpdateInventoryItemDto },
                       { onSuccess: () => setFormMode('none') },
                     )
                   }
@@ -282,7 +293,8 @@ function InventoryPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          window.confirm(`Delete "${item.name}"?`) && deleteItem.mutate(item.id)
+                          window.confirm(`Delete "${item.name}"?`) &&
+                          deleteItem.mutate({ id: item.id })
                         }
                         aria-label="Delete"
                         className="text-destructive hover:bg-accent rounded p-1 transition-colors"
@@ -295,7 +307,7 @@ function InventoryPage() {
                     <AdjustForm
                       onSave={(data) =>
                         adjustItem.mutate(
-                          { id: item.id, dto: data },
+                          { id: item.id, data },
                           { onSuccess: () => setAdjustingId(null) },
                         )
                       }
