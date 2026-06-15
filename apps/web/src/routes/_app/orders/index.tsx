@@ -1,15 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  useOrders,
-  useCreateOrder,
-  useUpdateOrderStatus,
-  useUpdateItemStatus,
-  useDeleteOrder,
-} from '@/lib/order-api';
-import { useTables } from '@/lib/table-api';
+  useOrderControllerGetAll,
+  useOrderControllerCreate,
+  useOrderControllerUpdateStatus,
+  useOrderControllerUpdateItemStatus,
+  useOrderControllerRemove,
+  invalidateOrderControllerGetAll,
+} from '@/api/orders/orders';
+import { useTableControllerGetAll } from '@/api/tables/tables';
 import { useMenuControllerGetItems } from '@/api/menu/menu';
 import type { Order, OrderStatus, OrderItemStatus } from '@restaurant/shared';
 
@@ -42,9 +44,10 @@ const ITEM_STATUSES: OrderItemStatus[] = ['pending', 'in_progress', 'ready'];
 // ── Create form ───────────────────────────────────────────────────────
 
 function CreateOrderForm({ onClose }: { onClose: () => void }) {
-  const { data: tables = [] } = useTables();
+  const { data: tables = [] } = useTableControllerGetAll();
   const { data: menuItems = [] } = useMenuControllerGetItems();
-  const createOrder = useCreateOrder();
+  const qc = useQueryClient();
+  const createOrder = useOrderControllerCreate();
   const [tableId, setTableId] = useState('');
   const [notes, setNotes] = useState('');
   const [rows, setRows] = useState([{ menuItemId: '', quantity: 1, notes: '' }]);
@@ -67,7 +70,15 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
           }));
 
         if (!items.length) return;
-        createOrder.mutate({ tableId, notes: notes || null, items }, { onSuccess: onClose });
+        createOrder.mutate(
+          { data: { tableId, notes: notes || null, items } },
+          {
+            onSuccess: () => {
+              invalidateOrderControllerGetAll(qc);
+              onClose();
+            },
+          },
+        );
       }}
       className="space-y-4 rounded-lg border p-4"
     >
@@ -162,9 +173,10 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
 
 function OrderCard({ order }: { order: Order }) {
   const [expanded, setExpanded] = useState(false);
-  const updateStatus = useUpdateOrderStatus();
-  const updateItemStatus = useUpdateItemStatus();
-  const deleteOrder = useDeleteOrder();
+  const qc = useQueryClient();
+  const updateStatus = useOrderControllerUpdateStatus();
+  const updateItemStatus = useOrderControllerUpdateItemStatus();
+  const deleteOrder = useOrderControllerRemove();
 
   return (
     <div className="space-y-3 rounded-lg border p-4">
@@ -181,7 +193,10 @@ function OrderCard({ order }: { order: Order }) {
           <select
             value={order.status}
             onChange={(e) =>
-              updateStatus.mutate({ id: order.id, dto: { status: e.target.value as OrderStatus } })
+              updateStatus.mutate(
+                { id: order.id, data: { status: e.target.value as OrderStatus } },
+                { onSuccess: () => invalidateOrderControllerGetAll(qc) },
+              )
             }
             className={cn(
               'cursor-pointer rounded-full border-0 px-2 py-0.5 text-xs font-medium outline-none',
@@ -196,7 +211,13 @@ function OrderCard({ order }: { order: Order }) {
           </select>
           <button
             type="button"
-            onClick={() => window.confirm('Delete order?') && deleteOrder.mutate(order.id)}
+            onClick={() =>
+              window.confirm('Delete order?') &&
+              deleteOrder.mutate(
+                { id: order.id },
+                { onSuccess: () => invalidateOrderControllerGetAll(qc) },
+              )
+            }
             className="text-destructive hover:bg-accent rounded p-1 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -223,11 +244,14 @@ function OrderCard({ order }: { order: Order }) {
               <select
                 value={item.status}
                 onChange={(e) =>
-                  updateItemStatus.mutate({
-                    orderId: order.id,
-                    itemId: item.id,
-                    dto: { status: e.target.value as OrderItemStatus },
-                  })
+                  updateItemStatus.mutate(
+                    {
+                      id: order.id,
+                      itemId: item.id,
+                      data: { status: e.target.value as OrderItemStatus },
+                    },
+                    { onSuccess: () => invalidateOrderControllerGetAll(qc) },
+                  )
                 }
                 className="rounded border px-1.5 py-0.5 text-xs outline-none"
               >
@@ -250,7 +274,9 @@ function OrderCard({ order }: { order: Order }) {
 function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
   const [showCreate, setShowCreate] = useState(false);
-  const { data: orders = [], isLoading } = useOrders(statusFilter);
+  const { data: orders = [], isLoading } = useOrderControllerGetAll(
+    statusFilter ? { status: statusFilter } : undefined,
+  );
 
   if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading orders…</div>;
 
