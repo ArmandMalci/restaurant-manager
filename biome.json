@@ -8,7 +8,6 @@
       "!**/.turbo/**",
       "!**/coverage/**",
       "!**/*.generated.ts",
-      "!**/apps/web/src/api/**",
       "!**/prisma/migrations/**",
       "!**/*.tsbuildinfo",
       "!**/apps/web/src/routeTree.gen.ts",
@@ -87,6 +86,10 @@
     }
   },
   "overrides": [
+    {
+      "includes": ["**/apps/web/src/api/**"],
+      "linter": { "enabled": false }
+    },
     {
       "includes": ["**/*.spec.ts", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.tsx"],
       "linter": {

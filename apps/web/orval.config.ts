@@ -13,6 +13,8 @@ export default defineConfig({
       httpClient: "axios",
       // Remove stale generated files when endpoints are renamed or deleted
       clean: true,
+      // Format generated files with biome (src/api is now included in biome.json)
+      formatter: "biome",
       override: {
         mutator: {
           path: "./src/lib/api-client.ts",
