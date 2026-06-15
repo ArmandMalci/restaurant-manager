@@ -1,18 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
-  useCategories,
-  useCreateCategory,
-  useUpdateCategory,
-  useDeleteCategory,
-  useItems,
-  useCreateItem,
-  useUpdateItem,
-  useDeleteItem,
-  useToggleAvailability,
-} from '@/lib/menu-api';
+  useMenuControllerGetCategories,
+  useMenuControllerCreateCategory,
+  useMenuControllerUpdateCategory,
+  useMenuControllerRemoveCategory,
+  useMenuControllerGetItems,
+  useMenuControllerCreateItem,
+  useMenuControllerUpdateItem,
+  useMenuControllerRemoveItem,
+  useMenuControllerSetAvailability,
+  getMenuControllerGetCategoriesQueryKey,
+  getMenuControllerGetItemsQueryKey,
+} from '@/api/menu/menu';
 import type { MenuCategory, MenuItem } from '@restaurant/shared';
 
 export const Route = createFileRoute('/_app/menu/')({
@@ -223,16 +226,33 @@ function MenuPage() {
   const [catFormMode, setCatFormMode] = useState<'none' | 'create' | { id: string }>('none');
   const [itemFormMode, setItemFormMode] = useState<'none' | 'create' | { id: string }>('none');
 
-  const { data: categories = [], isLoading: loadingCats } = useCategories();
-  const { data: items = [], isLoading: loadingItems } = useItems(selectedCatId);
+  const qc = useQueryClient();
 
-  const createCat = useCreateCategory();
-  const updateCat = useUpdateCategory();
-  const deleteCat = useDeleteCategory();
-  const createItem = useCreateItem();
-  const updateItem = useUpdateItem();
-  const deleteItem = useDeleteItem();
-  const toggleAvail = useToggleAvailability();
+  const { data: categories = [], isLoading: loadingCats } = useMenuControllerGetCategories();
+  const { data: items = [], isLoading: loadingItems } = useMenuControllerGetItems(
+    selectedCatId ? { categoryId: selectedCatId } : undefined,
+  );
+
+  const invalidateCategories = () =>
+    qc.invalidateQueries({ queryKey: getMenuControllerGetCategoriesQueryKey() });
+  const invalidateItems = () =>
+    qc.invalidateQueries({ queryKey: getMenuControllerGetItemsQueryKey() });
+
+  const createCat = useMenuControllerCreateCategory({
+    mutation: { onSuccess: invalidateCategories },
+  });
+  const updateCat = useMenuControllerUpdateCategory({
+    mutation: { onSuccess: invalidateCategories },
+  });
+  const deleteCat = useMenuControllerRemoveCategory({
+    mutation: { onSuccess: invalidateCategories },
+  });
+  const createItem = useMenuControllerCreateItem({ mutation: { onSuccess: invalidateItems } });
+  const updateItem = useMenuControllerUpdateItem({ mutation: { onSuccess: invalidateItems } });
+  const deleteItem = useMenuControllerRemoveItem({ mutation: { onSuccess: invalidateItems } });
+  const toggleAvail = useMenuControllerSetAvailability({
+    mutation: { onSuccess: invalidateItems },
+  });
 
   const editItem =
     itemFormMode !== 'none' && itemFormMode !== 'create'
@@ -259,7 +279,10 @@ function MenuPage() {
         {catFormMode === 'create' && (
           <CategoryForm
             onSave={(name, sortOrder) => {
-              createCat.mutate({ name, sortOrder }, { onSuccess: () => setCatFormMode('none') });
+              createCat.mutate(
+                { data: { name, sortOrder } },
+                { onSuccess: () => setCatFormMode('none') },
+              );
             }}
             onCancel={() => setCatFormMode('none')}
           />
@@ -276,7 +299,7 @@ function MenuPage() {
                     initial={cat}
                     onSave={(name, sortOrder) => {
                       updateCat.mutate(
-                        { id: cat.id, dto: { name, sortOrder } },
+                        { id: cat.id, data: { name, sortOrder } },
                         { onSuccess: () => setCatFormMode('none') },
                       );
                     }}
@@ -308,7 +331,7 @@ function MenuPage() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (confirm(`Delete "${cat.name}"?`)) deleteCat.mutate(cat.id);
+                        if (confirm(`Delete "${cat.name}"?`)) deleteCat.mutate({ id: cat.id });
                       }}
                       className="transition-opacity hover:opacity-70"
                     >
@@ -351,7 +374,7 @@ function MenuPage() {
                 : categories
             }
             onSave={(data) => {
-              createItem.mutate(data, { onSuccess: () => setItemFormMode('none') });
+              createItem.mutate({ data }, { onSuccess: () => setItemFormMode('none') });
             }}
             onCancel={() => setItemFormMode('none')}
           />
@@ -382,7 +405,7 @@ function MenuPage() {
                         initial={editItem}
                         onSave={(data) => {
                           updateItem.mutate(
-                            { id: item.id, dto: data },
+                            { id: item.id, data },
                             { onSuccess: () => setItemFormMode('none') },
                           );
                         }}
@@ -397,9 +420,7 @@ function MenuPage() {
                       <td className="py-2 text-center">
                         <button
                           type="button"
-                          onClick={() =>
-                            toggleAvail.mutate({ id: item.id, available: !item.available })
-                          }
+                          onClick={() => toggleAvail.mutate({ id: item.id })}
                           className={cn(
                             'transition-colors',
                             item.available ? 'text-green-600' : 'text-muted-foreground',
@@ -424,7 +445,8 @@ function MenuPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              if (confirm(`Delete "${item.name}"?`)) deleteItem.mutate(item.id);
+                              if (confirm(`Delete "${item.name}"?`))
+                                deleteItem.mutate({ id: item.id });
                             }}
                             className="hover:text-destructive text-muted-foreground transition-colors"
                           >

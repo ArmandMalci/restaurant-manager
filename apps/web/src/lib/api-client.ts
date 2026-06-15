@@ -38,8 +38,10 @@ apiClient.interceptors.response.use(
   },
 );
 
-// Orval mutator — default export called by generated hooks
-// biome-ignore lint/style/noDefaultExport: required by Orval mutator convention
-export default function customInstance<T>(config: AxiosRequestConfig): Promise<T> {
+// Orval mutator — exported both as named (for Orval's generated import) and as default
+export function customInstance<T>(config: AxiosRequestConfig): Promise<T> {
   return apiClient(config).then((res) => res.data);
 }
+
+// biome-ignore lint/style/noDefaultExport: required by Orval mutator convention
+export default customInstance;
