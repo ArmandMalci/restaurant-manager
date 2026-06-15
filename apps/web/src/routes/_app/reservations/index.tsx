@@ -1,14 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
-  useReservations,
-  useCreateReservation,
-  useUpdateReservation,
-  useDeleteReservation,
-} from '@/lib/reservation-api';
-import { useTables } from '@/lib/table-api';
+  useReservationControllerGetAll,
+  useReservationControllerCreate,
+  useReservationControllerUpdate,
+  useReservationControllerRemove,
+  invalidateReservationControllerGetAll,
+} from '@/api/reservations/reservations';
+import { useTableControllerGetAll } from '@/api/tables/tables';
 import type { Reservation } from '@restaurant/shared';
 
 export const Route = createFileRoute('/_app/reservations/')({
@@ -44,7 +46,7 @@ function ReservationForm({
   }) => void;
   onCancel: () => void;
 }) {
-  const { data: tables = [] } = useTables();
+  const { data: tables = [] } = useTableControllerGetAll();
   const [tableId, setTableId] = useState(initial?.tableId ?? '');
   const [guestName, setGuestName] = useState(initial?.guestName ?? '');
   const [guestEmail, setGuestEmail] = useState(initial?.guestEmail ?? '');
@@ -170,10 +172,13 @@ function ReservationsPage() {
   const [dateFilter, setDateFilter] = useState(todayStr());
   const [formMode, setFormMode] = useState<'none' | 'create' | { id: string }>('none');
 
-  const { data: reservations = [], isLoading } = useReservations(dateFilter || undefined);
-  const createRes = useCreateReservation();
-  const updateRes = useUpdateReservation();
-  const deleteRes = useDeleteReservation();
+  const qc = useQueryClient();
+  const { data: reservations = [], isLoading } = useReservationControllerGetAll(
+    dateFilter ? { date: dateFilter } : undefined,
+  );
+  const createRes = useReservationControllerCreate();
+  const updateRes = useReservationControllerUpdate();
+  const deleteRes = useReservationControllerRemove();
 
   if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
 
@@ -219,7 +224,15 @@ function ReservationsPage() {
       {formMode === 'create' && (
         <ReservationForm
           onSave={(data) =>
-            createRes.mutate(data as never, { onSuccess: () => setFormMode('none') })
+            createRes.mutate(
+              { data },
+              {
+                onSuccess: () => {
+                  invalidateReservationControllerGetAll(qc);
+                  setFormMode('none');
+                },
+              },
+            )
           }
           onCancel={() => setFormMode('none')}
         />
@@ -238,8 +251,13 @@ function ReservationsPage() {
                   initial={r}
                   onSave={(data) =>
                     updateRes.mutate(
-                      { id: r.id, dto: data as never },
-                      { onSuccess: () => setFormMode('none') },
+                      { id: r.id, data },
+                      {
+                        onSuccess: () => {
+                          invalidateReservationControllerGetAll(qc);
+                          setFormMode('none');
+                        },
+                      },
                     )
                   }
                   onCancel={() => setFormMode('none')}
@@ -280,7 +298,10 @@ function ReservationsPage() {
                       type="button"
                       onClick={() =>
                         window.confirm(`Delete reservation for ${r.guestName}?`) &&
-                        deleteRes.mutate(r.id)
+                        deleteRes.mutate(
+                          { id: r.id },
+                          { onSuccess: () => invalidateReservationControllerGetAll(qc) },
+                        )
                       }
                       aria-label="Delete"
                       className="text-destructive hover:bg-accent rounded p-1 transition-colors"
