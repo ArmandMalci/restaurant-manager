@@ -21,9 +21,7 @@ export default defineConfig({
           // Use these for cache invalidation:
           //   queryClient.invalidateQueries({ queryKey: getMenuControllerGetCategoriesQueryKey() })
           // No boilerplate needed at the call site — import key + call invalidateQueries.
-          options: {
-            staleTime: 10_000,
-          },
+          // staleTime is set globally in queryClient defaultOptions, not here (query.options is deprecated in Orval v7+).
         },
       },
     },
