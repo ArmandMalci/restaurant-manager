@@ -11,7 +11,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -113,7 +113,14 @@ export class MenuController {
   @UseGuards(RolesGuard)
   @Roles('manager', 'kitchen')
   @ApiOperation({ summary: 'Toggle item availability' })
-  public setAvailability(@Param('id') id: string, @Body('available') available: boolean) {
-    return this.menu.setItemAvailability(id, available);
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { available: { type: 'boolean' } },
+      required: ['available'],
+    },
+  })
+  public setAvailability(@Param('id') id: string, @Body() body: { available: boolean }) {
+    return this.menu.setItemAvailability(id, body.available);
   }
 }

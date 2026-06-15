@@ -420,7 +420,12 @@ function MenuPage() {
                       <td className="py-2 text-center">
                         <button
                           type="button"
-                          onClick={() => toggleAvail.mutate({ id: item.id })}
+                          onClick={() =>
+                            toggleAvail.mutate({
+                              id: item.id,
+                              data: { available: !item.available },
+                            })
+                          }
                           className={cn(
                             'transition-colors',
                             item.available ? 'text-green-600' : 'text-muted-foreground',
