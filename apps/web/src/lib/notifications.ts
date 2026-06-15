@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from './api-client';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -9,7 +9,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 }
 
 async function getVapidPublicKey(): Promise<string> {
-  const { data } = await axios.get<{ publicKey: string }>('/api/notifications/vapid-public-key');
+  const { data } = await apiClient.get<{ publicKey: string }>('/notifications/vapid-public-key');
 
   return data.publicKey;
 }
@@ -46,7 +46,7 @@ export async function subscribe(): Promise<boolean> {
 
   const raw = subscription.toJSON();
 
-  await axios.post('/api/notifications/subscribe', {
+  await apiClient.post('/notifications/subscribe', {
     endpoint: raw.endpoint,
     keys: { p256dh: raw.keys?.p256dh ?? '', auth: raw.keys?.auth ?? '' },
   });
@@ -62,7 +62,7 @@ export async function unsubscribe(): Promise<void> {
   const subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) return;
-  await axios.delete('/api/notifications/subscribe', {
+  await apiClient.delete('/notifications/subscribe', {
     data: { endpoint: subscription.endpoint },
   });
   await subscription.unsubscribe();
