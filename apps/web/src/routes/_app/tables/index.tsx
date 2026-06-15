@@ -1,14 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
-  useTables,
-  useCreateTable,
-  useUpdateTable,
-  useDeleteTable,
-  useSetTableStatus,
-} from '@/lib/table-api';
+  useTableControllerGetAll,
+  useTableControllerCreate,
+  useTableControllerUpdate,
+  useTableControllerRemove,
+  useTableControllerSetStatus,
+  invalidateTableControllerGetAll,
+} from '@/api/tables/tables';
 import type { Table, TableStatus } from '@restaurant/shared';
 
 export const Route = createFileRoute('/_app/tables/')({
@@ -118,12 +120,13 @@ function TableForm({
 function TablesPage() {
   const confirm = useConfirm();
   const [formMode, setFormMode] = useState<'none' | 'create' | { id: string }>('none');
+  const qc = useQueryClient();
 
-  const { data: tables = [], isLoading } = useTables();
-  const createTable = useCreateTable();
-  const updateTable = useUpdateTable();
-  const deleteTable = useDeleteTable();
-  const setStatus = useSetTableStatus();
+  const { data: tables = [], isLoading } = useTableControllerGetAll();
+  const createTable = useTableControllerCreate();
+  const updateTable = useTableControllerUpdate();
+  const deleteTable = useTableControllerRemove();
+  const setStatus = useTableControllerSetStatus();
 
   if (isLoading) {
     return <div className="text-muted-foreground p-6 text-sm">Loading tables…</div>;
@@ -150,7 +153,15 @@ function TablesPage() {
       {formMode === 'create' && (
         <TableForm
           onSave={(data) => {
-            createTable.mutate(data, { onSuccess: () => setFormMode('none') });
+            createTable.mutate(
+              { data },
+              {
+                onSuccess: () => {
+                  invalidateTableControllerGetAll(qc);
+                  setFormMode('none');
+                },
+              },
+            );
           }}
           onCancel={() => setFormMode('none')}
         />
@@ -167,8 +178,13 @@ function TablesPage() {
                   initial={table}
                   onSave={(dto) => {
                     updateTable.mutate(
-                      { id: table.id, dto },
-                      { onSuccess: () => setFormMode('none') },
+                      { id: table.id, data: dto },
+                      {
+                        onSuccess: () => {
+                          invalidateTableControllerGetAll(qc);
+                          setFormMode('none');
+                        },
+                      },
                     );
                   }}
                   onCancel={() => setFormMode('none')}
@@ -193,7 +209,10 @@ function TablesPage() {
                         type="button"
                         onClick={() => {
                           if (confirm(`Delete Table ${table.number}?`)) {
-                            deleteTable.mutate(table.id);
+                            deleteTable.mutate(
+                              { id: table.id },
+                              { onSuccess: () => invalidateTableControllerGetAll(qc) },
+                            );
                           }
                         }}
                         aria-label="Delete"
@@ -206,7 +225,10 @@ function TablesPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setStatus.mutate({ id: table.id, dto: { status: NEXT_STATUS[table.status] } })
+                      setStatus.mutate(
+                        { id: table.id, data: { status: NEXT_STATUS[table.status] } },
+                        { onSuccess: () => invalidateTableControllerGetAll(qc) },
+                      )
                     }
                     className={cn(
                       'rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-75',
