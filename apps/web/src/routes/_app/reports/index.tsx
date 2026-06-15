@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useReportSummary } from '@/lib/reports-api';
+import { useReportsControllerGetSummary } from '@/api/reports/reports';
 
 export const Route = createFileRoute('/_app/reports/')({
   component: ReportsPage,
@@ -38,7 +38,7 @@ function StatCard({ label, value, sub }: { label: string; value: number | string
 }
 
 function ReportsPage() {
-  const { data, isLoading, refetch, isFetching } = useReportSummary();
+  const { data, isLoading, refetch, isFetching } = useReportsControllerGetSummary();
 
   const totalOrders = data ? Object.values(data.ordersByStatus).reduce((a, b) => a + b, 0) : 0;
   const totalTables = data ? Object.values(data.tablesByStatus).reduce((a, b) => a + b, 0) : 0;
