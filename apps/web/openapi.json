@@ -1911,7 +1911,7 @@
             "type": "string"
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "price": {
@@ -1972,7 +1972,7 @@
             "type": "string"
           },
           "notes": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           }
         },
@@ -1994,7 +1994,7 @@
             "type": "string"
           },
           "notes": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "items": {
@@ -2019,18 +2019,18 @@
             "type": "string"
           },
           "tableId": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "guestName": {
             "type": "string"
           },
           "guestPhone": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "guestEmail": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "partySize": {
@@ -2040,7 +2040,7 @@
             "type": "string"
           },
           "notes": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "createdAt": {
@@ -2131,23 +2131,23 @@
             "type": "string"
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "phone": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "email": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "address": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "openingHours": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "updatedAt": {
@@ -2181,7 +2181,7 @@
             "type": "boolean"
           },
           "paidAt": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "createdAt": {
@@ -2255,7 +2255,7 @@
             "type": "string"
           },
           "endTime": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "createdAt": {

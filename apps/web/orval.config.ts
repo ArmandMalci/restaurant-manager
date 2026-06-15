@@ -1,33 +1,41 @@
-import { defineConfig } from 'orval';
+import { defineConfig } from "orval";
 
 // biome-ignore lint/style/noDefaultExport: Orval requires default export
 export default defineConfig({
   api: {
     input: {
-      target: './openapi.json',
+      target: "./openapi.json",
     },
     output: {
-      mode: 'tags-split',
-      target: './src/api',
-      client: 'react-query',
-      httpClient: 'axios',
+      mode: "tags-split",
+      target: "./src/api",
+      client: "react-query",
+      httpClient: "axios",
+      // Remove stale generated files when endpoints are renamed or deleted
+      clean: true,
       override: {
         mutator: {
-          path: './src/lib/api-client.ts',
-          name: 'customInstance',
+          path: "./src/lib/api-client.ts",
+          name: "customInstance",
         },
         query: {
+          // Default Orval behavior: GET → useQuery hooks, POST/PUT/PATCH/DELETE → useMutation hooks.
+          // DO NOT set useQuery/useMutation globally — doing so applies them to ALL methods,
+          // causing PATCH/DELETE to generate query hooks and GET to generate mutation hooks.
+
+          // AbortSignal forwarded to every request for cancellation on unmount
           signal: true,
-          // Generates getXxxQueryKey() factories alongside every hook.
-          // Use these for cache invalidation:
+          // Export getXxxQueryKey() factories:
           //   queryClient.invalidateQueries({ queryKey: getMenuControllerGetCategoriesQueryKey() })
-          // No boilerplate needed at the call site — import key + call invalidateQueries.
-          // staleTime is set globally in queryClient defaultOptions, not here (query.options is deprecated in Orval v7+).
+          shouldExportQueryKey: true,
+          // Export useInvalidateXxx() hooks — ergonomic shorthand at the call site
+          useInvalidate: true,
+          // Keep internal axios mutator hooks private — callers use the typed React hooks
+          shouldExportMutatorHooks: false,
+          // No paginated endpoints — skip useInfiniteXxx() generation
+          useInfinite: false,
         },
       },
-    },
-    hooks: {
-      afterAllFilesWrite: 'biome format --write ./src/api',
     },
   },
 });

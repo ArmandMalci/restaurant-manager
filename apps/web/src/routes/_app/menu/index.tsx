@@ -101,7 +101,7 @@ function ItemForm({
   onCancel,
 }: {
   categories: MenuCategory[];
-  initial?: Partial<MenuItem>;
+  initial?: Partial<Pick<MenuItem, 'name' | 'description' | 'price' | 'categoryId' | 'available'>>;
   onSave: (data: {
     name: string;
     description: string | null;

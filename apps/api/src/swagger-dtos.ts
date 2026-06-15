@@ -24,7 +24,9 @@ export class MenuItemDto {
   @ApiProperty() public id!: string;
   @ApiProperty() public categoryId!: string;
   @ApiProperty() public name!: string;
-  @ApiProperty({ nullable: true, required: false }) public description!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public description!:
+    | string
+    | null;
   @ApiProperty() public price!: number;
   @ApiProperty() public available!: boolean;
   @ApiProperty() public createdAt!: string;
@@ -50,7 +52,7 @@ export class OrderItemDto {
   @ApiProperty() public menuItemId!: string;
   @ApiProperty() public quantity!: number;
   @ApiProperty() public status!: string;
-  @ApiProperty({ nullable: true, required: false }) public notes!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public notes!: string | null;
 }
 
 export class OrderDto {
@@ -58,7 +60,7 @@ export class OrderDto {
   @ApiProperty() public tableId!: string;
   @ApiProperty() public staffId!: string;
   @ApiProperty() public status!: string;
-  @ApiProperty({ nullable: true, required: false }) public notes!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public notes!: string | null;
   @ApiProperty({ type: [OrderItemDto] }) public items!: OrderItemDto[];
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
@@ -82,7 +84,7 @@ export class ShiftDto {
   @ApiProperty() public id!: string;
   @ApiProperty() public staffId!: string;
   @ApiProperty() public startTime!: string;
-  @ApiProperty({ nullable: true, required: false }) public endTime!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public endTime!: string | null;
   @ApiProperty() public createdAt!: string;
 }
 
@@ -90,13 +92,13 @@ export class ShiftDto {
 
 export class ReservationDto {
   @ApiProperty() public id!: string;
-  @ApiProperty({ nullable: true, required: false }) public tableId!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public tableId!: string | null;
   @ApiProperty() public guestName!: string;
-  @ApiProperty({ nullable: true, required: false }) public guestPhone!: string | null;
-  @ApiProperty({ nullable: true, required: false }) public guestEmail!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public guestPhone!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public guestEmail!: string | null;
   @ApiProperty() public partySize!: number;
   @ApiProperty() public date!: string;
-  @ApiProperty({ nullable: true, required: false }) public notes!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public notes!: string | null;
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
 }
@@ -111,7 +113,7 @@ export class BillDto {
   @ApiProperty() public tax!: number;
   @ApiProperty() public total!: number;
   @ApiProperty() public paid!: boolean;
-  @ApiProperty({ nullable: true, required: false }) public paidAt!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public paidAt!: string | null;
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
 }
@@ -135,11 +137,15 @@ export class InventoryItemWithStatusDto {
 export class RestaurantSettingsDto {
   @ApiProperty() public id!: string;
   @ApiProperty() public name!: string;
-  @ApiProperty({ nullable: true, required: false }) public description!: string | null;
-  @ApiProperty({ nullable: true, required: false }) public phone!: string | null;
-  @ApiProperty({ nullable: true, required: false }) public email!: string | null;
-  @ApiProperty({ nullable: true, required: false }) public address!: string | null;
-  @ApiProperty({ nullable: true, required: false }) public openingHours!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public description!:
+    | string
+    | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public phone!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public email!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public address!: string | null;
+  @ApiProperty({ type: String, nullable: true, required: false }) public openingHours!:
+    | string
+    | null;
   @ApiProperty() public updatedAt!: string;
 }
 
