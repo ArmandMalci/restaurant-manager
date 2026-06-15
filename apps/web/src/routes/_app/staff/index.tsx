@@ -1,14 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, UserCheck, UserX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  useStaff,
-  useCreateStaff,
-  useUpdateStaff,
-  useDeleteStaff,
-  useSetStaffActive,
-} from '@/lib/staff-api';
+  useStaffControllerGetAll,
+  useStaffControllerCreate,
+  useStaffControllerUpdate,
+  useStaffControllerRemove,
+  useStaffControllerSetActive,
+  invalidateStaffControllerGetAll,
+} from '@/api/staff/staff';
 import type { Staff, StaffRole } from '@restaurant/shared';
 
 export const Route = createFileRoute('/_app/staff/')({
@@ -144,11 +146,22 @@ function StaffPage() {
   const [roleFilter, setRoleFilter] = useState<StaffRole | undefined>();
   const [formMode, setFormMode] = useState<'none' | 'create' | { id: string }>('none');
 
-  const { data: staff = [], isLoading } = useStaff(roleFilter);
-  const createStaff = useCreateStaff();
-  const updateStaff = useUpdateStaff();
-  const deleteStaff = useDeleteStaff();
-  const setActive = useSetStaffActive();
+  const qc = useQueryClient();
+  const { data: staff = [], isLoading } = useStaffControllerGetAll(
+    roleFilter ? { role: roleFilter } : undefined,
+  );
+  const createStaff = useStaffControllerCreate({
+    mutation: { onSuccess: () => invalidateStaffControllerGetAll(qc) },
+  });
+  const updateStaff = useStaffControllerUpdate({
+    mutation: { onSuccess: () => invalidateStaffControllerGetAll(qc) },
+  });
+  const deleteStaff = useStaffControllerRemove({
+    mutation: { onSuccess: () => invalidateStaffControllerGetAll(qc) },
+  });
+  const setActive = useStaffControllerSetActive({
+    mutation: { onSuccess: () => invalidateStaffControllerGetAll(qc) },
+  });
 
   if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
 
@@ -191,7 +204,7 @@ function StaffPage() {
       {formMode === 'create' && (
         <StaffForm
           onSave={(data) =>
-            createStaff.mutate(data as never, { onSuccess: () => setFormMode('none') })
+            createStaff.mutate({ data: data as never }, { onSuccess: () => setFormMode('none') })
           }
           onCancel={() => setFormMode('none')}
         />
@@ -210,7 +223,7 @@ function StaffPage() {
                   initial={s}
                   onSave={(data) =>
                     updateStaff.mutate(
-                      { id: s.id, dto: data as never },
+                      { id: s.id, data: data as never },
                       { onSuccess: () => setFormMode('none') },
                     )
                   }
@@ -240,7 +253,9 @@ function StaffPage() {
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => setActive.mutate({ id: s.id, active: !s.active })}
+                      onClick={() =>
+                        setActive.mutate({ id: s.id, data: { active: !s.active } as never })
+                      }
                       aria-label={s.active ? 'Deactivate' : 'Activate'}
                       className="hover:bg-accent rounded p-1 transition-colors"
                     >
@@ -261,7 +276,7 @@ function StaffPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        window.confirm(`Delete ${s.name}?`) && deleteStaff.mutate(s.id)
+                        window.confirm(`Delete ${s.name}?`) && deleteStaff.mutate({ id: s.id })
                       }
                       aria-label="Delete"
                       className="text-destructive hover:bg-accent rounded p-1 transition-colors"
