@@ -10,7 +10,7 @@ import {
   useDeleteOrder,
 } from '@/lib/order-api';
 import { useTables } from '@/lib/table-api';
-import { useItems } from '@/lib/menu-api';
+import { useMenuControllerGetItems } from '@/api/menu/menu';
 import type { Order, OrderStatus, OrderItemStatus } from '@restaurant/shared';
 
 export const Route = createFileRoute('/_app/orders/')({
@@ -43,7 +43,7 @@ const ITEM_STATUSES: OrderItemStatus[] = ['pending', 'in_progress', 'ready'];
 
 function CreateOrderForm({ onClose }: { onClose: () => void }) {
   const { data: tables = [] } = useTables();
-  const { data: menuItems = [] } = useItems();
+  const { data: menuItems = [] } = useMenuControllerGetItems({ query: {} });
   const createOrder = useCreateOrder();
   const [tableId, setTableId] = useState('');
   const [notes, setNotes] = useState('');
