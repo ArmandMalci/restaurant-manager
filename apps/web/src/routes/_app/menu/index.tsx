@@ -13,8 +13,8 @@ import {
   useMenuControllerUpdateItem,
   useMenuControllerRemoveItem,
   useMenuControllerSetAvailability,
-  getMenuControllerGetCategoriesQueryKey,
-  getMenuControllerGetItemsQueryKey,
+  invalidateMenuControllerGetCategories,
+  invalidateMenuControllerGetItems,
 } from '@/api/menu/menu';
 import type { MenuCategory, MenuItem } from '@restaurant/shared';
 
@@ -233,25 +233,26 @@ function MenuPage() {
     selectedCatId ? { categoryId: selectedCatId } : undefined,
   );
 
-  const invalidateCategories = () =>
-    qc.invalidateQueries({ queryKey: getMenuControllerGetCategoriesQueryKey() });
-  const invalidateItems = () =>
-    qc.invalidateQueries({ queryKey: getMenuControllerGetItemsQueryKey() });
-
   const createCat = useMenuControllerCreateCategory({
-    mutation: { onSuccess: invalidateCategories },
+    mutation: { onSuccess: () => invalidateMenuControllerGetCategories(qc) },
   });
   const updateCat = useMenuControllerUpdateCategory({
-    mutation: { onSuccess: invalidateCategories },
+    mutation: { onSuccess: () => invalidateMenuControllerGetCategories(qc) },
   });
   const deleteCat = useMenuControllerRemoveCategory({
-    mutation: { onSuccess: invalidateCategories },
+    mutation: { onSuccess: () => invalidateMenuControllerGetCategories(qc) },
   });
-  const createItem = useMenuControllerCreateItem({ mutation: { onSuccess: invalidateItems } });
-  const updateItem = useMenuControllerUpdateItem({ mutation: { onSuccess: invalidateItems } });
-  const deleteItem = useMenuControllerRemoveItem({ mutation: { onSuccess: invalidateItems } });
+  const createItem = useMenuControllerCreateItem({
+    mutation: { onSuccess: () => invalidateMenuControllerGetItems(qc) },
+  });
+  const updateItem = useMenuControllerUpdateItem({
+    mutation: { onSuccess: () => invalidateMenuControllerGetItems(qc) },
+  });
+  const deleteItem = useMenuControllerRemoveItem({
+    mutation: { onSuccess: () => invalidateMenuControllerGetItems(qc) },
+  });
   const toggleAvail = useMenuControllerSetAvailability({
-    mutation: { onSuccess: invalidateItems },
+    mutation: { onSuccess: () => invalidateMenuControllerGetItems(qc) },
   });
 
   const editItem =
