@@ -15,6 +15,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   useEffect(() => {
     if (!prevOnline.current && isOnline) {
+      // biome-ignore lint/suspicious/noConsole: error reporting for offline queue drain
       drainQueue().catch(console.error);
     }
     prevOnline.current = isOnline;

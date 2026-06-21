@@ -9,35 +9,52 @@ import {
 } from '@/api/settings/settings';
 import { subscribe, unsubscribe, isSubscribed } from '@/lib/notifications';
 import { useInstallPrompt } from '@/hooks/use-install-prompt';
+import { ThemeSelector } from '@/components/theme-selector';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/_app/settings/')({
   component: SettingsPage,
 });
 
-function Field({
+const INPUT_CLASS =
+  'h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground transition-colors focus-visible:ring-2 focus-visible:ring-ring';
+
+function FieldGroup({
   label,
-  value,
-  onChange,
-  type = 'text',
-  placeholder,
+  htmlFor,
+  children,
 }: {
   label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-  placeholder?: string;
+  htmlFor: string;
+  children: React.ReactNode;
 }) {
   return (
-    <label className="flex flex-col gap-1 text-sm">
-      {label}
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-      />
-    </label>
+    <div className="space-y-1.5">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-foreground">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function SectionCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border bg-muted/30 px-6 py-5">
+        <h2 className="text-base font-bold text-foreground">{title}</h2>
+        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+      </div>
+      <div className="p-6">{children}</div>
+    </section>
   );
 }
 
@@ -123,117 +140,153 @@ function SettingsPage() {
     );
   }
 
-  if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
+  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
 
   return (
-    <div className="max-w-2xl space-y-6 p-6">
+    <div className="mx-auto max-w-4xl space-y-8 p-4 sm:p-6 lg:p-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Restaurant profile and configuration</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Settings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Restaurant profile and configuration</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border p-6">
-        <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
-          Restaurant Info
-        </h2>
+      {/* Section 1: Restaurant Info */}
+      <SectionCard
+        title="Restaurant Info"
+        description="Update your restaurant's public-facing details."
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <FieldGroup label="Restaurant Name *" htmlFor="settings-name">
+              <input
+                id="settings-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="My Restaurant"
+                className={INPUT_CLASS}
+              />
+            </FieldGroup>
 
-        <Field label="Name *" value={name} onChange={setName} placeholder="My Restaurant" />
-        <Field
-          label="Description"
-          value={description}
-          onChange={setDescription}
-          placeholder="A short description…"
-        />
+            <FieldGroup label="Description" htmlFor="settings-description">
+              <input
+                id="settings-description"
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="A short description…"
+                className={INPUT_CLASS}
+              />
+            </FieldGroup>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field
-            label="Phone"
-            value={phone}
-            onChange={setPhone}
-            type="tel"
-            placeholder="+1 555 0100"
-          />
-          <Field
-            label="Email"
-            value={email}
-            onChange={setEmail}
-            type="email"
-            placeholder="hello@restaurant.com"
-          />
+            <FieldGroup label="Phone" htmlFor="settings-phone">
+              <input
+                id="settings-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 555 0100"
+                className={INPUT_CLASS}
+              />
+            </FieldGroup>
+
+            <FieldGroup label="Email" htmlFor="settings-email">
+              <input
+                id="settings-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="hello@restaurant.com"
+                className={INPUT_CLASS}
+              />
+            </FieldGroup>
+          </div>
+
+          <FieldGroup label="Address" htmlFor="settings-address">
+            <input
+              id="settings-address"
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="123 Main St, City, Country"
+              className={INPUT_CLASS}
+            />
+          </FieldGroup>
+
+          <FieldGroup label="Opening Hours" htmlFor="settings-hours">
+            <textarea
+              id="settings-hours"
+              value={openingHours}
+              onChange={(e) => setOpeningHours(e.target.value)}
+              rows={3}
+              placeholder={'Mon–Fri 11:00–22:00\nSat–Sun 10:00–23:00'}
+              className="w-full resize-none rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground transition-colors focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </FieldGroup>
+
+          <div className="flex items-center gap-3 border-t border-border pt-4">
+            <Button type="submit" disabled={update.isPending}>
+              <Save className="h-4 w-4" />
+              {update.isPending ? 'Saving…' : 'Save changes'}
+            </Button>
+            {saved && <span className="text-sm font-medium text-success">Saved!</span>}
+            {update.isError && <span className="text-sm text-destructive">Failed to save</span>}
+          </div>
+        </form>
+      </SectionCard>
+
+      {/* Section 2: Appearance */}
+      <SectionCard title="Appearance" description="Customize the look and feel of your workspace.">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground">Color Theme</p>
+          <p className="text-xs text-muted-foreground">Choose your preferred color scheme</p>
+          <div className="pt-1">
+            <ThemeSelector />
+          </div>
         </div>
+      </SectionCard>
 
-        <Field
-          label="Address"
-          value={address}
-          onChange={setAddress}
-          placeholder="123 Main St, City, Country"
-        />
+      {/* Section 3: Notifications */}
+      <SectionCard
+        title="Notifications"
+        description="Manage push notifications for orders and stock alerts on this device."
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Push notifications</p>
+              <p className="text-xs text-muted-foreground">
+                {notifEnabled ? 'Receiving alerts on this device' : 'Not subscribed on this device'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={toggleNotifications}
+              disabled={notifLoading}
+              className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+            >
+              {notifEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+              {notifLoading ? 'Updating…' : notifEnabled ? 'Disable' : 'Enable'}
+            </button>
+          </div>
 
-        <label className="flex flex-col gap-1 text-sm">
-          Opening Hours
-          <textarea
-            value={openingHours}
-            onChange={(e) => setOpeningHours(e.target.value)}
-            rows={3}
-            placeholder="Mon–Fri 11:00–22:00&#10;Sat–Sun 10:00–23:00"
-            className="focus-visible:ring-ring resize-none rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-          />
-        </label>
-
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={update.isPending}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60"
-          >
-            <Save className="h-4 w-4" />
-            {update.isPending ? 'Saving…' : 'Save changes'}
-          </button>
-          {saved && <span className="text-sm font-medium text-green-600">Saved!</span>}
-          {update.isError && <span className="text-destructive text-sm">Failed to save</span>}
+          {canInstall && !installed && (
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Install App</p>
+                <p className="text-xs text-muted-foreground">Faster access and offline support</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleInstall}
+                className="flex items-center gap-2 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Download className="h-4 w-4" />
+                Install
+              </button>
+            </div>
+          )}
         </div>
-      </form>
-
-      <div className="space-y-4 rounded-lg border p-6">
-        <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
-          Notifications
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          Receive push notifications for orders and stock alerts on this device.
-        </p>
-        <button
-          type="button"
-          onClick={toggleNotifications}
-          disabled={notifLoading}
-          className="hover:bg-accent flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60"
-        >
-          {notifEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-          {notifLoading
-            ? 'Updating…'
-            : notifEnabled
-              ? 'Disable notifications'
-              : 'Enable notifications'}
-        </button>
-      </div>
-
-      {canInstall && !installed && (
-        <div className="space-y-4 rounded-lg border p-6">
-          <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
-            Install App
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Install Restaurant Manager on this device for faster access and offline support.
-          </p>
-          <button
-            type="button"
-            onClick={handleInstall}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors"
-          >
-            <Download className="h-4 w-4" />
-            Install App
-          </button>
-        </div>
-      )}
+      </SectionCard>
     </div>
   );
 }

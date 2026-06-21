@@ -45,6 +45,3 @@ ruvector*
 .worktrees/
 docs/superpowers/
 .playwright-mcp/
-
-# orval-generated API client (regenerate with `pnpm gen:api`, do not commit)
-apps/web/src/api/

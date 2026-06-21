@@ -2,8 +2,6 @@ node_modules
 dist
 .turbo
 coverage
-*.generated.ts
-apps/web/src/api/
 prisma/migrations
 tsconfig.tsbuildinfo
 *.tsbuildinfo

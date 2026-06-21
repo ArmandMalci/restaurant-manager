@@ -3,18 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
-@custom-variant dark (&:is(.dark *));
-
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -28,13 +17,6 @@
 
 * {
   box-sizing: border-box;
-}
-
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: system-ui, -apple-system, sans-serif;
-  margin: 0;
 }
 
 @theme inline {
@@ -71,6 +53,10 @@ body {
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -80,8 +66,9 @@ body {
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  --background: oklch(1 0 0);
+:root,
+[data-theme="default"] {
+  --background: oklch(0.961 0.003 286);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -93,58 +80,113 @@ body {
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: oklch(0.702 0.197 49.2);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.702 0.197 49.2);
+  --radius: 0.5rem;
+  --success: oklch(0.723 0.219 149.6);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.769 0.188 70.1);
+  --warning-foreground: oklch(0.145 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: oklch(0.12 0 0);
+  --sidebar-foreground: oklch(0.961 0.003 286);
+  --sidebar-primary: oklch(0.702 0.197 49.2);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.274 0 0);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.274 0 0);
+  --sidebar-ring: oklch(0.702 0.197 49.2);
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+[data-theme="monokai"] {
+  --background: #272822;
+  --foreground: #f8f8f2;
+  --card: #3e3d32;
+  --card-foreground: #f8f8f2;
+  --popover: #3e3d32;
+  --popover-foreground: #f8f8f2;
+  --primary: #f8f8f2;
+  --primary-foreground: #272822;
+  --secondary: #49483e;
+  --secondary-foreground: #f8f8f2;
+  --muted: #49483e;
+  --muted-foreground: #75715e;
+  --accent: #fd971f;
+  --accent-foreground: #272822;
+  --destructive: #f92672;
+  --border: #49483e;
+  --input: #49483e;
+  --ring: #fd971f;
+  --radius: 0.375rem;
+  --success: #a6e22e;
+  --success-foreground: #272822;
+  --warning: #e6db74;
+  --warning-foreground: #272822;
+  --chart-1: #fd971f;
+  --chart-2: #a6e22e;
+  --chart-3: #66d9e8;
+  --chart-4: #e6db74;
+  --chart-5: #ae81ff;
+  --sidebar: #1e1f1c;
+  --sidebar-foreground: #f8f8f2;
+  --sidebar-primary: #fd971f;
+  --sidebar-primary-foreground: #272822;
+  --sidebar-accent: #383830;
+  --sidebar-accent-foreground: #f8f8f2;
+  --sidebar-border: #383830;
+  --sidebar-ring: #fd971f;
+}
+
+[data-theme="gruvbox"] {
+  --background: #282828;
+  --foreground: #ebdbb2;
+  --card: #3c3836;
+  --card-foreground: #ebdbb2;
+  --popover: #3c3836;
+  --popover-foreground: #ebdbb2;
+  --primary: #ebdbb2;
+  --primary-foreground: #282828;
+  --secondary: #504945;
+  --secondary-foreground: #ebdbb2;
+  --muted: #3c3836;
+  --muted-foreground: #928374;
+  --accent: #fe8019;
+  --accent-foreground: #282828;
+  --destructive: #cc241d;
+  --border: #504945;
+  --input: #504945;
+  --ring: #fe8019;
+  --radius: 0.375rem;
+  --success: #b8bb26;
+  --success-foreground: #282828;
+  --warning: #d79921;
+  --warning-foreground: #282828;
+  --chart-1: #fe8019;
+  --chart-2: #b8bb26;
+  --chart-3: #83a598;
+  --chart-4: #d79921;
+  --chart-5: #d3869b;
+  --sidebar: #1d2021;
+  --sidebar-foreground: #ebdbb2;
+  --sidebar-primary: #fe8019;
+  --sidebar-primary-foreground: #282828;
+  --sidebar-accent: #32302f;
+  --sidebar-accent-foreground: #ebdbb2;
+  --sidebar-border: #3c3836;
+  --sidebar-ring: #fe8019;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { cn } from '@/lib/utils';
 import {
   useReservationControllerGetAll,
   useReservationControllerCreate,
@@ -11,39 +10,96 @@ import {
   invalidateReservationControllerGetAll,
 } from '@/api/reservations/reservations';
 import { useTableControllerGetAll } from '@/api/tables/tables';
-import type { Reservation } from '@restaurant/shared';
+import type { ReservationDto } from '@/api/restaurantManagerAPI.schemas';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 
 export const Route = createFileRoute('/_app/reservations/')({
   component: ReservationsPage,
 });
 
-function toDatetimeLocal(d: Date | string) {
-  const dt = new Date(d);
+// ── Utilities ─────────────────────────────────────────────────────────
 
-  return dt.toISOString().slice(0, 16);
+function toDatetimeLocal(d: string) {
+  return new Date(d).toISOString().slice(0, 16);
 }
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// ── Reservation form ──────────────────────────────────────────────────
+type DerivedStatus = 'confirmed' | 'pending' | 'seated' | 'cancelled';
+
+function deriveStatus(r: ReservationDto): DerivedStatus {
+  const now = new Date();
+  const dt = new Date(r.date);
+  const isPast = dt < now && dt.toDateString() !== now.toDateString();
+
+  if (isPast) return 'cancelled';
+  if (!r.tableId) return 'pending';
+  const diffMins = (dt.getTime() - now.getTime()) / 60_000;
+
+  return diffMins < 30 && diffMins > -120 ? 'seated' : 'confirmed';
+}
+
+const STATUS_CLASSES: Record<DerivedStatus, string> = {
+  confirmed: 'bg-success/10 text-success',
+  pending: 'bg-warning/10 text-warning-foreground',
+  seated: 'bg-accent/10 text-accent',
+  cancelled: 'bg-muted text-muted-foreground',
+};
+
+const STATUS_LABELS: Record<DerivedStatus, string> = {
+  confirmed: 'Confirmed',
+  pending: 'Pending',
+  seated: 'Seated',
+  cancelled: 'Cancelled',
+};
+
+function initials(name: string) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
+}
+
+// ── Form ──────────────────────────────────────────────────────────────
+
+interface SaveData {
+  tableId: string;
+  guestName: string;
+  guestEmail: string | null;
+  guestPhone: string | null;
+  partySize: number;
+  date: string;
+  notes: string | null;
+}
 
 function ReservationForm({
   initial,
   onSave,
   onCancel,
 }: {
-  initial?: Partial<Reservation>;
-  onSave: (data: {
-    tableId: string;
-    guestName: string;
-    guestEmail: string | null;
-    guestPhone: string | null;
-    partySize: number;
-    date: Date;
-    notes: string | null;
-  }) => void;
+  initial?: Partial<ReservationDto>;
+  onSave: (d: SaveData) => void;
   onCancel: () => void;
 }) {
   const { data: tables = [] } = useTableControllerGetAll();
@@ -55,6 +111,10 @@ function ReservationForm({
   const [datetime, setDatetime] = useState(initial?.date ? toDatetimeLocal(initial.date) : '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
 
+  const field = 'flex flex-col gap-1';
+  const input =
+    'focus-visible:ring-ring w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2';
+
   return (
     <form
       onSubmit={(e) => {
@@ -65,52 +125,50 @@ function ReservationForm({
           guestEmail: guestEmail || null,
           guestPhone: guestPhone || null,
           partySize,
-          date: new Date(datetime),
+          date: datetime,
           notes: notes || null,
         });
       }}
-      className="space-y-4 rounded-lg border p-4"
+      className="flex flex-col gap-4 p-4"
     >
-      <div className="flex flex-wrap gap-3">
-        <label className="flex min-w-40 flex-1 flex-col gap-1 text-sm">
+      <div className={field}>
+        <label htmlFor="res-guest-name" className="text-sm font-medium">
           Guest name *
-          <input
-            value={guestName}
-            onChange={(e) => setGuestName(e.target.value)}
-            required
-            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-          />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Party size *
+        <input
+          id="res-guest-name"
+          value={guestName}
+          onChange={(e) => setGuestName(e.target.value)}
+          required
+          placeholder="Full name"
+          className={input}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className={field}>
+          <label htmlFor="res-party-size" className="text-sm font-medium">
+            Party size *
+          </label>
           <input
+            id="res-party-size"
             type="number"
             min={1}
             value={partySize}
             onChange={(e) => setPartySize(Number(e.target.value))}
             required
-            className="focus-visible:ring-ring w-24 rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
+            className={input}
           />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Date & time *
-          <input
-            type="datetime-local"
-            value={datetime}
-            onChange={(e) => setDatetime(e.target.value)}
-            required
-            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-          />
-        </label>
-      </div>
-      <div className="flex flex-wrap gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          Table
+        </div>
+        <div className={field}>
+          <label htmlFor="res-table" className="text-sm font-medium">
+            Table
+          </label>
           <select
+            id="res-table"
             value={tableId}
             onChange={(e) => setTableId(e.target.value)}
             required
-            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
+            className={input}
           >
             <option value="">Select table…</option>
             {tables.map((t) => (
@@ -119,202 +177,323 @@ function ReservationForm({
               </option>
             ))}
           </select>
-        </label>
-        <label className="flex min-w-32 flex-1 flex-col gap-1 text-sm">
-          Email
-          <input
-            type="email"
-            value={guestEmail}
-            onChange={(e) => setGuestEmail(e.target.value)}
-            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Phone
-          <input
-            value={guestPhone}
-            onChange={(e) => setGuestPhone(e.target.value)}
-            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-          />
-        </label>
+        </div>
       </div>
-      <label className="flex flex-col gap-1 text-sm">
-        Notes
+      <div className={field}>
+        <label htmlFor="res-datetime" className="text-sm font-medium">
+          Date &amp; time *
+        </label>
         <input
+          id="res-datetime"
+          type="datetime-local"
+          value={datetime}
+          onChange={(e) => setDatetime(e.target.value)}
+          required
+          className={input}
+        />
+      </div>
+      <div className={field}>
+        <label htmlFor="res-email" className="text-sm font-medium">
+          Email
+        </label>
+        <input
+          id="res-email"
+          type="email"
+          value={guestEmail}
+          onChange={(e) => setGuestEmail(e.target.value)}
+          placeholder="guest@example.com"
+          className={input}
+        />
+      </div>
+      <div className={field}>
+        <label htmlFor="res-phone" className="text-sm font-medium">
+          Phone
+        </label>
+        <input
+          id="res-phone"
+          value={guestPhone}
+          onChange={(e) => setGuestPhone(e.target.value)}
+          placeholder="+1 555 000 0000"
+          className={input}
+        />
+      </div>
+      <div className={field}>
+        <label htmlFor="res-notes" className="text-sm font-medium">
+          Notes
+        </label>
+        <input
+          id="res-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Optional"
-          className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
+          placeholder="Optional notes…"
+          className={input}
         />
-      </label>
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="hover:bg-accent rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
-        >
+      </div>
+      <div className="flex gap-2 pt-2">
+        <Button type="submit" className="flex-1">
+          Save reservation
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────
+// ── Table view ────────────────────────────────────────────────────────
+
+function ReservationsTable({
+  reservations,
+  tables,
+  onEdit,
+  onDelete,
+}: {
+  reservations: ReservationDto[];
+  tables: Array<{ id: string; number: number }>;
+  onEdit: (r: ReservationDto) => void;
+  onDelete: (r: ReservationDto) => void;
+}) {
+  if (reservations.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed py-16 text-center">
+        <p className="text-sm text-muted-foreground">No reservations found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            {['Guest', 'Party', 'Table', 'Date / Time', 'Status', ''].map((h) => (
+              <TableHead
+                key={h}
+                className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+              >
+                {h}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {reservations.map((r) => {
+            const status = deriveStatus(r);
+            const table = tables.find((t) => t.id === r.tableId);
+
+            return (
+              <TableRow key={r.id} className="hover:bg-muted/50">
+                <TableCell className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                      {initials(r.guestName)}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{r.guestName}</p>
+                      {r.guestEmail && (
+                        <p className="truncate text-xs text-muted-foreground">{r.guestEmail}</p>
+                      )}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="px-4 py-3 text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    {r.partySize}
+                  </span>
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <span className="inline-flex items-center rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium">
+                    {table ? `Table ${table.number}` : 'Unassigned'}
+                  </span>
+                </TableCell>
+                <TableCell className="px-4 py-3 text-sm text-muted-foreground">
+                  {new Date(r.date).toLocaleString([], {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_CLASSES[status]}`}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                    {STATUS_LABELS[status]}
+                  </span>
+                </TableCell>
+                <TableCell className="px-4 py-3 text-right">
+                  <div className="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(r)}
+                      aria-label="Edit"
+                      className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(r)}
+                      aria-label="Delete"
+                      className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────
+
+type FilterTab = 'today' | 'week' | 'all';
 
 function ReservationsPage() {
-  const [dateFilter, setDateFilter] = useState(todayStr());
-  const [formMode, setFormMode] = useState<'none' | 'create' | { id: string }>('none');
+  const [tab, setTab] = useState<FilterTab>('today');
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editingReservation, setEditingReservation] = useState<ReservationDto | null>(null);
 
   const qc = useQueryClient();
-  const { data: reservations = [], isLoading } = useReservationControllerGetAll(
-    dateFilter ? { date: dateFilter } : undefined,
+  const dateParam = tab === 'today' ? todayStr() : undefined;
+  const { data: allReservations = [], isLoading } = useReservationControllerGetAll(
+    dateParam ? { date: dateParam } : undefined,
   );
+  const { data: tables = [] } = useTableControllerGetAll();
   const createRes = useReservationControllerCreate();
   const updateRes = useReservationControllerUpdate();
   const deleteRes = useReservationControllerRemove();
 
-  if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
+  const displayed: ReservationDto[] =
+    tab !== 'week'
+      ? allReservations
+      : allReservations.filter((r) => {
+          const d = new Date(r.date);
+          const now = new Date();
+          const end = new Date(now);
+
+          end.setDate(now.getDate() + 7);
+
+          return d >= now && d <= end;
+        });
+
+  function openEdit(r: ReservationDto) {
+    setEditingReservation(r);
+    setSheetOpen(true);
+  }
+
+  function handleDelete(r: ReservationDto) {
+    if (!window.confirm(`Delete reservation for ${r.guestName}?`)) return;
+    deleteRes.mutate({ id: r.id }, { onSuccess: () => invalidateReservationControllerGetAll(qc) });
+  }
+
+  function handleSave(data: SaveData) {
+    const opts = {
+      onSuccess: () => {
+        invalidateReservationControllerGetAll(qc);
+        setSheetOpen(false);
+      },
+    };
+
+    if (editingReservation) {
+      updateRes.mutate({ id: editingReservation.id, data }, opts);
+    } else {
+      createRes.mutate({ data }, opts);
+    }
+  }
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Reservations</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {reservations.length} reservation{reservations.length !== 1 ? 's' : ''}
+          <p className="mt-1 text-sm text-muted-foreground">
+            {displayed.length} reservation{displayed.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setFormMode('create')}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
-        >
-          <Plus className="h-4 w-4" /> New
-        </button>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <label className="flex items-center gap-2 text-sm">
-          Date
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-          />
-        </label>
-        {dateFilter && (
-          <button
-            type="button"
-            onClick={() => setDateFilter('')}
-            className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger
+            render={
+              <Button
+                onClick={() => {
+                  setEditingReservation(null);
+                }}
+                className="gap-1.5"
+              />
+            }
           >
-            Show all
-          </button>
-        )}
+            <Plus className="h-4 w-4" />
+            Add reservation
+          </SheetTrigger>
+          <SheetContent side="right">
+            <SheetHeader>
+              <SheetTitle>{editingReservation ? 'Edit reservation' : 'New reservation'}</SheetTitle>
+              <SheetDescription>
+                {editingReservation
+                  ? `Editing reservation for ${editingReservation.guestName}`
+                  : 'Fill in the details to create a new reservation.'}
+              </SheetDescription>
+            </SheetHeader>
+            <ReservationForm
+              initial={editingReservation ?? undefined}
+              onSave={handleSave}
+              onCancel={() => setSheetOpen(false)}
+            />
+          </SheetContent>
+        </Sheet>
       </div>
 
-      {formMode === 'create' && (
-        <ReservationForm
-          onSave={(data) =>
-            createRes.mutate(
-              { data },
-              {
-                onSuccess: () => {
-                  invalidateReservationControllerGetAll(qc);
-                  setFormMode('none');
-                },
-              },
-            )
-          }
-          onCancel={() => setFormMode('none')}
-        />
-      )}
-
-      {reservations.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          No reservations{dateFilter ? ` for ${dateFilter}` : ''}.
-        </p>
-      ) : (
-        <div className="space-y-3">
-          {reservations.map((r) => (
-            <div key={r.id} className="rounded-lg border p-4">
-              {typeof formMode === 'object' && formMode.id === r.id ? (
-                <ReservationForm
-                  initial={r}
-                  onSave={(data) =>
-                    updateRes.mutate(
-                      { id: r.id, data },
-                      {
-                        onSuccess: () => {
-                          invalidateReservationControllerGetAll(qc);
-                          setFormMode('none');
-                        },
-                      },
-                    )
-                  }
-                  onCancel={() => setFormMode('none')}
+      <Tabs value={tab} onValueChange={(v) => setTab(v as FilterTab)}>
+        <TabsList>
+          <TabsTrigger value="today">Today</TabsTrigger>
+          <TabsTrigger value="week">This Week</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
+        </TabsList>
+        {isLoading ? (
+          <div className="mt-6 text-sm text-muted-foreground">Loading…</div>
+        ) : (
+          <>
+            <TabsContent value="today">
+              <div className="mt-4">
+                <ReservationsTable
+                  reservations={displayed}
+                  tables={tables}
+                  onEdit={openEdit}
+                  onDelete={handleDelete}
                 />
-              ) : (
-                <div className="flex items-start justify-between">
-                  <div className="space-y-0.5">
-                    <p className="font-medium">{r.guestName}</p>
-                    <p className="text-muted-foreground text-sm">
-                      {new Date(r.date).toLocaleString()} · {r.partySize} guests
-                    </p>
-                    {r.guestEmail && (
-                      <p className="text-muted-foreground text-xs">{r.guestEmail}</p>
-                    )}
-                    {r.guestPhone && (
-                      <p className="text-muted-foreground text-xs">{r.guestPhone}</p>
-                    )}
-                    {r.notes && <p className="text-muted-foreground text-xs italic">{r.notes}</p>}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span
-                      className={cn(
-                        'rounded-full px-2 py-0.5 text-xs font-medium',
-                        r.tableId ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600',
-                      )}
-                    >
-                      {r.tableId ? 'Table assigned' : 'No table'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setFormMode({ id: r.id })}
-                      aria-label="Edit"
-                      className="hover:bg-accent ml-2 rounded p-1 transition-colors"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        window.confirm(`Delete reservation for ${r.guestName}?`) &&
-                        deleteRes.mutate(
-                          { id: r.id },
-                          { onSuccess: () => invalidateReservationControllerGetAll(qc) },
-                        )
-                      }
-                      aria-label="Delete"
-                      className="text-destructive hover:bg-accent rounded p-1 transition-colors"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+              </div>
+            </TabsContent>
+            <TabsContent value="week">
+              <div className="mt-4">
+                <ReservationsTable
+                  reservations={displayed}
+                  tables={tables}
+                  onEdit={openEdit}
+                  onDelete={handleDelete}
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="all">
+              <div className="mt-4">
+                <ReservationsTable
+                  reservations={displayed}
+                  tables={tables}
+                  onEdit={openEdit}
+                  onDelete={handleDelete}
+                />
+              </div>
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
     </div>
   );
 }

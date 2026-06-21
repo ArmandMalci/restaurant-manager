@@ -19,6 +19,7 @@ import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/ind
 import { Route as AppReservationsIndexRouteImport } from './routes/_app/reservations/index'
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
+import { Route as AppNotificationsIndexRouteImport } from './routes/_app/notifications/index'
 import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
 import { Route as AppInventoryIndexRouteImport } from './routes/_app/inventory/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
@@ -73,6 +74,11 @@ const AppOrdersIndexRoute = AppOrdersIndexRouteImport.update({
   path: '/orders/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNotificationsIndexRoute = AppNotificationsIndexRouteImport.update({
+  id: '/notifications/',
+  path: '/notifications/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMenuIndexRoute = AppMenuIndexRouteImport.update({
   id: '/menu/',
   path: '/menu/',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AppDashboardIndexRoute
   '/inventory/': typeof AppInventoryIndexRoute
   '/menu/': typeof AppMenuIndexRoute
+  '/notifications/': typeof AppNotificationsIndexRoute
   '/orders/': typeof AppOrdersIndexRoute
   '/reports/': typeof AppReportsIndexRoute
   '/reservations/': typeof AppReservationsIndexRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardIndexRoute
   '/inventory': typeof AppInventoryIndexRoute
   '/menu': typeof AppMenuIndexRoute
+  '/notifications': typeof AppNotificationsIndexRoute
   '/orders': typeof AppOrdersIndexRoute
   '/reports': typeof AppReportsIndexRoute
   '/reservations': typeof AppReservationsIndexRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_app/dashboard/': typeof AppDashboardIndexRoute
   '/_app/inventory/': typeof AppInventoryIndexRoute
   '/_app/menu/': typeof AppMenuIndexRoute
+  '/_app/notifications/': typeof AppNotificationsIndexRoute
   '/_app/orders/': typeof AppOrdersIndexRoute
   '/_app/reports/': typeof AppReportsIndexRoute
   '/_app/reservations/': typeof AppReservationsIndexRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/inventory/'
     | '/menu/'
+    | '/notifications/'
     | '/orders/'
     | '/reports/'
     | '/reservations/'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inventory'
     | '/menu'
+    | '/notifications'
     | '/orders'
     | '/reports'
     | '/reservations'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard/'
     | '/_app/inventory/'
     | '/_app/menu/'
+    | '/_app/notifications/'
     | '/_app/orders/'
     | '/_app/reports/'
     | '/_app/reservations/'
@@ -275,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrdersIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/notifications/': {
+      id: '/_app/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications/'
+      preLoaderRoute: typeof AppNotificationsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/menu/': {
       id: '/_app/menu/'
       path: '/menu'
@@ -319,6 +338,7 @@ interface AppRouteChildren {
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
   AppInventoryIndexRoute: typeof AppInventoryIndexRoute
   AppMenuIndexRoute: typeof AppMenuIndexRoute
+  AppNotificationsIndexRoute: typeof AppNotificationsIndexRoute
   AppOrdersIndexRoute: typeof AppOrdersIndexRoute
   AppReportsIndexRoute: typeof AppReportsIndexRoute
   AppReservationsIndexRoute: typeof AppReservationsIndexRoute
@@ -333,6 +353,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardIndexRoute: AppDashboardIndexRoute,
   AppInventoryIndexRoute: AppInventoryIndexRoute,
   AppMenuIndexRoute: AppMenuIndexRoute,
+  AppNotificationsIndexRoute: AppNotificationsIndexRoute,
   AppOrdersIndexRoute: AppOrdersIndexRoute,
   AppReportsIndexRoute: AppReportsIndexRoute,
   AppReservationsIndexRoute: AppReservationsIndexRoute,
