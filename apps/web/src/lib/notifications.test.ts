@@ -1,25 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock the shared apiClient module BEFORE importing the SUT.
-vi.mock('./api-client', () => {
-  const apiClient = {
-    get: vi.fn().mockResolvedValue({ data: { publicKey: 'BPpublicKeyBase64Url' } }),
-    post: vi.fn().mockResolvedValue({ data: {} }),
-    delete: vi.fn().mockResolvedValue({ data: {} }),
-  };
+// Mock the generated Orval module BEFORE importing the SUT.
+vi.mock('@/api/notifications/notifications', () => ({
+  notificationsControllerGetPublicKey: vi
+    .fn()
+    .mockResolvedValue({ publicKey: 'BPpublicKeyBase64Url' }),
+  notificationsControllerSubscribe: vi.fn().mockResolvedValue({}),
+  notificationsControllerUnsubscribe: vi.fn().mockResolvedValue({}),
+}));
 
-  return { apiClient, default: vi.fn() };
-});
-
-import { apiClient } from './api-client';
+import { notificationsControllerUnsubscribe } from '@/api/notifications/notifications';
 import { unsubscribe } from './notifications';
 
-describe('notifications uses apiClient (not raw axios)', () => {
+describe('notifications uses Orval-generated functions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('unsubscribe hits the /notifications/subscribe path via apiClient.delete', async () => {
+  it('unsubscribe calls notificationsControllerUnsubscribe with the subscription endpoint', async () => {
     const fakeSub = {
       endpoint: 'https://push.example/abc',
       unsubscribe: vi.fn().mockResolvedValue(true),
@@ -35,8 +33,8 @@ describe('notifications uses apiClient (not raw axios)', () => {
 
     await unsubscribe();
 
-    expect(apiClient.delete).toHaveBeenCalledWith('/notifications/subscribe', {
-      data: { endpoint: 'https://push.example/abc' },
+    expect(notificationsControllerUnsubscribe).toHaveBeenCalledWith({
+      endpoint: 'https://push.example/abc',
     });
     expect(fakeSub.unsubscribe).toHaveBeenCalled();
   });

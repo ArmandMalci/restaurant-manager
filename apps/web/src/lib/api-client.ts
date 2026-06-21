@@ -1,7 +1,7 @@
 import Axios, { type AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/stores/auth.store';
 
-export const apiClient = Axios.create({ baseURL: '/api' });
+export const apiClient = Axios.create({ baseURL: '' });
 
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;

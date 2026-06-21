@@ -1,7 +1,7 @@
 import { useRouter } from '@tanstack/react-router';
 import { LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
-import { apiClient } from '@/lib/api-client';
+import { authControllerLogout } from '@/api/auth/auth';
 
 export function Topbar() {
   const { user, clearAuth } = useAuthStore();
@@ -9,7 +9,7 @@ export function Topbar() {
 
   async function handleLogout() {
     try {
-      await apiClient.post('/auth/logout');
+      await authControllerLogout();
     } finally {
       clearAuth();
       router.navigate({ to: '/login' });

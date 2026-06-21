@@ -556,6 +556,11 @@ export interface UpdateShiftDto {
   endTime?: string | null;
 }
 
+export type AuthControllerLoginBody = {
+  email: string;
+  password: string;
+};
+
 export type MenuControllerGetItemsParams = {
   categoryId?: string;
 };
@@ -566,6 +571,10 @@ export type MenuControllerSetAvailabilityBody = {
 
 export type OrderControllerGetAllParams = {
   status?: string;
+};
+
+export type NotificationsControllerUnsubscribeBody = {
+  endpoint: string;
 };
 
 export type ReservationControllerGetAllParams = {

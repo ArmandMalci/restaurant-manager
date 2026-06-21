@@ -1,7 +1,7 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import webpush from 'web-push';
+import * as webpush from 'web-push';
 import type { SubscribeDto } from '@restaurant/shared';
 
 @Injectable()

@@ -12,10 +12,21 @@ import type {
   UseMutationResult,
 } from '@tanstack/react-query';
 
+import type { AuthControllerLoginBody } from '../restaurantManagerAPI.schemas';
+
 import { customInstance } from '../../lib/api-client';
 
-export const authControllerLogin = (signal?: AbortSignal) => {
-  return customInstance<void>({ url: `/api/auth/login`, method: 'POST', signal });
+export const authControllerLogin = (
+  authControllerLoginBody: AuthControllerLoginBody,
+  signal?: AbortSignal,
+) => {
+  return customInstance<void>({
+    url: `/api/auth/login`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data: authControllerLoginBody,
+    signal,
+  });
 };
 
 export const getAuthControllerLoginMutationOptions = <
@@ -25,10 +36,15 @@ export const getAuthControllerLoginMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof authControllerLogin>>,
     TError,
-    void,
+    { data: AuthControllerLoginBody },
     TContext
   >;
-}): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError, void, TContext> => {
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof authControllerLogin>>,
+  TError,
+  { data: AuthControllerLoginBody },
+  TContext
+> => {
   const mutationKey = ['authControllerLogin'];
   const { mutation: mutationOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
@@ -38,9 +54,11 @@ export const getAuthControllerLoginMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof authControllerLogin>>,
-    void
-  > = () => {
-    return authControllerLogin();
+    { data: AuthControllerLoginBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return authControllerLogin(data);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -49,7 +67,7 @@ export const getAuthControllerLoginMutationOptions = <
 export type AuthControllerLoginMutationResult = NonNullable<
   Awaited<ReturnType<typeof authControllerLogin>>
 >;
-
+export type AuthControllerLoginMutationBody = AuthControllerLoginBody;
 export type AuthControllerLoginMutationError = unknown;
 
 export const useAuthControllerLogin = <TError = unknown, TContext = unknown>(
@@ -57,12 +75,17 @@ export const useAuthControllerLogin = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof authControllerLogin>>,
       TError,
-      void,
+      { data: AuthControllerLoginBody },
       TContext
     >;
   },
   queryClient?: QueryClient,
-): UseMutationResult<Awaited<ReturnType<typeof authControllerLogin>>, TError, void, TContext> => {
+): UseMutationResult<
+  Awaited<ReturnType<typeof authControllerLogin>>,
+  TError,
+  { data: AuthControllerLoginBody },
+  TContext
+> => {
   return useMutation(getAuthControllerLoginMutationOptions(options), queryClient);
 };
 export const authControllerRefresh = (signal?: AbortSignal) => {

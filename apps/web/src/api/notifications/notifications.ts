@@ -21,7 +21,10 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { SubscribeDtoClass } from '../restaurantManagerAPI.schemas';
+import type {
+  NotificationsControllerUnsubscribeBody,
+  SubscribeDtoClass,
+} from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
@@ -235,8 +238,17 @@ export const useNotificationsControllerSubscribe = <TError = unknown, TContext =
 > => {
   return useMutation(getNotificationsControllerSubscribeMutationOptions(options), queryClient);
 };
-export const notificationsControllerUnsubscribe = (signal?: AbortSignal) => {
-  return customInstance<void>({ url: `/api/notifications/subscribe`, method: 'DELETE', signal });
+export const notificationsControllerUnsubscribe = (
+  notificationsControllerUnsubscribeBody: NotificationsControllerUnsubscribeBody,
+  signal?: AbortSignal,
+) => {
+  return customInstance<void>({
+    url: `/api/notifications/subscribe`,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    data: notificationsControllerUnsubscribeBody,
+    signal,
+  });
 };
 
 export const getNotificationsControllerUnsubscribeMutationOptions = <
@@ -246,13 +258,13 @@ export const getNotificationsControllerUnsubscribeMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof notificationsControllerUnsubscribe>>,
     TError,
-    void,
+    { data: NotificationsControllerUnsubscribeBody },
     TContext
   >;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof notificationsControllerUnsubscribe>>,
   TError,
-  void,
+  { data: NotificationsControllerUnsubscribeBody },
   TContext
 > => {
   const mutationKey = ['notificationsControllerUnsubscribe'];
@@ -264,9 +276,11 @@ export const getNotificationsControllerUnsubscribeMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof notificationsControllerUnsubscribe>>,
-    void
-  > = () => {
-    return notificationsControllerUnsubscribe();
+    { data: NotificationsControllerUnsubscribeBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return notificationsControllerUnsubscribe(data);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -275,7 +289,7 @@ export const getNotificationsControllerUnsubscribeMutationOptions = <
 export type NotificationsControllerUnsubscribeMutationResult = NonNullable<
   Awaited<ReturnType<typeof notificationsControllerUnsubscribe>>
 >;
-
+export type NotificationsControllerUnsubscribeMutationBody = NotificationsControllerUnsubscribeBody;
 export type NotificationsControllerUnsubscribeMutationError = unknown;
 
 export const useNotificationsControllerUnsubscribe = <TError = unknown, TContext = unknown>(
@@ -283,7 +297,7 @@ export const useNotificationsControllerUnsubscribe = <TError = unknown, TContext
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof notificationsControllerUnsubscribe>>,
       TError,
-      void,
+      { data: NotificationsControllerUnsubscribeBody },
       TContext
     >;
   },
@@ -291,7 +305,7 @@ export const useNotificationsControllerUnsubscribe = <TError = unknown, TContext
 ): UseMutationResult<
   Awaited<ReturnType<typeof notificationsControllerUnsubscribe>>,
   TError,
-  void,
+  { data: NotificationsControllerUnsubscribeBody },
   TContext
 > => {
   return useMutation(getNotificationsControllerUnsubscribeMutationOptions(options), queryClient);

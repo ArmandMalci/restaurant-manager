@@ -25,6 +25,14 @@ export class NotificationsController {
 
   @Delete('subscribe')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { endpoint: { type: 'string', format: 'uri' } },
+      required: ['endpoint'],
+    },
+  })
   public async unsubscribe(@Body() body: { endpoint: string }) {
     await this.svc.unsubscribe(body.endpoint);
 

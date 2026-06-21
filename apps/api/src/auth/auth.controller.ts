@@ -1,4 +1,5 @@
 import { Body, Controller, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { LoginSchema } from '@restaurant/shared';
 import { AuthService } from './auth.service';
@@ -14,12 +15,20 @@ interface FastifyRequestLike {
   cookies?: Record<string, string>;
 }
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   public constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @HttpCode(200)
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { email: { type: 'string', format: 'email' }, password: { type: 'string' } },
+      required: ['email', 'password'],
+    },
+  })
   public async login(
     @Body(new ZodValidationPipe(LoginSchema)) body: { email: string; password: string },
     @Res({ passthrough: true }) res: FastifyReplyLike,

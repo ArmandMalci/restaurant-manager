@@ -1,4 +1,8 @@
-import { apiClient } from './api-client';
+import {
+  notificationsControllerGetPublicKey,
+  notificationsControllerSubscribe,
+  notificationsControllerUnsubscribe,
+} from '@/api/notifications/notifications';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -9,9 +13,10 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 }
 
 async function getVapidPublicKey(): Promise<string> {
-  const { data } = await apiClient.get<{ publicKey: string }>('/notifications/vapid-public-key');
+  const result = await notificationsControllerGetPublicKey();
+  const { publicKey } = result as unknown as { publicKey: string };
 
-  return data.publicKey;
+  return publicKey;
 }
 
 export async function isSubscribed(): Promise<boolean> {
@@ -46,8 +51,8 @@ export async function subscribe(): Promise<boolean> {
 
   const raw = subscription.toJSON();
 
-  await apiClient.post('/notifications/subscribe', {
-    endpoint: raw.endpoint,
+  await notificationsControllerSubscribe({
+    endpoint: raw.endpoint ?? '',
     keys: { p256dh: raw.keys?.p256dh ?? '', auth: raw.keys?.auth ?? '' },
   });
 
@@ -62,8 +67,6 @@ export async function unsubscribe(): Promise<void> {
   const subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) return;
-  await apiClient.delete('/notifications/subscribe', {
-    data: { endpoint: subscription.endpoint },
-  });
+  await notificationsControllerUnsubscribe({ endpoint: subscription.endpoint });
   await subscription.unsubscribe();
 }
