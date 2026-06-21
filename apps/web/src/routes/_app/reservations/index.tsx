@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, CalendarDays } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useReservationControllerGetAll,
@@ -256,9 +257,11 @@ function ReservationsTable({
 }) {
   if (reservations.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed py-16 text-center">
-        <p className="text-sm text-muted-foreground">No reservations found.</p>
-      </div>
+      <EmptyState
+        icon={CalendarDays}
+        title="No reservations found"
+        description="Try adjusting your filters or create a new reservation."
+      />
     );
   }
 

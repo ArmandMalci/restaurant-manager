@@ -45,3 +45,9 @@ ruvector*
 .worktrees/
 docs/superpowers/
 .playwright-mcp/
+
+# design iteration artifacts
+design-iterations/
+uxpilot-export/
+uxpilot-export.zip
+screenshot-*.png

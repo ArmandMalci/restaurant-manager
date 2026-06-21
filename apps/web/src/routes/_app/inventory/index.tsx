@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, Search, Package } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import {
   useInventoryControllerFindAll,
@@ -289,9 +290,13 @@ function InventoryPage() {
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          {search ? 'No items match your search.' : 'No inventory items yet.'}
-        </p>
+        <EmptyState
+          icon={Package}
+          title={search ? 'No items match your search' : 'No inventory items yet'}
+          description={
+            search ? 'Try a different search term.' : 'Add your first item to start tracking stock.'
+          }
+        />
       ) : (
         <div className="rounded-lg border">
           <table className="w-full text-sm">

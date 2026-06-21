@@ -34,6 +34,7 @@ function orderStatusClasses(status: string): string {
   if (status === 'served') return 'bg-success/10 text-success';
   if (status === 'in_progress' || status === 'ready')
     return 'bg-warning/10 text-warning-foreground';
+
   if (status === 'sent') return 'bg-accent/10 text-accent';
 
   return 'bg-muted text-muted-foreground';

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Users, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, X, LayoutGrid } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
@@ -359,9 +360,11 @@ function TablesPage() {
 
       {/* Grid */}
       {tables.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-12 text-center">
-          <p className="text-sm text-muted-foreground">No tables yet. Add one to get started.</p>
-        </div>
+        <EmptyState
+          icon={LayoutGrid}
+          title="No tables yet"
+          description="Add your first table to start tracking status and capacity."
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {tables.map((table) => (

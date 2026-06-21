@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Plus, Pencil, Trash2, UserCheck, UserX, Users } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import {
   useStaffControllerGetAll,
@@ -298,9 +299,15 @@ function StaffPage() {
 
       {/* Staff grid */}
       {staff.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          No staff{roleFilter ? ` with role "${roleFilter}"` : ''}.
-        </p>
+        <EmptyState
+          icon={Users}
+          title={roleFilter ? `No staff with role "${roleFilter}"` : 'No staff yet'}
+          description={
+            roleFilter
+              ? 'Try a different role filter.'
+              : 'Add your first staff member to get started.'
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {staff.map((s) =>
