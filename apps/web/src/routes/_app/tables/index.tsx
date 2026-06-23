@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, Users, X, LayoutGrid } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
@@ -314,8 +315,21 @@ function TablesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Loading tables…</p>
+      <div className="space-y-6 p-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-28" />
+          <Skeleton className="h-8 w-32" />
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-10 w-28 rounded-lg" />
+          ))}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-40 rounded-lg" />
+          ))}
+        </div>
       </div>
     );
   }

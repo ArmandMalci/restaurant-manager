@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { useRouterState } from '@tanstack/react-router';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import { OfflineBanner } from '../offline-banner';
@@ -12,6 +13,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const isOnline = useOnline();
   const prevOnline = useRef(isOnline);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     if (!prevOnline.current && isOnline) {
@@ -27,7 +29,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
         {!isOnline && <OfflineBanner />}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <div key={pathname} className="animate-page-in h-full">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

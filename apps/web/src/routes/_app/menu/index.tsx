@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, LayoutGrid } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@base-ui/react/dialog';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   useMenuControllerGetCategories,
   useMenuControllerCreateCategory,
@@ -447,7 +448,7 @@ function MenuPage() {
   const selectedCat = categories.find((c) => c.id === selectedCatId);
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 p-6">
       {/* ── Categories sidebar ───────────────────────────────── */}
       <aside className="w-60 shrink-0 flex flex-col rounded-lg border border-border bg-card self-start sticky top-0">
         <div className="px-4 py-4 border-b border-border">
@@ -470,7 +471,11 @@ function MenuPage() {
             </span>
           </button>
           {loadingCats ? (
-            <p className="px-3 py-2 text-xs text-muted-foreground">Loading…</p>
+            <div className="space-y-1 px-2 py-2">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-9 w-full rounded-md" />
+              ))}
+            </div>
           ) : (
             categories.map((cat) => (
               <div key={cat.id} className="group relative">
@@ -547,7 +552,11 @@ function MenuPage() {
         </div>
 
         {loadingItems ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-48 rounded-lg" />
+            ))}
+          </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <LayoutGrid className="mb-3 h-10 w-10 text-muted-foreground/40" />

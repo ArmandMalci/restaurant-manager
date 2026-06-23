@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Receipt, CreditCard, CheckCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -83,7 +84,19 @@ function BillingPage() {
   }
 
   if (isLoading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
+    return (
+      <div className="space-y-6 p-6">
+        <div className="space-y-1">
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-4 w-52" />
+        </div>
+        <div className="space-y-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

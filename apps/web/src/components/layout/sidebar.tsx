@@ -36,7 +36,7 @@ export function Sidebar() {
   const { user } = useAuthStore();
 
   return (
-    <aside className="bg-sidebar text-sidebar-foreground flex h-full w-60 shrink-0 flex-col border-r border-sidebar-border">
+    <aside className="bg-sidebar text-sidebar-foreground hidden h-full w-60 shrink-0 flex-col border-r border-sidebar-border md:flex">
       {/* Brand */}
       <div className="flex items-center gap-3 px-4 py-5">
         <div className="bg-accent text-accent-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">

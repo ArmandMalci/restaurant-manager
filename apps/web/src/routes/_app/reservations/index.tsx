@@ -13,6 +13,7 @@ import {
 import { useTableControllerGetAll } from '@/api/tables/tables';
 import type { ReservationDto } from '@/api/restaurantManagerAPI.schemas';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableHeader,
@@ -465,7 +466,11 @@ function ReservationsPage() {
           <TabsTrigger value="all">All</TabsTrigger>
         </TabsList>
         {isLoading ? (
-          <div className="mt-6 text-sm text-muted-foreground">Loading…</div>
+          <div className="mt-4 space-y-2 rounded-lg border p-3">
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-md" />
+            ))}
+          </div>
         ) : (
           <>
             <TabsContent value="today">
