@@ -97,11 +97,11 @@ function NotificationItem({
       type="button"
       onClick={() => !read && onRead(id)}
       onKeyDown={(e) => e.key === 'Enter' && !read && onRead(id)}
-      className="relative flex w-full cursor-pointer gap-4 overflow-hidden rounded-lg border border-border bg-card p-4 text-left transition-shadow hover:shadow-sm"
+      className={[
+        'flex w-full cursor-pointer gap-4 rounded-lg border p-4 text-left transition-shadow hover:shadow-sm',
+        read ? 'bg-card border-border' : 'bg-accent/5 border-accent/25',
+      ].join(' ')}
     >
-      {/* Unread left stripe */}
-      {!read && <div className="absolute bottom-0 left-0 top-0 w-1 bg-accent" aria-hidden="true" />}
-
       {/* Icon */}
       <div
         className={[

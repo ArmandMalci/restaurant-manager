@@ -27,7 +27,7 @@ const ORDER_STATUS_CLASSES: Record<string, string> = {
 
 const TABLE_DOT_CLASSES: Record<string, string> = {
   available: 'bg-success',
-  occupied: 'bg-destructive',
+  occupied: 'bg-info',
   reserved: 'bg-warning',
 };
 
@@ -197,7 +197,7 @@ function ReportsPage() {
                     </div>
                     <div className="bg-muted h-1.5 w-full rounded-full">
                       <div
-                        className="bg-primary h-1.5 rounded-full transition-all"
+                        className="bg-chart-1 h-1.5 rounded-full transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>

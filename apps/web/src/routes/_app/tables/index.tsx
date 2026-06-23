@@ -29,13 +29,13 @@ const STATUS_LABELS: Record<TableStatus, string> = {
 
 const STATUS_CLASSES: Record<TableStatus, string> = {
   available: 'bg-success/10 text-success',
-  occupied: 'bg-destructive/10 text-destructive',
+  occupied: 'bg-info/10 text-info',
   reserved: 'bg-warning/10 text-warning-foreground',
 };
 
 const STATUS_DOT: Record<TableStatus, string> = {
   available: 'bg-success',
-  occupied: 'bg-destructive',
+  occupied: 'bg-info',
   reserved: 'bg-warning',
 };
 
@@ -238,8 +238,8 @@ function TableCard({ table, onEdit, onDelete, onCycleStatus }: TableCardProps) {
       className={cn(
         'group relative flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm',
         'hover:border-accent/40 hover:shadow-md transition-all duration-200',
-        table.status === 'occupied' && 'border-l-4 border-l-destructive/60',
-        table.status === 'reserved' && 'border-l-4 border-l-warning/60',
+        table.status === 'occupied' && 'bg-info/5 border-info/30',
+        table.status === 'reserved' && 'bg-warning/5 border-warning/30',
       )}
     >
       {/* Hover actions */}
@@ -347,8 +347,8 @@ function TablesPage() {
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
             Available {available}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive">
-            <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-info/10 px-3 py-1 text-xs font-medium text-info">
+            <span className="h-1.5 w-1.5 rounded-full bg-info" />
             Occupied {occupied}
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-warning/10 px-3 py-1 text-xs font-medium text-warning-foreground">

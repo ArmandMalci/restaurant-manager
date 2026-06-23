@@ -21,7 +21,7 @@ export const Route = createFileRoute('/_app/dashboard/')({
 
 function tableStatusClasses(status: string): string {
   if (status === 'available') return 'bg-success/10 text-success';
-  if (status === 'occupied') return 'bg-destructive/10 text-destructive';
+  if (status === 'occupied') return 'bg-info/10 text-info';
 
   return 'bg-warning/10 text-warning-foreground';
 }
@@ -177,7 +177,7 @@ function DashboardPage() {
           detail={
             <span className="flex flex-wrap gap-2">
               <span className="text-success">{availableCount} avail</span>
-              <span className="text-destructive">{occupiedCount} occ</span>
+              <span className="text-info">{occupiedCount} occ</span>
               <span className="text-warning-foreground">{reservedCount} res</span>
             </span>
           }
@@ -266,7 +266,7 @@ function DashboardPage() {
                     Available
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-destructive inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-info inline-block" />
                     Occupied
                   </span>
                   <span className="flex items-center gap-1.5">

@@ -25,7 +25,7 @@ const ROLES: StaffRole[] = ['manager', 'waiter', 'kitchen', 'host'];
 const ROLE_CLASSES: Record<StaffRole, string> = {
   manager: 'bg-accent/10 text-accent',
   waiter: 'bg-secondary text-secondary-foreground',
-  kitchen: 'bg-destructive/10 text-destructive',
+  kitchen: 'bg-info/10 text-info',
   host: 'bg-primary/10 text-primary',
 };
 
