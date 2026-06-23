@@ -249,18 +249,22 @@ function ReservationsTable({
   tables,
   onEdit,
   onDelete,
+  emptyTitle,
+  emptyDescription,
 }: {
   reservations: ReservationDto[];
   tables: Array<{ id: string; number: number }>;
   onEdit: (r: ReservationDto) => void;
   onDelete: (r: ReservationDto) => void;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }) {
   if (reservations.length === 0) {
     return (
       <EmptyState
         icon={CalendarDays}
-        title="No reservations found"
-        description="Try adjusting your filters or create a new reservation."
+        title={emptyTitle ?? 'No reservations found'}
+        description={emptyDescription ?? 'Create a new reservation to get started.'}
       />
     );
   }
@@ -471,6 +475,8 @@ function ReservationsPage() {
                   tables={tables}
                   onEdit={openEdit}
                   onDelete={handleDelete}
+                  emptyTitle="No reservations today"
+                  emptyDescription="Nothing booked for today. Add a walk-in or new booking."
                 />
               </div>
             </TabsContent>
@@ -481,6 +487,8 @@ function ReservationsPage() {
                   tables={tables}
                   onEdit={openEdit}
                   onDelete={handleDelete}
+                  emptyTitle="No upcoming reservations"
+                  emptyDescription="Nothing scheduled in the next 7 days."
                 />
               </div>
             </TabsContent>
@@ -491,6 +499,8 @@ function ReservationsPage() {
                   tables={tables}
                   onEdit={openEdit}
                   onDelete={handleDelete}
+                  emptyTitle="No reservations yet"
+                  emptyDescription="Create a new reservation to get started."
                 />
               </div>
             </TabsContent>

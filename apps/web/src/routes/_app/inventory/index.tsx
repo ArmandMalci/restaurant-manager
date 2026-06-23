@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, Search, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Search, Package } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import {
@@ -190,19 +190,12 @@ function AdjustDialog({
 // ── Status badge ──────────────────────────────────────────────────────
 
 function StatusBadge({ lowStock }: { lowStock: boolean }) {
-  if (lowStock) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning-foreground">
-        <AlertTriangle className="h-3 w-3" />
-        Low stock
-      </span>
-    );
-  }
+  if (!lowStock) return null;
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
-      <CheckCircle className="h-3 w-3" />
-      OK
+    <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning-foreground">
+      <AlertTriangle className="h-3 w-3" />
+      Low stock
     </span>
   );
 }
