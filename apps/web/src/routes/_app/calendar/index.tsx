@@ -109,6 +109,7 @@ function CalendarPage() {
           views={[Views.WEEK, Views.DAY]}
           date={currentDate}
           onNavigate={setCurrentDate}
+          scrollToTime={new Date(0, 0, 0, 10, 0, 0)}
           style={{ height: '100%' }}
         />
       </div>
