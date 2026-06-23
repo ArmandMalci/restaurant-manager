@@ -175,7 +175,7 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
       <div className="flex gap-2">
         <button
           type="submit"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+          className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         >
           Create
         </button>
@@ -196,10 +196,11 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
 interface OrderCardProps {
   order: OrderDto;
   tableNumber: number | undefined;
+  menuNameMap: Map<string, string>;
 }
 
-function OrderCard({ order, tableNumber }: OrderCardProps) {
-  const [expanded, setExpanded] = useState(false);
+function OrderCard({ order, tableNumber, menuNameMap }: OrderCardProps) {
+  const [expanded, setExpanded] = useState(true);
   const qc = useQueryClient();
   const updateStatus = useOrderControllerUpdateStatus();
   const updateItemStatus = useOrderControllerUpdateItemStatus();
@@ -270,7 +271,7 @@ function OrderCard({ order, tableNumber }: OrderCardProps) {
           {order.items.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-2">
               <span className="text-xs text-muted-foreground truncate flex-1">
-                ×{item.quantity} <span className="font-mono">{item.menuItemId.slice(0, 6)}</span>
+                ×{item.quantity} {menuNameMap.get(item.menuItemId) ?? item.menuItemId.slice(0, 6)}
               </span>
               <select
                 value={item.status}
@@ -331,9 +332,10 @@ interface KanbanColumnProps {
   status: OrderStatus;
   orders: OrderDto[];
   tableMap: Map<string, number>;
+  menuNameMap: Map<string, string>;
 }
 
-function KanbanColumn({ status, orders, tableMap }: KanbanColumnProps) {
+function KanbanColumn({ status, orders, tableMap, menuNameMap }: KanbanColumnProps) {
   return (
     <div className="flex flex-col min-w-56 w-64 flex-shrink-0">
       {/* Column header */}
@@ -352,7 +354,12 @@ function KanbanColumn({ status, orders, tableMap }: KanbanColumnProps) {
           <p className="text-muted-foreground text-xs text-center py-4">No orders</p>
         ) : (
           orders.map((order) => (
-            <OrderCard key={order.id} order={order} tableNumber={tableMap.get(order.tableId)} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              tableNumber={tableMap.get(order.tableId)}
+              menuNameMap={menuNameMap}
+            />
           ))
         )}
       </div>
@@ -366,8 +373,10 @@ function OrdersPage() {
   const [showCreate, setShowCreate] = useState(false);
   const { data: orders = [], isLoading } = useOrderControllerGetAll();
   const { data: tables = [] } = useTableControllerGetAll();
+  const { data: menuItems = [] } = useMenuControllerGetItems();
 
   const tableMap = new Map<string, number>(tables.map((t) => [t.id, t.number]));
+  const menuNameMap = new Map<string, string>(menuItems.map((m) => [m.id, m.name]));
 
   const columnOrders = Object.fromEntries(
     ORDER_STATUSES.map((status) => [status, orders.filter((o) => o.status === status)]),
@@ -383,7 +392,7 @@ function OrdersPage() {
         <button
           type="button"
           onClick={() => setShowCreate((s) => !s)}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+          className="bg-accent text-accent-foreground hover:bg-accent/90 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
         >
           <Plus className="h-4 w-4" /> New Order
         </button>
@@ -401,6 +410,7 @@ function OrdersPage() {
               status={status}
               orders={columnOrders[status]}
               tableMap={tableMap}
+              menuNameMap={menuNameMap}
             />
           ))}
         </div>

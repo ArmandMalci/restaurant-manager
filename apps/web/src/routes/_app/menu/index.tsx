@@ -460,7 +460,7 @@ function MenuPage() {
             className={cn(
               'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
               !selectedCatId
-                ? 'bg-accent/10 text-accent border-l-2 border-accent font-medium'
+                ? 'bg-accent/10 text-accent font-medium'
                 : 'text-foreground hover:bg-muted',
             )}
           >
@@ -480,7 +480,7 @@ function MenuPage() {
                   className={cn(
                     'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
                     selectedCatId === cat.id
-                      ? 'bg-accent/10 text-accent border-l-2 border-accent font-medium'
+                      ? 'bg-accent/10 text-accent font-medium'
                       : 'text-foreground hover:bg-muted',
                   )}
                 >
@@ -563,7 +563,7 @@ function MenuPage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
             {items.map((item) => (
               <ItemCard
                 key={item.id}
