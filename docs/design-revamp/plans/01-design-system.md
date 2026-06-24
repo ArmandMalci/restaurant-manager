@@ -537,7 +537,7 @@ describe('PageHeader', () => {
   });
 
   it('renders the subtitle and action', () => {
-    render(<PageHeader title="Menu" subtitle="20 items" action={<button>Add item</button>} />);
+    render(<PageHeader title="Menu" subtitle="20 items" action={<button type="button">Add item</button>} />);
     expect(screen.getByText('20 items')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add item' })).toBeInTheDocument();
   });
@@ -618,7 +618,7 @@ describe('ListRow', () => {
         title="Table 6 · 2 dishes ready"
         subtitle="Carbonara, Branzino"
         meta="2 min"
-        action={<button>Run</button>}
+        action={<button type="button">Run</button>}
       />,
     );
     expect(screen.getByText('Table 6 · 2 dishes ready')).toBeInTheDocument();
