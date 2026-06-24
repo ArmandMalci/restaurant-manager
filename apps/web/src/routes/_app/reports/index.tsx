@@ -63,7 +63,7 @@ function ReportsPage() {
 
   const headerAction = (
     <div className="flex items-center gap-2">
-      <Select value={dateRange} onValueChange={setDateRange}>
+      <Select value={dateRange} onValueChange={(v) => setDateRange(v ?? 'today')}>
         <SelectTrigger size="sm">
           <SelectValue />
         </SelectTrigger>
