@@ -1,10 +1,15 @@
 import { useTheme, type Theme } from './theme-provider';
 
-const THEMES: { value: Theme; label: string; description: string }[] = [
-  { value: 'default', label: 'Warm canvas', description: 'Warm paper & terracotta' },
-  { value: 'midnight', label: 'Midnight', description: 'Dark premium tool' },
-  { value: 'monokai', label: 'Monokai', description: 'Dark editorial' },
-  { value: 'gruvbox', label: 'Gruvbox', description: 'Warm retro dark' },
+const THEMES: { value: Theme; label: string; description: string; swatch: string }[] = [
+  {
+    value: 'default',
+    label: 'Warm canvas',
+    description: 'Warm paper & terracotta',
+    swatch: '#c2562f',
+  },
+  { value: 'midnight', label: 'Midnight', description: 'Dark premium tool', swatch: '#6366f1' },
+  { value: 'monokai', label: 'Monokai', description: 'Dark editorial', swatch: '#fd971f' },
+  { value: 'gruvbox', label: 'Gruvbox', description: 'Warm retro dark', swatch: '#fe8019' },
 ];
 
 export function ThemeSelector() {
@@ -12,7 +17,7 @@ export function ThemeSelector() {
 
   return (
     <div className="flex flex-col gap-2">
-      {THEMES.map(({ value, label, description }) => {
+      {THEMES.map(({ value, label, description, swatch }) => {
         const isActive = theme === value;
 
         return (
@@ -29,10 +34,7 @@ export function ThemeSelector() {
           >
             <span
               className="h-4 w-4 shrink-0 rounded-full border border-border"
-              style={{
-                background:
-                  value === 'default' ? '#f97316' : value === 'monokai' ? '#fd971f' : '#fe8019',
-              }}
+              style={{ background: swatch }}
             />
             <span className="flex flex-col">
               <span>{label}</span>
