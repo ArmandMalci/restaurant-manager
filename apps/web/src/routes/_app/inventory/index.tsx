@@ -1,9 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, AlertTriangle, Search, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Package } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { StatusBadge } from '@/components/ui/status';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
 import {
   useInventoryControllerFindAll,
   useInventoryControllerCreate,
@@ -187,19 +197,6 @@ function AdjustDialog({
   );
 }
 
-// ── Status badge ──────────────────────────────────────────────────────
-
-function StatusBadge({ lowStock }: { lowStock: boolean }) {
-  if (!lowStock) return null;
-
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning-foreground">
-      <AlertTriangle className="h-3 w-3" />
-      Low stock
-    </span>
-  );
-}
-
 // ── Main page ─────────────────────────────────────────────────────────
 
 function InventoryPage() {
@@ -226,7 +223,6 @@ function InventoryPage() {
   const items: InventoryItemWithStatusDto[] = rawItems;
 
   const lowStockCount = items.filter((i) => i.lowStock).length;
-  const okCount = items.length - lowStockCount;
 
   const filtered = search.trim()
     ? items.filter((i) => i.name.toLowerCase().includes(search.trim().toLowerCase()))
@@ -235,31 +231,24 @@ function InventoryPage() {
   if (isLoading) return <div className="text-muted-foreground p-6 text-sm">Loading…</div>;
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
-        <Button onClick={() => setFormMode('create')}>
-          <Plus className="mr-1.5 h-4 w-4" />
-          Add Item
-        </Button>
-      </div>
-
-      {/* Stat pills */}
-      <div className="flex flex-wrap gap-3">
-        <div className="bg-muted/50 rounded-lg border px-4 py-2 text-sm">
-          <span className="text-muted-foreground">Total Items</span>
-          <span className="ml-2 font-semibold">{items.length}</span>
-        </div>
-        <div className="rounded-lg border bg-warning/5 px-4 py-2 text-sm">
-          <span className="text-muted-foreground">Low Stock</span>
-          <span className="text-warning-foreground ml-2 font-semibold">{lowStockCount}</span>
-        </div>
-        <div className="rounded-lg border bg-success/5 px-4 py-2 text-sm">
-          <span className="text-muted-foreground">OK</span>
-          <span className="ml-2 font-semibold text-success">{okCount}</span>
-        </div>
-      </div>
+    <div className="space-y-4 p-6">
+      <PageHeader
+        title="Inventory"
+        subtitle={
+          <>
+            {items.length} items
+            {lowStockCount > 0 && (
+              <span className="text-warning ml-2">· {lowStockCount} low stock</span>
+            )}
+          </>
+        }
+        action={
+          <Button onClick={() => setFormMode('create')}>
+            <Plus className="mr-1.5 h-4 w-4" />
+            Add item
+          </Button>
+        }
+      />
 
       {/* Create form */}
       {formMode === 'create' && (
@@ -292,22 +281,25 @@ function InventoryPage() {
         />
       ) : (
         <div className="rounded-lg border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-muted/50 border-b text-left">
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Unit</th>
-                <th className="px-4 py-3 font-medium">Quantity</th>
-                <th className="px-4 py-3 font-medium">Min Stock</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((item) =>
-                typeof formMode === 'object' && formMode.id === item.id ? (
-                  <tr key={item.id}>
-                    <td colSpan={6} className="px-4 py-3">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40 hover:bg-muted/40">
+                <TableHead className="pl-4">Item</TableHead>
+                <TableHead>Stock</TableHead>
+                <TableHead className="hidden sm:table-cell">Par</TableHead>
+                <TableHead className="hidden sm:table-cell">Unit</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="pr-4 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((item) => {
+                const isOut = item.quantity <= 0;
+                const isLow = !isOut && item.lowStock;
+
+                return typeof formMode === 'object' && formMode.id === item.id ? (
+                  <TableRow key={item.id}>
+                    <TableCell colSpan={6} className="px-4 py-3">
                       <InventoryForm
                         initial={{
                           name: item.name,
@@ -323,48 +315,38 @@ function InventoryPage() {
                         }
                         onCancel={() => setFormMode('none')}
                       />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
-                  <tr
-                    key={item.id}
-                    className={
-                      item.lowStock
-                        ? 'bg-warning/5 border-b last:border-0'
-                        : 'border-b last:border-0'
-                    }
-                  >
-                    <td className="px-4 py-3 font-medium">
-                      {item.lowStock && (
-                        <AlertTriangle className="mb-0.5 mr-1.5 inline h-3.5 w-3.5 text-warning" />
-                      )}
-                      {item.name}
-                    </td>
-                    <td className="text-muted-foreground px-4 py-3">{item.unit}</td>
-                    <td className="px-4 py-3">
+                  <TableRow key={item.id}>
+                    <TableCell className="pl-4 font-medium">{item.name}</TableCell>
+                    <TableCell>
                       <button
                         type="button"
                         onClick={() => setAdjustingItem(item)}
-                        className={
-                          'rounded px-1.5 py-0.5 font-mono text-sm transition-colors hover:bg-accent' +
-                          (item.lowStock ? ' text-warning' : '')
-                        }
+                        className="rounded px-1.5 py-0.5 font-mono text-sm transition-colors hover:bg-accent"
                         title="Click to adjust quantity"
                       >
                         {item.quantity}
                       </button>
-                    </td>
-                    <td className="text-muted-foreground px-4 py-3">{item.minStock}</td>
-                    <td className="px-4 py-3">
-                      <StatusBadge lowStock={item.lowStock} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground hidden sm:table-cell">
+                      {item.minStock}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground hidden sm:table-cell">
+                      {item.unit}
+                    </TableCell>
+                    <TableCell>
+                      {isOut && <StatusBadge tone="destructive" label="Out of stock" />}
+                      {isLow && <StatusBadge tone="warning" label="Low stock" />}
+                    </TableCell>
+                    <TableCell className="pr-4 text-right">
+                      <div className="inline-flex items-center gap-1">
                         <button
                           type="button"
                           onClick={() => setFormMode({ id: item.id })}
                           aria-label="Edit"
-                          className="hover:bg-accent rounded p-1 transition-colors"
+                          className="hover:bg-accent rounded p-1.5 transition-colors"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
@@ -375,17 +357,17 @@ function InventoryPage() {
                             deleteItem.mutate({ id: item.id })
                           }
                           aria-label="Delete"
-                          className="text-destructive hover:bg-accent rounded p-1 transition-colors"
+                          className="text-destructive hover:bg-accent rounded p-1.5 transition-colors"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                ),
-              )}
-            </tbody>
-          </table>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       )}
 
