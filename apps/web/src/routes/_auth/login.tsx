@@ -5,6 +5,9 @@ import { useAuthControllerLogin } from '@/api/auth/auth';
 import { useAuthStore } from '@/stores/auth.store';
 import type { AuthUser } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export const Route = createFileRoute('/_auth/login')({
   component: LoginPage,
@@ -38,81 +41,95 @@ function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-md px-4">
-      {/* Brand mark */}
-      <div className="mb-8 flex flex-col items-center gap-4">
-        <div className="bg-accent text-accent-foreground flex h-12 w-12 items-center justify-center rounded-xl shadow-sm">
-          <UtensilsCrossed className="size-6" />
+    /* Full-viewport breakout — escapes the parent _auth flex centering at lg+ */
+    <div className="fixed inset-0 flex flex-col lg:grid lg:grid-cols-2">
+      {/* Brand panel — warm, terracotta */}
+      <div className="bg-sidebar text-sidebar-foreground hidden flex-col items-center justify-center gap-8 px-16 lg:flex">
+        <div className="flex flex-col items-center gap-6 text-center">
+          <div className="bg-sidebar-foreground/10 flex h-16 w-16 items-center justify-center rounded-2xl ring-1 ring-sidebar-foreground/20">
+            <UtensilsCrossed className="text-sidebar-foreground size-8" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="font-serif text-4xl font-semibold tracking-tight">RestoManager</h1>
+            <p className="text-sidebar-foreground/70 text-base">
+              Your restaurant, running like clockwork.
+            </p>
+          </div>
         </div>
-        <div className="space-y-1 text-center">
-          <h1 className="text-foreground text-2xl font-bold tracking-tight">RestoManager</h1>
-          <p className="text-muted-foreground text-sm">Sign in to manage your restaurant</p>
-        </div>
+        <p className="text-sidebar-foreground/40 absolute bottom-6 text-xs">
+          Access restricted to authorized staff only.
+        </p>
       </div>
 
-      {/* Card */}
-      <div className="bg-card border-border rounded-xl border px-8 py-8 shadow-sm">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-foreground block text-sm font-medium">
-              Work Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@restaurant.local"
-              disabled={login.isPending}
-              className="border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring/50 w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-colors focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
+      {/* Sign-in panel */}
+      <div className="bg-background flex flex-col items-center justify-center px-6 py-12 lg:px-16">
+        {/* Mobile brand mark — only visible below lg */}
+        <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
+          <div className="bg-sidebar text-sidebar-foreground flex h-12 w-12 items-center justify-center rounded-xl">
+            <UtensilsCrossed className="size-6" />
           </div>
+          <h2 className="font-serif text-2xl font-semibold tracking-tight">RestoManager</h2>
+        </div>
 
-          {/* Password */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-foreground block text-sm font-medium">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={login.isPending}
-              className="border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring/50 w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-colors focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Sign in</CardTitle>
+            <CardDescription>Enter your work credentials to continue.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email */}
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Work Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@restaurant.local"
+                  disabled={login.isPending}
+                />
+              </div>
 
-          {/* Error state */}
-          {login.isError && (
-            <div className="bg-destructive/10 border-destructive/20 rounded-lg border px-3 py-2.5">
-              <p className="text-destructive text-sm font-medium">
-                {(login.error as Error)?.message ?? 'Invalid credentials. Please try again.'}
-              </p>
-            </div>
-          )}
+              {/* Password */}
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={login.isPending}
+                />
+              </div>
 
-          {/* Submit */}
-          <Button
-            type="submit"
-            disabled={login.isPending}
-            className="bg-accent text-accent-foreground hover:bg-accent/90 mt-2 h-10 w-full rounded-lg text-sm font-medium transition-colors"
-          >
-            {login.isPending ? 'Signing in…' : 'Sign in'}
-          </Button>
-        </form>
+              {/* Error state */}
+              {login.isError && (
+                <div className="bg-destructive/10 border-destructive/20 rounded-lg border px-3 py-2.5">
+                  <p className="text-destructive text-sm font-medium">
+                    {(login.error as Error)?.message ?? 'Invalid credentials. Please try again.'}
+                  </p>
+                </div>
+              )}
+
+              {/* Submit — single primary CTA */}
+              <Button type="submit" disabled={login.isPending} className="mt-1 h-10 w-full">
+                {login.isPending ? 'Signing in…' : 'Sign in'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Mobile footer */}
+        <p className="text-muted-foreground mt-6 text-center text-xs lg:hidden">
+          Access restricted to authorized staff only.
+        </p>
       </div>
-
-      {/* Footer note */}
-      <p className="text-muted-foreground mt-6 text-center text-xs">
-        Access restricted to authorized staff only.
-      </p>
     </div>
   );
 }
