@@ -16,13 +16,18 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AppTablesIndexRouteImport } from './routes/_app/tables/index'
 import { Route as AppStaffIndexRouteImport } from './routes/_app/staff/index'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
+import { Route as AppServiceIndexRouteImport } from './routes/_app/service/index'
 import { Route as AppReservationsIndexRouteImport } from './routes/_app/reservations/index'
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
+import { Route as AppOrderIndexRouteImport } from './routes/_app/order/index'
 import { Route as AppNotificationsIndexRouteImport } from './routes/_app/notifications/index'
 import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
 import { Route as AppInventoryIndexRouteImport } from './routes/_app/inventory/index'
+import { Route as AppFloorIndexRouteImport } from './routes/_app/floor/index'
+import { Route as AppDoorIndexRouteImport } from './routes/_app/door/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
+import { Route as AppCheckoutIndexRouteImport } from './routes/_app/checkout/index'
 import { Route as AppCalendarIndexRouteImport } from './routes/_app/calendar/index'
 import { Route as AppBillingIndexRouteImport } from './routes/_app/billing/index'
 
@@ -59,6 +64,11 @@ const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
   path: '/settings/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppServiceIndexRoute = AppServiceIndexRouteImport.update({
+  id: '/service/',
+  path: '/service/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppReservationsIndexRoute = AppReservationsIndexRouteImport.update({
   id: '/reservations/',
   path: '/reservations/',
@@ -72,6 +82,11 @@ const AppReportsIndexRoute = AppReportsIndexRouteImport.update({
 const AppOrdersIndexRoute = AppOrdersIndexRouteImport.update({
   id: '/orders/',
   path: '/orders/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrderIndexRoute = AppOrderIndexRouteImport.update({
+  id: '/order/',
+  path: '/order/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppNotificationsIndexRoute = AppNotificationsIndexRouteImport.update({
@@ -89,9 +104,24 @@ const AppInventoryIndexRoute = AppInventoryIndexRouteImport.update({
   path: '/inventory/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFloorIndexRoute = AppFloorIndexRouteImport.update({
+  id: '/floor/',
+  path: '/floor/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDoorIndexRoute = AppDoorIndexRouteImport.update({
+  id: '/door/',
+  path: '/door/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCheckoutIndexRoute = AppCheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCalendarIndexRoute = AppCalendarIndexRouteImport.update({
@@ -110,13 +140,18 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/billing/': typeof AppBillingIndexRoute
   '/calendar/': typeof AppCalendarIndexRoute
+  '/checkout/': typeof AppCheckoutIndexRoute
   '/dashboard/': typeof AppDashboardIndexRoute
+  '/door/': typeof AppDoorIndexRoute
+  '/floor/': typeof AppFloorIndexRoute
   '/inventory/': typeof AppInventoryIndexRoute
   '/menu/': typeof AppMenuIndexRoute
   '/notifications/': typeof AppNotificationsIndexRoute
+  '/order/': typeof AppOrderIndexRoute
   '/orders/': typeof AppOrdersIndexRoute
   '/reports/': typeof AppReportsIndexRoute
   '/reservations/': typeof AppReservationsIndexRoute
+  '/service/': typeof AppServiceIndexRoute
   '/settings/': typeof AppSettingsIndexRoute
   '/staff/': typeof AppStaffIndexRoute
   '/tables/': typeof AppTablesIndexRoute
@@ -126,13 +161,18 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/billing': typeof AppBillingIndexRoute
   '/calendar': typeof AppCalendarIndexRoute
+  '/checkout': typeof AppCheckoutIndexRoute
   '/dashboard': typeof AppDashboardIndexRoute
+  '/door': typeof AppDoorIndexRoute
+  '/floor': typeof AppFloorIndexRoute
   '/inventory': typeof AppInventoryIndexRoute
   '/menu': typeof AppMenuIndexRoute
   '/notifications': typeof AppNotificationsIndexRoute
+  '/order': typeof AppOrderIndexRoute
   '/orders': typeof AppOrdersIndexRoute
   '/reports': typeof AppReportsIndexRoute
   '/reservations': typeof AppReservationsIndexRoute
+  '/service': typeof AppServiceIndexRoute
   '/settings': typeof AppSettingsIndexRoute
   '/staff': typeof AppStaffIndexRoute
   '/tables': typeof AppTablesIndexRoute
@@ -145,13 +185,18 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_app/billing/': typeof AppBillingIndexRoute
   '/_app/calendar/': typeof AppCalendarIndexRoute
+  '/_app/checkout/': typeof AppCheckoutIndexRoute
   '/_app/dashboard/': typeof AppDashboardIndexRoute
+  '/_app/door/': typeof AppDoorIndexRoute
+  '/_app/floor/': typeof AppFloorIndexRoute
   '/_app/inventory/': typeof AppInventoryIndexRoute
   '/_app/menu/': typeof AppMenuIndexRoute
   '/_app/notifications/': typeof AppNotificationsIndexRoute
+  '/_app/order/': typeof AppOrderIndexRoute
   '/_app/orders/': typeof AppOrdersIndexRoute
   '/_app/reports/': typeof AppReportsIndexRoute
   '/_app/reservations/': typeof AppReservationsIndexRoute
+  '/_app/service/': typeof AppServiceIndexRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
   '/_app/staff/': typeof AppStaffIndexRoute
   '/_app/tables/': typeof AppTablesIndexRoute
@@ -163,13 +208,18 @@ export interface FileRouteTypes {
     | '/login'
     | '/billing/'
     | '/calendar/'
+    | '/checkout/'
     | '/dashboard/'
+    | '/door/'
+    | '/floor/'
     | '/inventory/'
     | '/menu/'
     | '/notifications/'
+    | '/order/'
     | '/orders/'
     | '/reports/'
     | '/reservations/'
+    | '/service/'
     | '/settings/'
     | '/staff/'
     | '/tables/'
@@ -179,13 +229,18 @@ export interface FileRouteTypes {
     | '/login'
     | '/billing'
     | '/calendar'
+    | '/checkout'
     | '/dashboard'
+    | '/door'
+    | '/floor'
     | '/inventory'
     | '/menu'
     | '/notifications'
+    | '/order'
     | '/orders'
     | '/reports'
     | '/reservations'
+    | '/service'
     | '/settings'
     | '/staff'
     | '/tables'
@@ -197,13 +252,18 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_app/billing/'
     | '/_app/calendar/'
+    | '/_app/checkout/'
     | '/_app/dashboard/'
+    | '/_app/door/'
+    | '/_app/floor/'
     | '/_app/inventory/'
     | '/_app/menu/'
     | '/_app/notifications/'
+    | '/_app/order/'
     | '/_app/orders/'
     | '/_app/reports/'
     | '/_app/reservations/'
+    | '/_app/service/'
     | '/_app/settings/'
     | '/_app/staff/'
     | '/_app/tables/'
@@ -266,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/service/': {
+      id: '/_app/service/'
+      path: '/service'
+      fullPath: '/service/'
+      preLoaderRoute: typeof AppServiceIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/reservations/': {
       id: '/_app/reservations/'
       path: '/reservations'
@@ -285,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders/'
       preLoaderRoute: typeof AppOrdersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/order/': {
+      id: '/_app/order/'
+      path: '/order'
+      fullPath: '/order/'
+      preLoaderRoute: typeof AppOrderIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/notifications/': {
@@ -308,11 +382,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInventoryIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/floor/': {
+      id: '/_app/floor/'
+      path: '/floor'
+      fullPath: '/floor/'
+      preLoaderRoute: typeof AppFloorIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/door/': {
+      id: '/_app/door/'
+      path: '/door'
+      fullPath: '/door/'
+      preLoaderRoute: typeof AppDoorIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard/': {
       id: '/_app/dashboard/'
       path: '/dashboard'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof AppDashboardIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/checkout/': {
+      id: '/_app/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof AppCheckoutIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/calendar/': {
@@ -335,13 +430,18 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppBillingIndexRoute: typeof AppBillingIndexRoute
   AppCalendarIndexRoute: typeof AppCalendarIndexRoute
+  AppCheckoutIndexRoute: typeof AppCheckoutIndexRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
+  AppDoorIndexRoute: typeof AppDoorIndexRoute
+  AppFloorIndexRoute: typeof AppFloorIndexRoute
   AppInventoryIndexRoute: typeof AppInventoryIndexRoute
   AppMenuIndexRoute: typeof AppMenuIndexRoute
   AppNotificationsIndexRoute: typeof AppNotificationsIndexRoute
+  AppOrderIndexRoute: typeof AppOrderIndexRoute
   AppOrdersIndexRoute: typeof AppOrdersIndexRoute
   AppReportsIndexRoute: typeof AppReportsIndexRoute
   AppReservationsIndexRoute: typeof AppReservationsIndexRoute
+  AppServiceIndexRoute: typeof AppServiceIndexRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
   AppStaffIndexRoute: typeof AppStaffIndexRoute
   AppTablesIndexRoute: typeof AppTablesIndexRoute
@@ -350,13 +450,18 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppBillingIndexRoute: AppBillingIndexRoute,
   AppCalendarIndexRoute: AppCalendarIndexRoute,
+  AppCheckoutIndexRoute: AppCheckoutIndexRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
+  AppDoorIndexRoute: AppDoorIndexRoute,
+  AppFloorIndexRoute: AppFloorIndexRoute,
   AppInventoryIndexRoute: AppInventoryIndexRoute,
   AppMenuIndexRoute: AppMenuIndexRoute,
   AppNotificationsIndexRoute: AppNotificationsIndexRoute,
+  AppOrderIndexRoute: AppOrderIndexRoute,
   AppOrdersIndexRoute: AppOrdersIndexRoute,
   AppReportsIndexRoute: AppReportsIndexRoute,
   AppReservationsIndexRoute: AppReservationsIndexRoute,
+  AppServiceIndexRoute: AppServiceIndexRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
   AppStaffIndexRoute: AppStaffIndexRoute,
   AppTablesIndexRoute: AppTablesIndexRoute,

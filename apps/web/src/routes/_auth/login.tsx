@@ -27,7 +27,7 @@ function LoginPage() {
         const { user, accessToken } = data as unknown as LoginResponse;
 
         setAuth(user, accessToken);
-        router.navigate({ to: '/dashboard' });
+        router.navigate({ to: '/service' });
       },
     },
   });
