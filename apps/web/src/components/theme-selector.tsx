@@ -1,7 +1,8 @@
 import { useTheme, type Theme } from './theme-provider';
 
 const THEMES: { value: Theme; label: string; description: string }[] = [
-  { value: 'default', label: 'Default', description: 'Orange & zinc' },
+  { value: 'default', label: 'Warm canvas', description: 'Warm paper & terracotta' },
+  { value: 'midnight', label: 'Midnight', description: 'Dark premium tool' },
   { value: 'monokai', label: 'Monokai', description: 'Dark editorial' },
   { value: 'gruvbox', label: 'Gruvbox', description: 'Warm retro dark' },
 ];

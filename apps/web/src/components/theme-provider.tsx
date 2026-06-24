@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-export type Theme = 'default' | 'monokai' | 'gruvbox';
+export type Theme = 'default' | 'midnight' | 'monokai' | 'gruvbox';
 
 interface ThemeContextValue {
   theme: Theme;
