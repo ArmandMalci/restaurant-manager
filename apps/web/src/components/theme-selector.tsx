@@ -28,7 +28,7 @@ export function ThemeSelector() {
             className={[
               'flex items-center gap-3 rounded-md border px-3 py-2.5 text-left text-sm transition-colors',
               isActive
-                ? 'border-accent bg-accent/10 text-accent-foreground font-medium ring-1 ring-accent'
+                ? 'border-accent bg-accent/10 text-foreground font-medium ring-1 ring-accent'
                 : 'border-border bg-card text-foreground hover:bg-muted',
             ].join(' ')}
           >
