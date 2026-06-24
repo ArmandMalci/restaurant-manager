@@ -14,14 +14,6 @@ import { useTableControllerGetAll } from '@/api/tables/tables';
 import type { ReservationDto } from '@/api/restaurantManagerAPI.schemas';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Sheet,
@@ -31,6 +23,11 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { PageHeader } from '@/components/ui/page-header';
+import { ListRow } from '@/components/ui/list-row';
+import { StatusBadge } from '@/components/ui/status';
+import type { Tone } from '@/components/ui/status';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export const Route = createFileRoute('/_app/door/')({
   component: ReservationsPage,
@@ -60,11 +57,11 @@ function deriveStatus(r: ReservationDto): DerivedStatus {
   return diffMins < 30 && diffMins > -120 ? 'seated' : 'confirmed';
 }
 
-const STATUS_CLASSES: Record<DerivedStatus, string> = {
-  confirmed: 'bg-success/10 text-success',
-  pending: 'bg-warning/10 text-warning-foreground',
-  seated: 'bg-accent/10 text-accent',
-  cancelled: 'bg-muted text-muted-foreground',
+const STATUS_TONE: Record<DerivedStatus, Tone> = {
+  confirmed: 'success',
+  pending: 'warning',
+  seated: 'info',
+  cancelled: 'destructive',
 };
 
 const STATUS_LABELS: Record<DerivedStatus, string> = {
@@ -243,9 +240,9 @@ function ReservationForm({
   );
 }
 
-// ── Table view ────────────────────────────────────────────────────────
+// ── List view ─────────────────────────────────────────────────────────
 
-function ReservationsTable({
+function ReservationList({
   reservations,
   tables,
   onEdit,
@@ -271,92 +268,71 @@ function ReservationsTable({
   }
 
   return (
-    <div className="rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/50 hover:bg-muted/50">
-            {['Guest', 'Party', 'Table', 'Date / Time', 'Status', ''].map((h) => (
-              <TableHead
-                key={h}
-                className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
-              >
-                {h}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {reservations.map((r) => {
-            const status = deriveStatus(r);
-            const table = tables.find((t) => t.id === r.tableId);
+    <div className="rounded-lg border bg-card">
+      {reservations.map((r) => {
+        const status = deriveStatus(r);
+        const table = tables.find((t) => t.id === r.tableId);
+        const tableLabel = table ? `Table ${table.number}` : 'Unassigned';
+        const contactLine = [r.guestEmail, r.guestPhone, r.notes].filter(Boolean).join(' · ');
+        const dateLine = new Date(r.date).toLocaleString([], {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
 
-            return (
-              <TableRow key={r.id} className="hover:bg-muted/50">
-                <TableCell className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                      {initials(r.guestName)}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate font-medium">{r.guestName}</p>
-                      {r.guestEmail && (
-                        <p className="truncate text-xs text-muted-foreground">{r.guestEmail}</p>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" />
-                    {r.partySize}
-                  </span>
-                </TableCell>
-                <TableCell className="px-4 py-3">
-                  <span className="inline-flex items-center rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium">
-                    {table ? `Table ${table.number}` : 'Unassigned'}
-                  </span>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-sm text-muted-foreground">
-                  {new Date(r.date).toLocaleString([], {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </TableCell>
-                <TableCell className="px-4 py-3">
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_CLASSES[status]}`}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    {STATUS_LABELS[status]}
-                  </span>
-                </TableCell>
-                <TableCell className="px-4 py-3 text-right">
-                  <div className="inline-flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => onEdit(r)}
-                      aria-label="Edit"
-                      className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDelete(r)}
-                      aria-label="Delete"
-                      className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+        return (
+          <ListRow
+            key={r.id}
+            leading={
+              <Avatar>
+                <AvatarFallback>{initials(r.guestName)}</AvatarFallback>
+              </Avatar>
+            }
+            title={r.guestName}
+            subtitle={
+              <span className="flex items-center gap-2">
+                <span>{contactLine || tableLabel}</span>
+                {contactLine && <span className="text-muted-foreground/60">{tableLabel}</span>}
+              </span>
+            }
+            meta={
+              <span className="flex items-center gap-2">
+                <span className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {r.partySize}
+                </span>
+                <span>{dateLine}</span>
+                <StatusBadge tone={STATUS_TONE[status]} label={STATUS_LABELS[status]} />
+              </span>
+            }
+            action={
+              <span className="flex items-center gap-0.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(r)}
+                  aria-label="Edit"
+                  className="h-8 w-8"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(r)}
+                  aria-label="Delete"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </span>
+            }
+          />
+        );
+      })}
     </div>
   );
 }
@@ -419,45 +395,43 @@ function ReservationsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reservations</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {displayed.length} reservation{displayed.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger
-            render={
-              <Button
-                onClick={() => {
-                  setEditingReservation(null);
-                }}
-                className="gap-1.5"
-              />
-            }
-          >
-            <Plus className="h-4 w-4" />
-            Add reservation
-          </SheetTrigger>
-          <SheetContent side="right">
-            <SheetHeader>
-              <SheetTitle>{editingReservation ? 'Edit reservation' : 'New reservation'}</SheetTitle>
-              <SheetDescription>
-                {editingReservation
-                  ? `Editing reservation for ${editingReservation.guestName}`
-                  : 'Fill in the details to create a new reservation.'}
-              </SheetDescription>
-            </SheetHeader>
-            <ReservationForm
-              initial={editingReservation ?? undefined}
-              onSave={handleSave}
-              onCancel={() => setSheetOpen(false)}
-            />
-          </SheetContent>
-        </Sheet>
-      </div>
+    <div className="p-6">
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <PageHeader
+          title="Door"
+          subtitle={`${displayed.length} reservation${displayed.length !== 1 ? 's' : ''}`}
+          action={
+            <SheetTrigger
+              render={
+                <Button
+                  onClick={() => {
+                    setEditingReservation(null);
+                  }}
+                  className="gap-1.5"
+                />
+              }
+            >
+              <Plus className="h-4 w-4" />
+              Add reservation
+            </SheetTrigger>
+          }
+        />
+        <SheetContent side="right">
+          <SheetHeader>
+            <SheetTitle>{editingReservation ? 'Edit reservation' : 'New reservation'}</SheetTitle>
+            <SheetDescription>
+              {editingReservation
+                ? `Editing reservation for ${editingReservation.guestName}`
+                : 'Fill in the details to create a new reservation.'}
+            </SheetDescription>
+          </SheetHeader>
+          <ReservationForm
+            initial={editingReservation ?? undefined}
+            onSave={handleSave}
+            onCancel={() => setSheetOpen(false)}
+          />
+        </SheetContent>
+      </Sheet>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as FilterTab)}>
         <TabsList>
@@ -475,7 +449,7 @@ function ReservationsPage() {
           <>
             <TabsContent value="today">
               <div className="mt-4">
-                <ReservationsTable
+                <ReservationList
                   reservations={displayed}
                   tables={tables}
                   onEdit={openEdit}
@@ -487,7 +461,7 @@ function ReservationsPage() {
             </TabsContent>
             <TabsContent value="week">
               <div className="mt-4">
-                <ReservationsTable
+                <ReservationList
                   reservations={displayed}
                   tables={tables}
                   onEdit={openEdit}
@@ -499,7 +473,7 @@ function ReservationsPage() {
             </TabsContent>
             <TabsContent value="all">
               <div className="mt-4">
-                <ReservationsTable
+                <ReservationList
                   reservations={displayed}
                   tables={tables}
                   onEdit={openEdit}
