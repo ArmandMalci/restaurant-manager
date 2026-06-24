@@ -5,6 +5,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@base-ui/react/dialog';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { StatusBadge } from '@/components/ui/status';
 import {
   useMenuControllerGetCategories,
   useMenuControllerCreateCategory,
@@ -329,50 +332,56 @@ function ItemCard({
   onToggle: () => void;
 }) {
   return (
-    <div className="flex flex-col rounded-lg border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="flex flex-col rounded-lg border border-border bg-card p-3 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-2 mb-1">
-        <h3 className="font-semibold text-foreground leading-tight line-clamp-2">{item.name}</h3>
-        <span className="shrink-0 text-accent font-medium text-sm">
+        <h3 className="font-semibold text-foreground leading-tight line-clamp-2 text-sm">
+          {item.name}
+        </h3>
+        <span className="shrink-0 text-foreground font-medium text-sm">
           €{Number(item.price).toFixed(2)}
         </span>
       </div>
       {item.description && (
         <p className="text-muted-foreground text-xs line-clamp-2 mb-2">{item.description}</p>
       )}
-      <div className="mt-auto flex items-center justify-between pt-3 border-t border-border">
-        <button
-          type="button"
-          onClick={onToggle}
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors',
-            item.available ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground',
-          )}
-        >
-          <span
-            className={cn(
-              'h-1.5 w-1.5 rounded-full',
-              item.available ? 'bg-success' : 'bg-muted-foreground',
-            )}
-          />
-          {item.available ? 'Available' : 'Unavailable'}
-        </button>
-        <div className="flex items-center gap-1">
+      <div className="mt-auto flex items-center justify-between pt-2 border-t border-border">
+        <div className="flex items-center gap-1.5">
+          {!item.available && <StatusBadge tone="destructive" label="86'd" />}
           <button
             type="button"
+            onClick={onToggle}
+            title={item.available ? 'Mark unavailable' : 'Mark available'}
+            className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <span
+              className={cn(
+                'h-1.5 w-1.5 rounded-full',
+                item.available ? 'bg-success' : 'bg-muted-foreground',
+              )}
+            />
+            {item.available ? 'Available' : 'Unavailable'}
+          </button>
+        </div>
+        <div className="flex items-center gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onEdit}
             title="Edit"
-            className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Edit item"
           >
             <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onDelete}
             title="Delete"
-            className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
+            aria-label="Delete item"
+            className="text-muted-foreground hover:text-destructive"
           >
             <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -448,144 +457,146 @@ function MenuPage() {
   const selectedCat = categories.find((c) => c.id === selectedCatId);
 
   return (
-    <div className="flex gap-6 p-6">
-      {/* ── Categories sidebar ───────────────────────────────── */}
-      <aside className="w-60 shrink-0 flex flex-col rounded-lg border border-border bg-card self-start sticky top-0">
-        <div className="px-4 py-4 border-b border-border">
-          <h2 className="text-sm font-semibold text-foreground">Categories</h2>
-        </div>
-        <div className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5">
-          <button
-            type="button"
-            onClick={() => setSelectedCatId(undefined)}
-            className={cn(
-              'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
-              !selectedCatId
-                ? 'bg-accent/10 text-accent font-medium'
-                : 'text-foreground hover:bg-muted',
+    <div className="flex flex-col gap-0 p-6">
+      {/* ── Page header ───────────────────────────────────────── */}
+      <PageHeader
+        title="Menu"
+        subtitle={`${selectedCat?.name ?? 'All items'} · ${allItems.length} item${allItems.length !== 1 ? 's' : ''}`}
+        action={
+          <Button onClick={() => setItemSheet({ open: true })} disabled={categories.length === 0}>
+            <Plus className="h-4 w-4" />
+            Add item
+          </Button>
+        }
+      />
+
+      {/* ── Body: sidebar + grid ──────────────────────────────── */}
+      <div className="flex flex-col gap-6 lg:flex-row">
+        {/* ── Categories sidebar ────────────────────────────── */}
+        <aside className="w-full lg:w-56 shrink-0 flex flex-col rounded-lg border border-border bg-card self-start lg:sticky lg:top-6">
+          <div className="px-4 py-3 border-b border-border">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Categories
+            </h2>
+          </div>
+          <div className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5">
+            <button
+              type="button"
+              onClick={() => setSelectedCatId(undefined)}
+              className={cn(
+                'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
+                !selectedCatId
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'text-foreground hover:bg-muted',
+              )}
+            >
+              <span>All items</span>
+              <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                {allItems.length}
+              </span>
+            </button>
+            {loadingCats ? (
+              <div className="space-y-1 px-1 py-1">
+                {[0, 1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-8 w-full rounded-md" />
+                ))}
+              </div>
+            ) : (
+              categories.map((cat) => (
+                <div key={cat.id} className="group relative">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCatId(cat.id)}
+                    className={cn(
+                      'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
+                      selectedCatId === cat.id
+                        ? 'bg-primary/10 text-primary font-medium'
+                        : 'text-foreground hover:bg-muted',
+                    )}
+                  >
+                    <span className="truncate pr-10">{cat.name}</span>
+                    <span className="ml-2 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                      {countByCat[cat.id] ?? 0}
+                    </span>
+                  </button>
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCatDialog({ open: true, cat });
+                      }}
+                      aria-label="Edit category"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget({ kind: 'category', id: cat.id, name: cat.name });
+                      }}
+                      aria-label="Delete category"
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))
             )}
-          >
-            <span>All items</span>
-            <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-              {allItems.length}
-            </span>
-          </button>
-          {loadingCats ? (
-            <div className="space-y-1 px-2 py-2">
-              {[0, 1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-9 w-full rounded-md" />
+          </div>
+          <div className="px-3 py-3 border-t border-border">
+            <button
+              type="button"
+              onClick={() => setCatDialog({ open: true })}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-border py-2 text-xs text-muted-foreground hover:border-foreground hover:text-foreground transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Category
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Items grid ──────────────────────────────────────── */}
+        <div className="flex-1 min-w-0">
+          {loadingItems ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-36 rounded-lg" />
               ))}
             </div>
-          ) : (
-            categories.map((cat) => (
-              <div key={cat.id} className="group relative">
+          ) : items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <LayoutGrid className="mb-3 h-10 w-10 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">No items yet.</p>
+              {categories.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setSelectedCatId(cat.id)}
-                  className={cn(
-                    'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
-                    selectedCatId === cat.id
-                      ? 'bg-accent/10 text-accent font-medium'
-                      : 'text-foreground hover:bg-muted',
-                  )}
+                  onClick={() => setItemSheet({ open: true })}
+                  className="mt-3 text-sm text-muted-foreground underline-offset-4 hover:underline"
                 >
-                  <span className="truncate">{cat.name}</span>
-                  <span className="ml-2 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                    {countByCat[cat.id] ?? 0}
-                  </span>
+                  Add the first item
                 </button>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCatDialog({ open: true, cat });
-                    }}
-                    className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteTarget({ kind: 'category', id: cat.id, name: cat.name });
-                    }}
-                    className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-destructive"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            ))
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {items.map((item) => (
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  onEdit={() => setItemSheet({ open: true, item })}
+                  onDelete={() => setDeleteTarget({ kind: 'item', id: item.id, name: item.name })}
+                  onToggle={() =>
+                    toggleAvail.mutate({ id: item.id, data: { available: !item.available } })
+                  }
+                />
+              ))}
+            </div>
           )}
         </div>
-        <div className="px-3 py-3 border-t border-border">
-          <button
-            type="button"
-            onClick={() => setCatDialog({ open: true })}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-border py-2 text-sm text-muted-foreground hover:border-foreground hover:text-foreground transition-colors"
-          >
-            <Plus className="h-4 w-4" /> Add Category
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Items grid ────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <LayoutGrid className="h-5 w-5 text-muted-foreground" />
-            <h1 className="text-xl font-semibold text-foreground">
-              {selectedCat ? selectedCat.name : 'All Items'}
-            </h1>
-            <span className="text-sm text-muted-foreground">({items.length})</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setItemSheet({ open: true })}
-            disabled={categories.length === 0}
-            className={cn(btnPrimary, 'flex items-center gap-2 disabled:opacity-50')}
-          >
-            <Plus className="h-4 w-4" /> Add Item
-          </button>
-        </div>
-
-        {loadingItems ? (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-48 rounded-lg" />
-            ))}
-          </div>
-        ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <LayoutGrid className="mb-3 h-10 w-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No items yet.</p>
-            {categories.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setItemSheet({ open: true })}
-                className="mt-3 text-sm text-accent underline-offset-4 hover:underline"
-              >
-                Add the first item
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-            {items.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                onEdit={() => setItemSheet({ open: true, item })}
-                onDelete={() => setDeleteTarget({ kind: 'item', id: item.id, name: item.name })}
-                onToggle={() =>
-                  toggleAvail.mutate({ id: item.id, data: { available: !item.available } })
-                }
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ── Overlays ──────────────────────────────────────────── */}
