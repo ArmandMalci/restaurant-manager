@@ -1,11 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Receipt, CreditCard, CheckCircle } from 'lucide-react';
+import { Receipt, CreditCard, CheckCircle, ShoppingBag } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader } from '@/components/ui/page-header';
+import { StatusBadge } from '@/components/ui/status';
+import { MetricCell } from '@/components/ui/metric-cell';
+import { ListRow } from '@/components/ui/list-row';
 import { cn } from '@/lib/utils';
 import { useOrderControllerGetAll, invalidateOrderControllerGetAll } from '@/api/orders/orders';
 import { useTableControllerGetAll } from '@/api/tables/tables';
@@ -15,7 +19,7 @@ import {
   useBillingControllerFindOne,
   invalidateBillingControllerFindOne,
 } from '@/api/billing/billing';
-import type { OrderDto } from '@/api/restaurantManagerAPI.schemas';
+import type { OrderDto, BillDto } from '@/api/restaurantManagerAPI.schemas';
 
 export const Route = createFileRoute('/_app/checkout/')({
   component: BillingPage,
@@ -23,11 +27,182 @@ export const Route = createFileRoute('/_app/checkout/')({
 
 const BILLABLE_STATUSES = new Set(['served', 'ready', 'in_progress']);
 
-const STATUS_STYLE: Record<string, string> = {
-  served: 'bg-success/10 text-success',
-  ready: 'bg-warning/10 text-warning-foreground',
-  in_progress: 'bg-accent/10 text-accent',
+type OrderStatus = 'served' | 'ready' | 'in_progress';
+
+const ORDER_STATUS_TONE: Record<OrderStatus, 'neutral' | 'success' | 'warning'> = {
+  served: 'neutral',
+  ready: 'success',
+  in_progress: 'warning',
 };
+
+const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  served: 'Served',
+  ready: 'Ready',
+  in_progress: 'In progress',
+};
+
+function tableLabel(num: number | string | undefined): string {
+  return num !== undefined ? `T${num}` : '?';
+}
+
+// ── Sub-components ──────────────────────────────────────────────────────────
+
+interface CheckoutRowProps {
+  order: OrderDto;
+  tableNumber: number | string | undefined;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+}
+
+function CheckoutRow({ order, tableNumber, isSelected, onSelect }: CheckoutRowProps) {
+  const status = order.status as OrderStatus;
+  const tone = ORDER_STATUS_TONE[status] ?? 'neutral';
+  const label = ORDER_STATUS_LABEL[status] ?? order.status.replace('_', ' ');
+  const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+  return (
+    <ListRow
+      className={cn(
+        'cursor-pointer rounded-lg border transition-colors',
+        isSelected ? 'border-accent/40 bg-accent/5' : 'border-border bg-card',
+      )}
+      leading={
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+          {tableLabel(tableNumber)}
+        </div>
+      }
+      title={tableNumber !== undefined ? `Table ${tableNumber}` : 'Unknown table'}
+      subtitle={`${itemCount} item${itemCount !== 1 ? 's' : ''}`}
+      meta={<StatusBadge tone={tone} label={label} />}
+      action={
+        <Button size="sm" variant="outline" onClick={() => onSelect(order.id)}>
+          {isSelected ? 'Cancel' : 'Settle'}
+        </Button>
+      }
+    />
+  );
+}
+
+interface BillDetailProps {
+  order: OrderDto;
+  tableNumber: number | string | undefined;
+  discountPct: string;
+  onDiscountChange: (val: string) => void;
+  onCreateBill: () => void;
+  isCreating: boolean;
+  createError: boolean;
+}
+
+function BillDetail({
+  order,
+  tableNumber,
+  discountPct,
+  onDiscountChange,
+  onCreateBill,
+  isCreating,
+  createError,
+}: BillDetailProps) {
+  const status = order.status as OrderStatus;
+  const tone = ORDER_STATUS_TONE[status] ?? 'neutral';
+  const label = ORDER_STATUS_LABEL[status] ?? order.status.replace('_', ' ');
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div>
+            <CardTitle className="text-base">
+              {tableNumber !== undefined ? `Table ${tableNumber}` : 'Checkout'}
+            </CardTitle>
+            <StatusBadge tone={tone} label={label} className="mt-0.5" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-1.5">
+          <label htmlFor="discount-pct" className="text-sm font-medium text-foreground">
+            Discount %
+          </label>
+          <input
+            id="discount-pct"
+            type="number"
+            min={0}
+            max={100}
+            value={discountPct}
+            onChange={(e) => onDiscountChange(e.target.value)}
+            className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+        <Button onClick={onCreateBill} disabled={isCreating} className="w-full">
+          {isCreating ? 'Creating…' : 'Create Bill'}
+        </Button>
+        {createError && (
+          <p className="text-sm text-destructive">Failed to create bill. Try again.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+interface BillResultProps {
+  bill: BillDto;
+  onPay: () => void;
+  isPaying: boolean;
+  payError: boolean;
+  onDone: () => void;
+}
+
+function BillResult({ bill, onPay, isPaying, payError, onDone }: BillResultProps) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-success/10">
+            <Receipt className="h-4 w-4 text-success" />
+          </div>
+          <CardTitle className="text-base">Bill Created</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-3 gap-2">
+          <MetricCell label="Subtotal" value={`$${Number(bill.subtotal).toFixed(2)}`} />
+          <MetricCell
+            label="Tax"
+            value={`$${Number(bill.tax).toFixed(2)}`}
+            sub={bill.discountPct > 0 ? `−${bill.discountPct}% disc.` : undefined}
+          />
+          <MetricCell label="Total" value={`$${Number(bill.total).toFixed(2)}`} />
+        </div>
+
+        {!bill.paid ? (
+          <div className="space-y-2 border-t border-border pt-3">
+            <Button onClick={onPay} disabled={isPaying} className="w-full">
+              {isPaying ? 'Processing…' : 'Mark as Paid'}
+            </Button>
+            {payError && <p className="text-sm text-destructive">Payment failed. Try again.</p>}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2 text-sm font-medium text-success">
+            <CheckCircle className="h-4 w-4" />
+            Paid
+            {bill.paidAt
+              ? ` · ${new Date(bill.paidAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              : ''}
+          </div>
+        )}
+
+        <Button variant="outline" size="sm" className="w-full" onClick={onDone}>
+          Done
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Page ────────────────────────────────────────────────────────────────────
 
 function BillingPage() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -83,16 +258,21 @@ function BillingPage() {
     });
   }
 
+  const subtitle =
+    billableOrders.length > 0
+      ? `${billableOrders.length} order${billableOrders.length !== 1 ? 's' : ''} ready for checkout`
+      : 'No open orders';
+
   if (isLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <div className="space-y-1">
-          <Skeleton className="h-8 w-24" />
+      <div className="p-6">
+        <div className="mb-6 space-y-1">
+          <Skeleton className="h-8 w-28" />
           <Skeleton className="h-4 w-52" />
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-lg" />
+            <Skeleton key={i} className="h-14 w-full rounded-lg" />
           ))}
         </div>
       </div>
@@ -100,16 +280,8 @@ function BillingPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Billing</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {billableOrders.length > 0
-            ? `${billableOrders.length} order${billableOrders.length !== 1 ? 's' : ''} ready for checkout`
-            : 'No open orders'}
-        </p>
-      </div>
+    <div className="p-6">
+      <PageHeader title="Checkout" subtitle={subtitle} />
 
       {billableOrders.length === 0 ? (
         <EmptyState
@@ -119,168 +291,62 @@ function BillingPage() {
         />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-          {/* Order queue */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Ready for checkout
-            </p>
+          {/* Queue */}
+          <Card className="overflow-hidden py-0">
+            <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+              <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Ready for checkout
+              </span>
+            </div>
             {billableOrders.map((order) => {
               const table = tableById.get(order.tableId);
-              const isSelected = order.id === selectedOrderId;
 
               return (
-                <div
+                <CheckoutRow
                   key={order.id}
-                  className={cn(
-                    'flex items-center justify-between rounded-lg border p-4 transition-colors',
-                    isSelected ? 'border-accent/40 bg-accent/5' : 'border-border bg-card',
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold',
-                        STATUS_STYLE[order.status] ?? 'bg-muted text-muted-foreground',
-                      )}
-                    >
-                      {table?.number ?? '?'}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {table ? `Table ${table.number}` : 'Unknown table'}
-                      </p>
-                      <p className="text-xs capitalize text-muted-foreground">
-                        {order.status.replace('_', ' ')}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant={isSelected ? 'outline' : 'default'}
-                    onClick={() => selectOrder(order.id)}
-                    className={
-                      isSelected ? '' : 'bg-accent text-accent-foreground hover:bg-accent/90'
-                    }
-                  >
-                    {isSelected ? 'Cancel' : 'Checkout'}
-                  </Button>
-                </div>
+                  order={order}
+                  tableNumber={table?.number}
+                  isSelected={order.id === selectedOrderId}
+                  onSelect={selectOrder}
+                />
               );
             })}
-          </div>
+          </Card>
 
-          {/* Right panel: checkout form or bill result */}
+          {/* Detail panel */}
           <div>
+            {!selectedOrder && !activeBillId && (
+              <EmptyState
+                icon={CreditCard}
+                title="Select a check to settle"
+                description="Choose an order from the queue to create a bill."
+              />
+            )}
+
             {selectedOrder && !activeBillId && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent/10">
-                      <CreditCard className="h-4 w-4 text-accent" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">
-                        {tableById.get(selectedOrder.tableId)
-                          ? `Table ${tableById.get(selectedOrder.tableId)?.number}`
-                          : 'Checkout'}
-                      </CardTitle>
-                      <p className="text-xs capitalize text-muted-foreground">
-                        {selectedOrder.status.replace('_', ' ')}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label htmlFor="discount-pct" className="text-sm font-medium">
-                      Discount %
-                    </label>
-                    <input
-                      id="discount-pct"
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={discountPct}
-                      onChange={(e) => setDiscountPct(e.target.value)}
-                      className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleCreateBill}
-                    disabled={createBill.isPending}
-                    className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                  >
-                    {createBill.isPending ? 'Creating…' : 'Create Bill'}
-                  </Button>
-                  {createBill.isError && (
-                    <p className="text-sm text-destructive">Failed to create bill. Try again.</p>
-                  )}
-                </CardContent>
-              </Card>
+              <BillDetail
+                order={selectedOrder}
+                tableNumber={tableById.get(selectedOrder.tableId)?.number}
+                discountPct={discountPct}
+                onDiscountChange={setDiscountPct}
+                onCreateBill={handleCreateBill}
+                isCreating={createBill.isPending}
+                createError={createBill.isError}
+              />
             )}
 
             {activeBillId && bill && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-success/10">
-                      <Receipt className="h-4 w-4 text-success" />
-                    </div>
-                    <CardTitle className="text-base">Bill Created</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                    <dt className="text-muted-foreground">Subtotal</dt>
-                    <dd>${Number(bill.subtotal).toFixed(2)}</dd>
-                    {bill.discountPct > 0 && (
-                      <>
-                        <dt className="text-muted-foreground">Discount</dt>
-                        <dd className="text-success">−{bill.discountPct}%</dd>
-                      </>
-                    )}
-                    <dt className="text-muted-foreground">Tax</dt>
-                    <dd>${Number(bill.tax).toFixed(2)}</dd>
-                    <dt className="font-semibold text-foreground">Total</dt>
-                    <dd className="text-xl font-bold">${Number(bill.total).toFixed(2)}</dd>
-                  </dl>
-
-                  {!bill.paid ? (
-                    <div className="space-y-2 border-t border-border pt-4">
-                      <Button
-                        onClick={() => payBill.mutate({ id: bill.id })}
-                        disabled={payBill.isPending}
-                        className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                      >
-                        {payBill.isPending ? 'Processing…' : 'Mark as Paid'}
-                      </Button>
-                      {payBill.isError && (
-                        <p className="text-sm text-destructive">Payment failed. Try again.</p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2 text-sm font-medium text-success">
-                      <CheckCircle className="h-4 w-4" />
-                      Paid
-                      {bill.paidAt
-                        ? ` · ${new Date(bill.paidAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                        : ''}
-                    </div>
-                  )}
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setSelectedOrderId(null);
-                      setActiveBillId(null);
-                    }}
-                  >
-                    Done
-                  </Button>
-                </CardContent>
-              </Card>
+              <BillResult
+                bill={bill}
+                onPay={() => payBill.mutate({ id: bill.id })}
+                isPaying={payBill.isPending}
+                payError={payBill.isError}
+                onDone={() => {
+                  setSelectedOrderId(null);
+                  setActiveBillId(null);
+                }}
+              />
             )}
           </div>
         </div>
