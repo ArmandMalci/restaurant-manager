@@ -12,6 +12,14 @@ describe('StatusBadge', () => {
     render(<StatusBadge status="open" label="Available" />);
     expect(screen.getByText('Available')).toBeInTheDocument();
   });
+
+  it('supports a generic tone + label (no ServiceStatus)', () => {
+    render(<StatusBadge tone="success" label="Confirmed" />);
+    const badge = screen.getByText('Confirmed');
+
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveClass('text-success');
+  });
 });
 
 describe('StatusDot', () => {
