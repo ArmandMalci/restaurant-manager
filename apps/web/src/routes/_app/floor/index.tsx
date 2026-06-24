@@ -3,8 +3,11 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2, Users, X, LayoutGrid } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { StatusBadge } from '@/components/ui/status';
+import type { Tone } from '@/components/ui/status';
 import { useQueryClient } from '@tanstack/react-query';
-import { cn } from '@/lib/utils';
 import {
   useTableControllerGetAll,
   useTableControllerCreate,
@@ -28,16 +31,10 @@ const STATUS_LABELS: Record<TableStatus, string> = {
   reserved: 'Reserved',
 };
 
-const STATUS_CLASSES: Record<TableStatus, string> = {
-  available: 'bg-success/10 text-success',
-  occupied: 'bg-info/10 text-info',
-  reserved: 'bg-warning/10 text-warning-foreground',
-};
-
-const STATUS_DOT: Record<TableStatus, string> = {
-  available: 'bg-success',
-  occupied: 'bg-info',
-  reserved: 'bg-warning',
+const STATUS_TONE: Record<TableStatus, Tone> = {
+  available: 'success',
+  occupied: 'info',
+  reserved: 'warning',
 };
 
 const NEXT_STATUS: Record<TableStatus, TableStatus> = {
@@ -234,57 +231,44 @@ interface TableCardProps {
 }
 
 function TableCard({ table, onEdit, onDelete, onCycleStatus }: TableCardProps) {
+  const statusKey = table.status as TableStatus;
+
   return (
-    <div
-      className={cn(
-        'group relative flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm',
-        'hover:border-accent/40 hover:shadow-md transition-all duration-200',
-        table.status === 'occupied' && 'bg-info/5 border-info/30',
-        table.status === 'reserved' && 'bg-warning/5 border-warning/30',
-      )}
-    >
+    <div className="group relative flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm hover:border-accent/40 hover:shadow-md transition-all duration-200">
       {/* Hover actions */}
       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <button
-          type="button"
-          onClick={onEdit}
-          aria-label="Edit table"
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-sm hover:text-foreground hover:bg-muted transition-colors"
-        >
-          <Pencil className="h-3 w-3" />
-        </button>
-        <button
-          type="button"
+        <Button variant="ghost" size="icon-xs" onClick={onEdit} aria-label="Edit table">
+          <Pencil />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-xs"
           onClick={onDelete}
           aria-label="Delete table"
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-sm hover:text-destructive transition-colors"
+          className="hover:text-destructive"
         >
-          <Trash2 className="h-3 w-3" />
-        </button>
+          <Trash2 />
+        </Button>
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-8 text-center">
-        <p className="text-4xl font-bold text-foreground">T{table.number}</p>
-        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Users className="h-3.5 w-3.5" />
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-5 text-center">
+        <p className="text-lg font-semibold text-foreground">T{table.number}</p>
+        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+          <Users className="h-3 w-3" />
           {table.seats} seats
         </p>
       </div>
 
-      {/* Status footer */}
-      <div className="border-t border-border bg-muted/30 p-3">
+      {/* Status — single StatusBadge, clickable to cycle */}
+      <div className="border-t border-border px-3 py-2 flex justify-center">
         <button
           type="button"
           onClick={onCycleStatus}
-          className={cn(
-            'flex w-full items-center justify-center gap-2 rounded-md py-1.5 px-3 text-xs font-medium transition-colors hover:opacity-80',
-            STATUS_CLASSES[table.status as TableStatus],
-          )}
-          title={`Switch to ${STATUS_LABELS[NEXT_STATUS[table.status as TableStatus]]}`}
+          title={`Switch to ${STATUS_LABELS[NEXT_STATUS[statusKey]]}`}
+          className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className={cn('h-2 w-2 rounded-full', STATUS_DOT[table.status as TableStatus])} />
-          {STATUS_LABELS[table.status as TableStatus]}
+          <StatusBadge tone={STATUS_TONE[statusKey]} label={STATUS_LABELS[statusKey]} />
         </button>
       </div>
     </div>
@@ -315,19 +299,22 @@ function TablesPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-28" />
-          <Skeleton className="h-8 w-32" />
+      <div className="p-6">
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-24" />
+            <Skeleton className="h-4 w-20" />
+          </div>
+          <Skeleton className="h-8 w-28 rounded-lg" />
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="mb-4 flex gap-2">
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-10 w-28 rounded-lg" />
+            <Skeleton key={i} className="h-6 w-24 rounded-md" />
           ))}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-40 rounded-lg" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-lg" />
           ))}
         </div>
       </div>
@@ -335,40 +322,24 @@ function TablesPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Tables</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {tables.length} table{tables.length !== 1 ? 's' : ''} total
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setModal({ type: 'create' })}
-          className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-accent/90 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Add Table
-        </button>
-      </div>
+    <div className="p-6">
+      <PageHeader
+        title="Floor"
+        subtitle={`${tables.length} table${tables.length !== 1 ? 's' : ''}`}
+        action={
+          <Button onClick={() => setModal({ type: 'create' })}>
+            <Plus />
+            Add table
+          </Button>
+        }
+      />
 
-      {/* Stats bar */}
+      {/* Summary counts */}
       {tables.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-success/10 px-3 py-1 text-xs font-medium text-success">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Available {available}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-info/10 px-3 py-1 text-xs font-medium text-info">
-            <span className="h-1.5 w-1.5 rounded-full bg-info" />
-            Occupied {occupied}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-warning/10 px-3 py-1 text-xs font-medium text-warning-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-            Reserved {reserved}
-          </span>
+        <div className="mb-4 flex flex-wrap gap-2">
+          <StatusBadge tone="success" label={`Available ${available}`} />
+          <StatusBadge tone="info" label={`Occupied ${occupied}`} />
+          <StatusBadge tone="warning" label={`Reserved ${reserved}`} />
         </div>
       )}
 
@@ -380,7 +351,7 @@ function TablesPage() {
           description="Add your first table to start tracking status and capacity."
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {tables.map((table) => (
             <TableCard
               key={table.id}
