@@ -19,7 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { MenuCategoryDto, MenuItemDto } from '../swagger-dtos';
+import { MenuCategoryDto, MenuItemDto, ModifierGroupDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -29,6 +29,8 @@ import {
   UpdateMenuCategoryDto,
   CreateMenuItemDto,
   UpdateMenuItemDto,
+  CreateModifierGroupDto,
+  UpdateModifierGroupDto,
 } from './dto/menu.dto';
 
 @ApiTags('menu')
@@ -143,5 +145,43 @@ export class MenuController {
   })
   public setAvailability(@Param('id') id: string, @Body() body: { available: boolean }) {
     return this.menu.setItemAvailability(id, body.available);
+  }
+
+  // ── Modifier Groups ──────────────────────────────────────────────────
+
+  @Get('modifier-groups')
+  @ApiOperation({ summary: 'List modifier groups with options' })
+  @ApiResponse({ status: 200, type: [ModifierGroupDto] })
+  public getModifierGroups() {
+    return this.menu.findAllModifierGroups();
+  }
+
+  @Post('modifier-groups')
+  @UseGuards(RolesGuard)
+  @Roles('manager')
+  @ApiOperation({ summary: 'Create a modifier group' })
+  @ApiBody({ type: CreateModifierGroupDto })
+  @ApiResponse({ status: 201, type: ModifierGroupDto })
+  public createModifierGroup(@Body() dto: CreateModifierGroupDto) {
+    return this.menu.createModifierGroup(dto);
+  }
+
+  @Patch('modifier-groups/:id')
+  @UseGuards(RolesGuard)
+  @Roles('manager')
+  @ApiOperation({ summary: 'Update a modifier group' })
+  @ApiBody({ type: UpdateModifierGroupDto })
+  @ApiResponse({ status: 200, type: ModifierGroupDto })
+  public updateModifierGroup(@Param('id') id: string, @Body() dto: UpdateModifierGroupDto) {
+    return this.menu.updateModifierGroup(id, dto);
+  }
+
+  @Delete('modifier-groups/:id')
+  @UseGuards(RolesGuard)
+  @Roles('manager')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a modifier group' })
+  public removeModifierGroup(@Param('id') id: string) {
+    return this.menu.removeModifierGroup(id);
   }
 }

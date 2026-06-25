@@ -36,6 +36,20 @@ export interface UpdateMenuCategoryDto {
   sortOrder?: number;
 }
 
+/**
+ * @nullable
+ */
+export type MenuItemDtoStation =
+  | (typeof MenuItemDtoStation)[keyof typeof MenuItemDtoStation]
+  | null;
+
+export const MenuItemDtoStation = {
+  grill: 'grill',
+  cold: 'cold',
+  bar: 'bar',
+  pass: 'pass',
+} as const;
+
 export interface MenuItemDto {
   id: string;
   categoryId: string;
@@ -44,9 +58,26 @@ export interface MenuItemDto {
   description?: string | null;
   price: number;
   available: boolean;
+  /** @nullable */
+  station?: MenuItemDtoStation;
+  modifierGroupIds: string[];
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * @nullable
+ */
+export type CreateMenuItemDtoStation =
+  | (typeof CreateMenuItemDtoStation)[keyof typeof CreateMenuItemDtoStation]
+  | null;
+
+export const CreateMenuItemDtoStation = {
+  grill: 'grill',
+  cold: 'cold',
+  bar: 'bar',
+  pass: 'pass',
+} as const;
 
 export interface CreateMenuItemDto {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
@@ -64,7 +95,23 @@ export interface CreateMenuItemDto {
   /** @exclusiveMinimum 0 */
   price: number;
   available?: boolean;
+  /** @nullable */
+  station?: CreateMenuItemDtoStation;
 }
+
+/**
+ * @nullable
+ */
+export type UpdateMenuItemDtoStation =
+  | (typeof UpdateMenuItemDtoStation)[keyof typeof UpdateMenuItemDtoStation]
+  | null;
+
+export const UpdateMenuItemDtoStation = {
+  grill: 'grill',
+  cold: 'cold',
+  bar: 'bar',
+  pass: 'pass',
+} as const;
 
 export interface UpdateMenuItemDto {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
@@ -82,6 +129,92 @@ export interface UpdateMenuItemDto {
   /** @exclusiveMinimum 0 */
   price?: number;
   available?: boolean;
+  /** @nullable */
+  station?: UpdateMenuItemDtoStation;
+  /** @items.pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  modifierGroupIds?: string[];
+}
+
+export interface ModifierOptionDto {
+  id: string;
+  groupId: string;
+  name: string;
+  priceDelta: number;
+  sortOrder: number;
+}
+
+export interface ModifierGroupDto {
+  id: string;
+  name: string;
+  selectionType: string;
+  required: boolean;
+  options: ModifierOptionDto[];
+}
+
+export type CreateModifierGroupDtoSelectionType =
+  (typeof CreateModifierGroupDtoSelectionType)[keyof typeof CreateModifierGroupDtoSelectionType];
+
+export const CreateModifierGroupDtoSelectionType = {
+  single: 'single',
+  multi: 'multi',
+} as const;
+
+export type CreateModifierGroupDtoOptionsItem = {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  priceDelta?: number;
+  /**
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
+  sortOrder?: number;
+};
+
+export interface CreateModifierGroupDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  selectionType?: CreateModifierGroupDtoSelectionType;
+  required?: boolean;
+  options?: CreateModifierGroupDtoOptionsItem[];
+}
+
+export type UpdateModifierGroupDtoSelectionType =
+  (typeof UpdateModifierGroupDtoSelectionType)[keyof typeof UpdateModifierGroupDtoSelectionType];
+
+export const UpdateModifierGroupDtoSelectionType = {
+  single: 'single',
+  multi: 'multi',
+} as const;
+
+export type UpdateModifierGroupDtoOptionsItem = {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  priceDelta?: number;
+  /**
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
+  sortOrder?: number;
+};
+
+export interface UpdateModifierGroupDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name?: string;
+  selectionType?: UpdateModifierGroupDtoSelectionType;
+  required?: boolean;
+  options?: UpdateModifierGroupDtoOptionsItem[];
 }
 
 export interface TableDto {

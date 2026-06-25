@@ -29,8 +29,27 @@ export class MenuItemDto {
     | null;
   @ApiProperty() public price!: number;
   @ApiProperty() public available!: boolean;
+  @ApiProperty({ enum: ['grill', 'cold', 'bar', 'pass'], nullable: true, required: false })
+  public station!: string | null;
+  @ApiProperty({ type: [String] }) public modifierGroupIds!: string[];
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
+}
+
+export class ModifierOptionDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public groupId!: string;
+  @ApiProperty() public name!: string;
+  @ApiProperty() public priceDelta!: number;
+  @ApiProperty() public sortOrder!: number;
+}
+
+export class ModifierGroupDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public name!: string;
+  @ApiProperty() public selectionType!: string;
+  @ApiProperty() public required!: boolean;
+  @ApiProperty({ type: [ModifierOptionDto] }) public options!: ModifierOptionDto[];
 }
 
 // ── Tables ────────────────────────────────────────────────────────────────────

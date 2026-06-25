@@ -24,12 +24,15 @@ import type {
 import type {
   CreateMenuCategoryDto,
   CreateMenuItemDto,
+  CreateModifierGroupDto,
   MenuCategoryDto,
   MenuControllerGetItemsParams,
   MenuControllerSetAvailabilityBody,
   MenuItemDto,
+  ModifierGroupDto,
   UpdateMenuCategoryDto,
   UpdateMenuItemDto,
+  UpdateModifierGroupDto,
 } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
@@ -1104,4 +1107,361 @@ export const useMenuControllerSetAvailability = <TError = unknown, TContext = un
   TContext
 > => {
   return useMutation(getMenuControllerSetAvailabilityMutationOptions(options), queryClient);
+};
+/**
+ * @summary List modifier groups with options
+ */
+export const menuControllerGetModifierGroups = (signal?: AbortSignal) => {
+  return customInstance<ModifierGroupDto[]>({
+    url: `/api/menu/modifier-groups`,
+    method: 'GET',
+    signal,
+  });
+};
+
+export const getMenuControllerGetModifierGroupsQueryKey = () => {
+  return [`/api/menu/modifier-groups`] as const;
+};
+
+export const getMenuControllerGetModifierGroupsQueryOptions = <
+  TData = Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof menuControllerGetModifierGroups>>, TError, TData>
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMenuControllerGetModifierGroupsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof menuControllerGetModifierGroups>>> = ({
+    signal,
+  }) => menuControllerGetModifierGroups(signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MenuControllerGetModifierGroupsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof menuControllerGetModifierGroups>>
+>;
+export type MenuControllerGetModifierGroupsQueryError = unknown;
+
+export function useMenuControllerGetModifierGroups<
+  TData = Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof menuControllerGetModifierGroups>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+          TError,
+          Awaited<ReturnType<typeof menuControllerGetModifierGroups>>
+        >,
+        'initialData'
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useMenuControllerGetModifierGroups<
+  TData = Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof menuControllerGetModifierGroups>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+          TError,
+          Awaited<ReturnType<typeof menuControllerGetModifierGroups>>
+        >,
+        'initialData'
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useMenuControllerGetModifierGroups<
+  TData = Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof menuControllerGetModifierGroups>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List modifier groups with options
+ */
+
+export function useMenuControllerGetModifierGroups<
+  TData = Awaited<ReturnType<typeof menuControllerGetModifierGroups>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof menuControllerGetModifierGroups>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getMenuControllerGetModifierGroupsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List modifier groups with options
+ */
+export const invalidateMenuControllerGetModifierGroups = async (
+  queryClient: QueryClient,
+  options?: InvalidateOptions,
+): Promise<QueryClient> => {
+  await queryClient.invalidateQueries(
+    { queryKey: getMenuControllerGetModifierGroupsQueryKey() },
+    options,
+  );
+
+  return queryClient;
+};
+
+/**
+ * @summary Create a modifier group
+ */
+export const menuControllerCreateModifierGroup = (
+  createModifierGroupDto: CreateModifierGroupDto,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModifierGroupDto>({
+    url: `/api/menu/modifier-groups`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data: createModifierGroupDto,
+    signal,
+  });
+};
+
+export const getMenuControllerCreateModifierGroupMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof menuControllerCreateModifierGroup>>,
+    TError,
+    { data: CreateModifierGroupDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof menuControllerCreateModifierGroup>>,
+  TError,
+  { data: CreateModifierGroupDto },
+  TContext
+> => {
+  const mutationKey = ['menuControllerCreateModifierGroup'];
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof menuControllerCreateModifierGroup>>,
+    { data: CreateModifierGroupDto }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return menuControllerCreateModifierGroup(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MenuControllerCreateModifierGroupMutationResult = NonNullable<
+  Awaited<ReturnType<typeof menuControllerCreateModifierGroup>>
+>;
+export type MenuControllerCreateModifierGroupMutationBody = CreateModifierGroupDto;
+export type MenuControllerCreateModifierGroupMutationError = unknown;
+
+/**
+ * @summary Create a modifier group
+ */
+export const useMenuControllerCreateModifierGroup = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof menuControllerCreateModifierGroup>>,
+      TError,
+      { data: CreateModifierGroupDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof menuControllerCreateModifierGroup>>,
+  TError,
+  { data: CreateModifierGroupDto },
+  TContext
+> => {
+  return useMutation(getMenuControllerCreateModifierGroupMutationOptions(options), queryClient);
+};
+/**
+ * @summary Update a modifier group
+ */
+export const menuControllerUpdateModifierGroup = (
+  id: string,
+  updateModifierGroupDto: UpdateModifierGroupDto,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModifierGroupDto>({
+    url: `/api/menu/modifier-groups/${id}`,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    data: updateModifierGroupDto,
+    signal,
+  });
+};
+
+export const getMenuControllerUpdateModifierGroupMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof menuControllerUpdateModifierGroup>>,
+    TError,
+    { id: string; data: UpdateModifierGroupDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof menuControllerUpdateModifierGroup>>,
+  TError,
+  { id: string; data: UpdateModifierGroupDto },
+  TContext
+> => {
+  const mutationKey = ['menuControllerUpdateModifierGroup'];
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof menuControllerUpdateModifierGroup>>,
+    { id: string; data: UpdateModifierGroupDto }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return menuControllerUpdateModifierGroup(id, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MenuControllerUpdateModifierGroupMutationResult = NonNullable<
+  Awaited<ReturnType<typeof menuControllerUpdateModifierGroup>>
+>;
+export type MenuControllerUpdateModifierGroupMutationBody = UpdateModifierGroupDto;
+export type MenuControllerUpdateModifierGroupMutationError = unknown;
+
+/**
+ * @summary Update a modifier group
+ */
+export const useMenuControllerUpdateModifierGroup = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof menuControllerUpdateModifierGroup>>,
+      TError,
+      { id: string; data: UpdateModifierGroupDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof menuControllerUpdateModifierGroup>>,
+  TError,
+  { id: string; data: UpdateModifierGroupDto },
+  TContext
+> => {
+  return useMutation(getMenuControllerUpdateModifierGroupMutationOptions(options), queryClient);
+};
+/**
+ * @summary Delete a modifier group
+ */
+export const menuControllerRemoveModifierGroup = (id: string, signal?: AbortSignal) => {
+  return customInstance<void>({ url: `/api/menu/modifier-groups/${id}`, method: 'DELETE', signal });
+};
+
+export const getMenuControllerRemoveModifierGroupMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof menuControllerRemoveModifierGroup>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof menuControllerRemoveModifierGroup>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ['menuControllerRemoveModifierGroup'];
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof menuControllerRemoveModifierGroup>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return menuControllerRemoveModifierGroup(id);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MenuControllerRemoveModifierGroupMutationResult = NonNullable<
+  Awaited<ReturnType<typeof menuControllerRemoveModifierGroup>>
+>;
+
+export type MenuControllerRemoveModifierGroupMutationError = unknown;
+
+/**
+ * @summary Delete a modifier group
+ */
+export const useMenuControllerRemoveModifierGroup = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof menuControllerRemoveModifierGroup>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof menuControllerRemoveModifierGroup>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getMenuControllerRemoveModifierGroupMutationOptions(options), queryClient);
 };
