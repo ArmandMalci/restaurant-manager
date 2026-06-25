@@ -1,284 +1,215 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { LayoutGrid, ShoppingCart, CalendarCheck, UtensilsCrossed } from 'lucide-react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { CircleCheck } from 'lucide-react';
+import { useServiceControllerGetSnapshot } from '@/api/service/service';
+import { PageHeader } from '@/components/ui/page-header';
+import { MetricCell } from '@/components/ui/metric-cell';
+import { ListRow } from '@/components/ui/list-row';
+import { StatusDot } from '@/components/ui/status';
+import type { Tone } from '@/components/ui/status';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTableControllerGetAll } from '@/api/tables/tables';
-import { useOrderControllerGetAll } from '@/api/orders/orders';
-import { useReservationControllerGetAll } from '@/api/reservations/reservations';
-import { useMenuControllerGetItems } from '@/api/menu/menu';
-import type {
-  TableDto,
-  OrderDto,
-  ReservationDto,
-  MenuItemDto,
-} from '@/api/restaurantManagerAPI.schemas';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export const Route = createFileRoute('/_app/service/')({
-  component: DashboardPage,
+  component: ServicePage,
 });
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-function tableStatusClasses(status: string): string {
-  if (status === 'available') return 'bg-success/10 text-success';
-  if (status === 'occupied') return 'bg-info/10 text-info';
+function formatMins(m: number): string {
+  if (m >= 60) return `${Math.floor(m / 60)}h ${m % 60}m`;
 
-  return 'bg-warning/10 text-warning-foreground';
+  return `${m}m`;
 }
 
-function orderStatusLabel(status: string): string {
-  return status.replace(/_/g, ' ');
+function statusToTone(status: string): Tone {
+  if (status === 'available') return 'success';
+  if (status === 'occupied') return 'info';
+  if (status === 'reserved') return 'warning';
+
+  return 'neutral';
 }
 
-function orderStatusClasses(status: string): string {
-  if (status === 'served') return 'bg-success/10 text-success';
-  if (status === 'in_progress' || status === 'ready')
-    return 'bg-warning/10 text-warning-foreground';
+function asTone(s: string): Tone {
+  if (s === 'success' || s === 'info' || s === 'warning' || s === 'destructive') return s;
 
-  if (status === 'sent') return 'bg-accent/10 text-accent';
-
-  return 'bg-muted text-muted-foreground';
+  return 'neutral';
 }
 
-function isToday(dateStr: string): boolean {
-  const date = new Date(dateStr);
+function formatAge(ageMin: number): string {
+  if (ageMin > 0) return `${ageMin}m`;
+  if (ageMin < 0) return `in ${-ageMin}m`;
+
+  return 'now';
+}
+
+function liveDateLabel(): string {
   const now = new Date();
+  const weekday = now.toLocaleDateString(undefined, { weekday: 'long' });
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
+  return `${weekday} · ${time}`;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-interface StatCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-  detail: React.ReactNode;
-  loading: boolean;
-}
-
-function StatCard({ icon, label, value, detail, loading }: StatCardProps) {
+function PulseSkeletons() {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-        <span className="text-muted-foreground">{icon}</span>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <>
-            <Skeleton className="h-8 w-16 mb-2" />
-            <Skeleton className="h-4 w-32" />
-          </>
-        ) : (
-          <>
-            <p className="text-3xl font-bold text-foreground">{value}</p>
-            <div className="mt-1 text-xs text-muted-foreground">{detail}</div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-interface RecentOrderRowProps {
-  order: OrderDto;
-  tableNumber: number | undefined;
-}
-
-function RecentOrderRow({ order, tableNumber }: RecentOrderRowProps) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-foreground">
-          {tableNumber !== undefined ? `Table ${tableNumber}` : 'Unknown'}
-        </span>
-        <span
-          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${orderStatusClasses(order.status)}`}
-        >
-          {orderStatusLabel(order.status)}
-        </span>
-      </div>
-      <span className="text-xs text-muted-foreground">
-        {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-      </span>
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder — no stable id
+        <Skeleton key={i} className="h-20 w-full rounded-lg" />
+      ))}
     </div>
   );
 }
 
-interface TableDotProps {
-  table: TableDto;
-}
-
-function TableDot({ table }: TableDotProps) {
+function AttentionSkeletons() {
   return (
-    <div
-      title={`Table ${table.number} — ${table.status}`}
-      className={`flex flex-col items-center justify-center rounded-lg p-2 gap-0.5 ${tableStatusClasses(table.status)}`}
-    >
-      <span className="text-xs font-bold leading-none">{table.number}</span>
-      <span className="text-[10px] leading-none capitalize hidden sm:block">
-        {table.status.slice(0, 3)}
-      </span>
+    <div className="space-y-1">
+      {Array.from({ length: 3 }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder — no stable id
+        <Skeleton key={i} className="h-14 w-full" />
+      ))}
     </div>
   );
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-function DashboardPage() {
-  const { data: tables = [], isLoading: tablesLoading } = useTableControllerGetAll<TableDto[]>();
-  const { data: orders = [], isLoading: ordersLoading } = useOrderControllerGetAll<OrderDto[]>();
-  const { data: reservations = [], isLoading: reservationsLoading } =
-    useReservationControllerGetAll<ReservationDto[]>();
-  const { data: menuItems = [], isLoading: menuLoading } =
-    useMenuControllerGetItems<MenuItemDto[]>();
+function ServicePage() {
+  const navigate = useNavigate();
+  const { data, isLoading } = useServiceControllerGetSnapshot({
+    query: { refetchInterval: 12_000 },
+  });
 
-  // Derived stats
-  const availableCount = tables.filter((t) => t.status === 'available').length;
-  const occupiedCount = tables.filter((t) => t.status === 'occupied').length;
-  const reservedCount = tables.filter((t) => t.status === 'reserved').length;
+  const pulse = data?.pulse;
+  const attention = data?.attention ?? [];
+  const floor = data?.floor ?? [];
 
-  const todayOrders = orders.filter((o) => isToday(o.createdAt));
-  const inProgressCount = todayOrders.filter(
-    (o) => o.status === 'in_progress' || o.status === 'sent' || o.status === 'ready',
-  ).length;
+  function handleAttentionAction(type: string) {
+    switch (type) {
+      case 'order-ready':
+        void navigate({ to: '/order' });
+        break;
+      case 'table-waiting':
+        void navigate({ to: '/floor' });
+        break;
+      case 'reservation-due':
+        void navigate({ to: '/door' });
+        break;
+      case 'low-stock':
+        void navigate({ to: '/inventory' });
+        break;
+      default:
+        break;
+    }
+  }
 
-  const upcomingReservations = reservations.filter((r) => new Date(r.date) >= new Date()).length;
-
-  const activeMenuItems = menuItems.filter((m) => m.available).length;
-
-  // Table lookup by id
-  const tableById = new Map(tables.map((t) => [t.id, t]));
-
-  // Recent orders: last 5 by createdAt descending
-  const recentOrders = [...orders]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+  function actionLabel(type: string): string {
+    switch (type) {
+      case 'order-ready':
+        return 'Run';
+      case 'table-waiting':
+        return 'Take order';
+      case 'reservation-due':
+        return 'Seat';
+      case 'low-stock':
+        return 'View';
+      default:
+        return 'Go';
+    }
+  }
 
   return (
     <div className="space-y-6 p-1">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Live overview of your restaurant.</p>
-      </div>
+      <PageHeader title="Service" subtitle={liveDateLabel()} />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard
-          icon={<LayoutGrid size={18} />}
-          label="Tables"
-          value={tables.length}
-          loading={tablesLoading}
-          detail={
-            <span className="flex flex-wrap gap-2">
-              <span className="text-success">{availableCount} avail</span>
-              <span className="text-info">{occupiedCount} occ</span>
-              <span className="text-warning-foreground">{reservedCount} res</span>
-            </span>
-          }
-        />
-        <StatCard
-          icon={<ShoppingCart size={18} />}
-          label="Orders Today"
-          value={todayOrders.length}
-          loading={ordersLoading}
-          detail={<span>{inProgressCount} in progress</span>}
-        />
-        <StatCard
-          icon={<CalendarCheck size={18} />}
-          label="Reservations"
-          value={upcomingReservations}
-          loading={reservationsLoading}
-          detail={<span>upcoming</span>}
-        />
-        <StatCard
-          icon={<UtensilsCrossed size={18} />}
-          label="Menu Items"
-          value={activeMenuItems}
-          loading={menuLoading}
-          detail={<span>{menuItems.length} total items</span>}
-        />
-      </div>
+      {/* Pulse strip */}
+      {isLoading ? (
+        <PulseSkeletons />
+      ) : (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <MetricCell
+            label="Covers seated"
+            value={`${pulse?.coversSeated ?? 0} / ${pulse?.capacity ?? 0}`}
+          />
+          <MetricCell
+            label="Tables occupied"
+            value={`${pulse?.tablesOccupied ?? 0} / ${pulse?.tablesTotal ?? 0}`}
+          />
+          <MetricCell
+            label="Avg turn"
+            value={pulse?.avgTurnMin == null ? '—' : formatMins(pulse.avgTurnMin)}
+          />
+          <MetricCell
+            label="Kitchen load"
+            value={String(pulse?.kitchen.ticketCount ?? 0)}
+            sub={`${pulse?.kitchen.oldestMin ?? 0}m oldest`}
+          />
+        </div>
+      )}
 
-      {/* Quick-action panels */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Recent Orders */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold">Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {ordersLoading || tablesLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder — no stable id
-                  <Skeleton key={i} className="h-8 w-full" />
-                ))}
-              </div>
-            ) : recentOrders.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">No orders yet.</p>
-            ) : (
-              <div>
-                {recentOrders.map((order) => (
-                  <RecentOrderRow
-                    key={order.id}
-                    order={order}
-                    tableNumber={tableById.get(order.tableId)?.number}
-                  />
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Needs attention */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold">Needs attention</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="px-4 py-3">
+              <AttentionSkeletons />
+            </div>
+          ) : attention.length === 0 ? (
+            <EmptyState
+              icon={CircleCheck}
+              title="All clear"
+              description="No alerts right now."
+              className="border-0"
+            />
+          ) : (
+            attention.map((a) => (
+              <ListRow
+                key={a.id}
+                leading={<StatusDot tone={asTone(a.tone)} size="md" />}
+                title={a.title}
+                subtitle={a.subtitle}
+                meta={formatAge(a.ageMin)}
+                action={
+                  <button
+                    type="button"
+                    onClick={() => handleAttentionAction(a.type)}
+                    className="inline-flex items-center justify-center rounded-md border border-border bg-background px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                  >
+                    {actionLabel(a.type)}
+                  </button>
+                }
+              />
+            ))
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Table Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold">Table Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {tablesLoading ? (
-              <div className="grid grid-cols-4 gap-2">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder — no stable id
-                  <Skeleton key={i} className="h-10 w-full rounded-lg" />
-                ))}
+      {/* Floor mini-grid */}
+      {!isLoading && floor.length > 0 && (
+        <div>
+          <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">
+            Floor
+          </p>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {floor.map((t) => (
+              <div
+                key={t.id}
+                title={`Table ${t.number} — ${t.status}${t.ageMin != null ? ` (${t.ageMin}m)` : ''}`}
+                className="bg-card border-border flex items-center gap-1.5 rounded-lg border px-2 py-1.5"
+              >
+                <StatusDot tone={statusToTone(t.status)} size="sm" />
+                <span className="text-foreground text-xs font-medium">T{t.number}</span>
               </div>
-            ) : tables.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No tables configured.
-              </p>
-            ) : (
-              <>
-                <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 lg:grid-cols-6">
-                  {tables.map((table) => (
-                    <TableDot key={table.id} table={table} />
-                  ))}
-                </div>
-                <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-success inline-block" />
-                    Available
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-info inline-block" />
-                    Occupied
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-warning inline-block" />
-                    Reserved
-                  </span>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
