@@ -149,6 +149,45 @@ export class RestaurantSettingsDto {
   @ApiProperty() public updatedAt!: string;
 }
 
+// ── Service ───────────────────────────────────────────────────────────────────
+
+export class ServicePulseKitchenDto {
+  @ApiProperty() public ticketCount!: number;
+  @ApiProperty({ type: Number, nullable: true }) public oldestMin!: number | null;
+}
+export class ServicePulseDto {
+  @ApiProperty() public coversSeated!: number;
+  @ApiProperty() public capacity!: number;
+  @ApiProperty() public tablesOccupied!: number;
+  @ApiProperty() public tablesTotal!: number;
+  @ApiProperty({ type: Number, nullable: true }) public avgTurnMin!: number | null;
+  @ApiProperty({ type: ServicePulseKitchenDto }) public kitchen!: ServicePulseKitchenDto;
+}
+export class ServiceAttentionRefDto {
+  @ApiProperty() public kind!: string;
+  @ApiProperty() public id!: string;
+}
+export class ServiceAttentionDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public type!: string;
+  @ApiProperty() public tone!: string;
+  @ApiProperty() public title!: string;
+  @ApiProperty() public subtitle!: string;
+  @ApiProperty() public ageMin!: number;
+  @ApiProperty({ type: ServiceAttentionRefDto }) public ref!: ServiceAttentionRefDto;
+}
+export class ServiceFloorTableDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public number!: number;
+  @ApiProperty() public status!: string;
+  @ApiProperty({ type: Number, nullable: true }) public ageMin!: number | null;
+}
+export class ServiceSnapshotDto {
+  @ApiProperty({ type: ServicePulseDto }) public pulse!: ServicePulseDto;
+  @ApiProperty({ type: [ServiceAttentionDto] }) public attention!: ServiceAttentionDto[];
+  @ApiProperty({ type: [ServiceFloorTableDto] }) public floor!: ServiceFloorTableDto[];
+}
+
 // ── Reports ───────────────────────────────────────────────────────────────────
 
 export class TopItemDto {

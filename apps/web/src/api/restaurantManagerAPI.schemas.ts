@@ -556,6 +556,51 @@ export interface UpdateShiftDto {
   endTime?: string | null;
 }
 
+export interface ServicePulseKitchenDto {
+  ticketCount: number;
+  /** @nullable */
+  oldestMin: number | null;
+}
+
+export interface ServicePulseDto {
+  coversSeated: number;
+  capacity: number;
+  tablesOccupied: number;
+  tablesTotal: number;
+  /** @nullable */
+  avgTurnMin: number | null;
+  kitchen: ServicePulseKitchenDto;
+}
+
+export interface ServiceAttentionRefDto {
+  kind: string;
+  id: string;
+}
+
+export interface ServiceAttentionDto {
+  id: string;
+  type: string;
+  tone: string;
+  title: string;
+  subtitle: string;
+  ageMin: number;
+  ref: ServiceAttentionRefDto;
+}
+
+export interface ServiceFloorTableDto {
+  id: string;
+  number: number;
+  status: string;
+  /** @nullable */
+  ageMin: number | null;
+}
+
+export interface ServiceSnapshotDto {
+  pulse: ServicePulseDto;
+  attention: ServiceAttentionDto[];
+  floor: ServiceFloorTableDto[];
+}
+
 export type AuthControllerLoginBody = {
   email: string;
   password: string;

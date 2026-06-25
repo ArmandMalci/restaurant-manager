@@ -14,6 +14,7 @@ import { BillingModule } from './billing/billing.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ShiftModule } from './shift/shift.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ServiceModule } from './service/service.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     InventoryModule,
     ShiftModule,
     NotificationsModule,
+    ServiceModule,
   ],
   controllers: [HealthController],
 })

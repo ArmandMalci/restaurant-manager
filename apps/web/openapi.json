@@ -1907,6 +1907,31 @@
         "summary": "Delete a shift",
         "tags": ["shifts"]
       }
+    },
+    "/api/service/snapshot": {
+      "get": {
+        "operationId": "ServiceController_getSnapshot",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceSnapshotDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Live service snapshot: pulse, attention queue, floor",
+        "tags": ["service"]
+      }
     }
   },
   "info": {
@@ -2889,6 +2914,130 @@
             "nullable": true
           }
         }
+      },
+      "ServicePulseKitchenDto": {
+        "type": "object",
+        "properties": {
+          "ticketCount": {
+            "type": "number"
+          },
+          "oldestMin": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": ["ticketCount", "oldestMin"]
+      },
+      "ServicePulseDto": {
+        "type": "object",
+        "properties": {
+          "coversSeated": {
+            "type": "number"
+          },
+          "capacity": {
+            "type": "number"
+          },
+          "tablesOccupied": {
+            "type": "number"
+          },
+          "tablesTotal": {
+            "type": "number"
+          },
+          "avgTurnMin": {
+            "type": "number",
+            "nullable": true
+          },
+          "kitchen": {
+            "$ref": "#/components/schemas/ServicePulseKitchenDto"
+          }
+        },
+        "required": [
+          "coversSeated",
+          "capacity",
+          "tablesOccupied",
+          "tablesTotal",
+          "avgTurnMin",
+          "kitchen"
+        ]
+      },
+      "ServiceAttentionRefDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": ["kind", "id"]
+      },
+      "ServiceAttentionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "tone": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "ageMin": {
+            "type": "number"
+          },
+          "ref": {
+            "$ref": "#/components/schemas/ServiceAttentionRefDto"
+          }
+        },
+        "required": ["id", "type", "tone", "title", "subtitle", "ageMin", "ref"]
+      },
+      "ServiceFloorTableDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ageMin": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": ["id", "number", "status", "ageMin"]
+      },
+      "ServiceSnapshotDto": {
+        "type": "object",
+        "properties": {
+          "pulse": {
+            "$ref": "#/components/schemas/ServicePulseDto"
+          },
+          "attention": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceAttentionDto"
+            }
+          },
+          "floor": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceFloorTableDto"
+            }
+          }
+        },
+        "required": ["pulse", "attention", "floor"]
       }
     }
   }
