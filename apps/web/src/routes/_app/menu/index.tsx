@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, LayoutGrid } from 'lucide-react';
+import { Plus, Pencil, Trash2, LayoutGrid, ChevronDown } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@base-ui/react/dialog';
 import { cn } from '@/lib/utils';
@@ -18,11 +18,23 @@ import {
   useMenuControllerUpdateItem,
   useMenuControllerRemoveItem,
   useMenuControllerSetAvailability,
+  useMenuControllerGetModifierGroups,
+  useMenuControllerCreateModifierGroup,
+  useMenuControllerUpdateModifierGroup,
+  useMenuControllerRemoveModifierGroup,
   invalidateMenuControllerGetCategories,
   invalidateMenuControllerGetItems,
+  invalidateMenuControllerGetModifierGroups,
 } from '@/api/menu/menu';
 import type { MenuCategory, MenuItem } from '@restaurant/shared';
-import type { MenuItemDto } from '@/api/restaurantManagerAPI.schemas';
+import type {
+  MenuItemDto,
+  ModifierGroupDto,
+  CreateModifierGroupDto,
+  UpdateModifierGroupDto,
+  UpdateMenuItemDtoStation,
+  CreateMenuItemDtoStation,
+} from '@/api/restaurantManagerAPI.schemas';
 
 export const Route = createFileRoute('/_app/menu/')({
   component: MenuPage,
@@ -196,6 +208,271 @@ function DeleteDialog({
   );
 }
 
+// ── Modifier option row ────────────────────────────────────────────────
+interface OptionRow {
+  uid: number;
+  name: string;
+  priceDelta: string;
+}
+
+let optionUidCounter = 0;
+
+function nextOptionUid() {
+  optionUidCounter += 1;
+
+  return optionUidCounter;
+}
+
+function OptionRowInput({
+  row,
+  index,
+  onChange,
+  onRemove,
+}: {
+  row: OptionRow;
+  index: number;
+  onChange: (index: number, field: 'name' | 'priceDelta', value: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        value={row.name}
+        onChange={(e) => onChange(index, 'name', e.target.value)}
+        placeholder="Option name"
+        required
+        className={cn(field, 'flex-1')}
+      />
+      <input
+        type="number"
+        step="0.01"
+        value={row.priceDelta}
+        onChange={(e) => onChange(index, 'priceDelta', e.target.value)}
+        placeholder="Δ€"
+        className={cn(field, 'w-20')}
+      />
+      <button
+        type="button"
+        onClick={() => onRemove(index)}
+        className="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
+        aria-label="Remove option"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+// ── Modifier group editor sheet ────────────────────────────────────────
+function ModifierGroupSheet({
+  open,
+  onClose,
+  initial,
+  onSave,
+}: {
+  open: boolean;
+  onClose: () => void;
+  initial?: ModifierGroupDto;
+  onSave: (data: CreateModifierGroupDto | UpdateModifierGroupDto) => void;
+}) {
+  const [name, setName] = useState(initial?.name ?? '');
+  const [selectionType, setSelectionType] = useState<'single' | 'multi'>(
+    (initial?.selectionType as 'single' | 'multi') ?? 'single',
+  );
+  const [required, setRequired] = useState(initial?.required ?? false);
+  const [options, setOptions] = useState<OptionRow[]>(
+    initial?.options.map((o) => ({
+      uid: nextOptionUid(),
+      name: o.name,
+      priceDelta: String(o.priceDelta),
+    })) ?? [],
+  );
+
+  function handleOptionChange(index: number, key: 'name' | 'priceDelta', value: string) {
+    setOptions((prev) => prev.map((r, i) => (i === index ? { ...r, [key]: value } : r)));
+  }
+
+  function handleOptionRemove(index: number) {
+    setOptions((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function handleAddOption() {
+    setOptions((prev) => [...prev, { uid: nextOptionUid(), name: '', priceDelta: '0' }]);
+  }
+
+  return (
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title={initial ? 'Edit modifier group' : 'New modifier group'}
+    >
+      <form
+        className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSave({
+            name,
+            selectionType,
+            required,
+            options: options.map((o, i) => ({
+              name: o.name,
+              priceDelta: Number(o.priceDelta),
+              sortOrder: i,
+            })),
+          });
+        }}
+      >
+        <div className="space-y-1">
+          <label htmlFor="mg-name" className="text-xs font-medium text-muted-foreground">
+            Name
+          </label>
+          <input
+            id="mg-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className={field}
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="mg-type" className="text-xs font-medium text-muted-foreground">
+            Selection type
+          </label>
+          <select
+            id="mg-type"
+            value={selectionType}
+            onChange={(e) => setSelectionType(e.target.value as 'single' | 'multi')}
+            className={field}
+          >
+            <option value="single">Single choice</option>
+            <option value="multi">Multiple choice</option>
+          </select>
+        </div>
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={required}
+            onChange={(e) => setRequired(e.target.checked)}
+            className="rounded border"
+          />
+          Required
+        </label>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">Options</span>
+            <button
+              type="button"
+              onClick={handleAddOption}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Plus className="h-3 w-3" /> Add option
+            </button>
+          </div>
+          {options.length === 0 && (
+            <p className="text-xs text-muted-foreground">No options yet. Add one above.</p>
+          )}
+          {options.map((row, i) => (
+            <OptionRowInput
+              key={row.uid}
+              row={row}
+              index={i}
+              onChange={handleOptionChange}
+              onRemove={handleOptionRemove}
+            />
+          ))}
+        </div>
+        <div className="mt-auto flex justify-end gap-2 pt-4">
+          <button type="button" onClick={onClose} className={btnOutline}>
+            Cancel
+          </button>
+          <button type="submit" className={btnPrimary}>
+            Save
+          </button>
+        </div>
+      </form>
+    </Sheet>
+  );
+}
+
+// ── Modifier groups list ───────────────────────────────────────────────
+function ModifiersTab({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: (group: ModifierGroupDto) => void;
+  onDelete: (group: ModifierGroupDto) => void;
+}) {
+  const { data: groups = [], isLoading } = useMenuControllerGetModifierGroups();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2 mt-4">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-md" />
+        ))}
+      </div>
+    );
+  }
+
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <ChevronDown className="mb-3 h-10 w-10 text-muted-foreground/40" />
+        <p className="text-sm text-muted-foreground">No modifier groups yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 space-y-2">
+      {groups.map((group) => (
+        <div
+          key={group.id}
+          className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium text-foreground">{group.name}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground capitalize">
+                {group.selectionType}
+              </span>
+              {group.required && (
+                <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+                  Required
+                </span>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {group.options.length} option{group.options.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onEdit(group)}
+              title="Edit modifier group"
+              aria-label="Edit modifier group"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onDelete(group)}
+              title="Delete modifier group"
+              aria-label="Delete modifier group"
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Item drawer ────────────────────────────────────────────────────────
 function ItemSheet({
   open,
@@ -216,6 +493,8 @@ function ItemSheet({
     price: number;
     categoryId: string;
     available: boolean;
+    station: string | null;
+    modifierGroupIds: string[];
   }) => void;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
@@ -225,6 +504,18 @@ function ItemSheet({
     initial?.categoryId ?? defaultCategoryId ?? categories[0]?.id ?? '',
   );
   const [available, setAvailable] = useState(initial?.available ?? true);
+  const [station, setStation] = useState<string>((initial as Partial<MenuItemDto>)?.station ?? '');
+  const [modifierGroupIds, setModifierGroupIds] = useState<string[]>(
+    (initial as Partial<MenuItemDto>)?.modifierGroupIds ?? [],
+  );
+
+  const { data: groups = [] } = useMenuControllerGetModifierGroups();
+
+  function toggleGroup(id: string) {
+    setModifierGroupIds((prev) =>
+      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
+    );
+  }
 
   return (
     <Sheet open={open} onClose={onClose} title={initial ? 'Edit Item' : 'Add Item'}>
@@ -238,6 +529,8 @@ function ItemSheet({
             price: Number(price),
             categoryId,
             available,
+            station: station || null,
+            modifierGroupIds,
           });
         }}
       >
@@ -297,6 +590,44 @@ function ItemSheet({
             className={field}
           />
         </div>
+        <div className="space-y-1">
+          <label htmlFor="item-station" className="text-xs font-medium text-muted-foreground">
+            Station
+          </label>
+          <select
+            id="item-station"
+            value={station}
+            onChange={(e) => setStation(e.target.value)}
+            className={field}
+          >
+            <option value="">None</option>
+            <option value="grill">Grill</option>
+            <option value="cold">Cold</option>
+            <option value="bar">Bar</option>
+            <option value="pass">Pass</option>
+          </select>
+        </div>
+        {groups.length > 0 && (
+          <div className="space-y-1.5">
+            <span className="text-xs font-medium text-muted-foreground">Modifier groups</span>
+            <div className="space-y-1 rounded-md border border-border p-2">
+              {groups.map((g) => (
+                <label key={g.id} className="flex cursor-pointer items-center gap-2 text-sm py-0.5">
+                  <input
+                    type="checkbox"
+                    checked={modifierGroupIds.includes(g.id)}
+                    onChange={() => toggleGroup(g.id)}
+                    className="rounded border"
+                  />
+                  <span className="text-foreground">{g.name}</span>
+                  <span className="ml-auto text-xs text-muted-foreground capitalize">
+                    {g.selectionType}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
         <label className="flex cursor-pointer items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -390,6 +721,7 @@ function ItemCard({
 
 // ── Main page ──────────────────────────────────────────────────────────
 function MenuPage() {
+  const [activeTab, setActiveTab] = useState<'items' | 'modifiers'>('items');
   const [selectedCatId, setSelectedCatId] = useState<string | undefined>();
   const [catDialog, setCatDialog] = useState<{ open: boolean; cat?: MenuCategory }>({
     open: false,
@@ -402,6 +734,10 @@ function MenuPage() {
     id: string;
     name: string;
   } | null>(null);
+  const [mgSheet, setMgSheet] = useState<{ open: boolean; group?: ModifierGroupDto }>({
+    open: false,
+  });
+  const [mgDeleteTarget, setMgDeleteTarget] = useState<ModifierGroupDto | null>(null);
 
   const qc = useQueryClient();
 
@@ -454,6 +790,26 @@ function MenuPage() {
     mutation: { onSuccess: () => invalidateMenuControllerGetItems(qc) },
   });
 
+  const createMg = useMenuControllerCreateModifierGroup({
+    mutation: {
+      onSuccess: () => {
+        invalidateMenuControllerGetModifierGroups(qc);
+        setMgSheet({ open: false });
+      },
+    },
+  });
+  const updateMg = useMenuControllerUpdateModifierGroup({
+    mutation: {
+      onSuccess: () => {
+        invalidateMenuControllerGetModifierGroups(qc);
+        setMgSheet({ open: false });
+      },
+    },
+  });
+  const deleteMg = useMenuControllerRemoveModifierGroup({
+    mutation: { onSuccess: () => invalidateMenuControllerGetModifierGroups(qc) },
+  });
+
   const selectedCat = categories.find((c) => c.id === selectedCatId);
 
   return (
@@ -461,143 +817,192 @@ function MenuPage() {
       {/* ── Page header ───────────────────────────────────────── */}
       <PageHeader
         title="Menu"
-        subtitle={`${selectedCat?.name ?? 'All items'} · ${allItems.length} item${allItems.length !== 1 ? 's' : ''}`}
+        subtitle={
+          activeTab === 'items'
+            ? `${selectedCat?.name ?? 'All items'} · ${allItems.length} item${allItems.length !== 1 ? 's' : ''}`
+            : 'Modifier groups'
+        }
         action={
-          <Button onClick={() => setItemSheet({ open: true })} disabled={categories.length === 0}>
-            <Plus className="h-4 w-4" />
-            Add item
-          </Button>
+          activeTab === 'items' ? (
+            <Button onClick={() => setItemSheet({ open: true })} disabled={categories.length === 0}>
+              <Plus className="h-4 w-4" />
+              Add item
+            </Button>
+          ) : (
+            <Button onClick={() => setMgSheet({ open: true })}>
+              <Plus className="h-4 w-4" />
+              New group
+            </Button>
+          )
         }
       />
 
-      {/* ── Body: sidebar + grid ──────────────────────────────── */}
-      <div className="flex flex-col gap-6 lg:flex-row">
-        {/* ── Categories sidebar ────────────────────────────── */}
-        <aside className="w-full lg:w-56 shrink-0 flex flex-col rounded-lg border border-border bg-card self-start lg:sticky lg:top-6">
-          <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Categories
-            </h2>
-          </div>
-          <div className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5">
-            <button
-              type="button"
-              onClick={() => setSelectedCatId(undefined)}
-              className={cn(
-                'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
-                !selectedCatId
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-foreground hover:bg-muted',
+      {/* ── Tabs ─────────────────────────────────────────────── */}
+      <div className="mb-4 flex gap-1 border-b border-border">
+        <button
+          type="button"
+          onClick={() => setActiveTab('items')}
+          className={cn(
+            'px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px',
+            activeTab === 'items'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground',
+          )}
+        >
+          Items
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('modifiers')}
+          className={cn(
+            'px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px',
+            activeTab === 'modifiers'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground',
+          )}
+        >
+          Modifiers
+        </button>
+      </div>
+
+      {/* ── Items tab ────────────────────────────────────────── */}
+      {activeTab === 'items' && (
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* ── Categories sidebar ────────────────────────────── */}
+          <aside className="w-full lg:w-56 shrink-0 flex flex-col rounded-lg border border-border bg-card self-start lg:sticky lg:top-6">
+            <div className="px-4 py-3 border-b border-border">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Categories
+              </h2>
+            </div>
+            <div className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5">
+              <button
+                type="button"
+                onClick={() => setSelectedCatId(undefined)}
+                className={cn(
+                  'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
+                  !selectedCatId
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'text-foreground hover:bg-muted',
+                )}
+              >
+                <span>All items</span>
+                <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                  {allItems.length}
+                </span>
+              </button>
+              {loadingCats ? (
+                <div className="space-y-1 px-1 py-1">
+                  {[0, 1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-8 w-full rounded-md" />
+                  ))}
+                </div>
+              ) : (
+                categories.map((cat) => (
+                  <div key={cat.id} className="group relative">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCatId(cat.id)}
+                      className={cn(
+                        'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
+                        selectedCatId === cat.id
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-foreground hover:bg-muted',
+                      )}
+                    >
+                      <span className="truncate pr-10">{cat.name}</span>
+                      <span className="ml-2 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                        {countByCat[cat.id] ?? 0}
+                      </span>
+                    </button>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCatDialog({ open: true, cat });
+                        }}
+                        aria-label="Edit category"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget({ kind: 'category', id: cat.id, name: cat.name });
+                        }}
+                        aria-label="Delete category"
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
               )}
-            >
-              <span>All items</span>
-              <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                {allItems.length}
-              </span>
-            </button>
-            {loadingCats ? (
-              <div className="space-y-1 px-1 py-1">
-                {[0, 1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-8 w-full rounded-md" />
+            </div>
+            <div className="px-3 py-3 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setCatDialog({ open: true })}
+                className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-border py-2 text-xs text-muted-foreground hover:border-foreground hover:text-foreground transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Category
+              </button>
+            </div>
+          </aside>
+
+          {/* ── Items grid ──────────────────────────────────────── */}
+          <div className="flex-1 min-w-0">
+            {loadingItems ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-36 rounded-lg" />
                 ))}
               </div>
-            ) : (
-              categories.map((cat) => (
-                <div key={cat.id} className="group relative">
+            ) : items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <LayoutGrid className="mb-3 h-10 w-10 text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">No items yet.</p>
+                {categories.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => setSelectedCatId(cat.id)}
-                    className={cn(
-                      'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
-                      selectedCatId === cat.id
-                        ? 'bg-primary/10 text-primary font-medium'
-                        : 'text-foreground hover:bg-muted',
-                    )}
+                    onClick={() => setItemSheet({ open: true })}
+                    className="mt-3 text-sm text-muted-foreground underline-offset-4 hover:underline"
                   >
-                    <span className="truncate pr-10">{cat.name}</span>
-                    <span className="ml-2 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                      {countByCat[cat.id] ?? 0}
-                    </span>
+                    Add the first item
                   </button>
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-0.5">
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCatDialog({ open: true, cat });
-                      }}
-                      aria-label="Edit category"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget({ kind: 'category', id: cat.id, name: cat.name });
-                      }}
-                      aria-label="Delete category"
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {items.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    onEdit={() => setItemSheet({ open: true, item })}
+                    onDelete={() => setDeleteTarget({ kind: 'item', id: item.id, name: item.name })}
+                    onToggle={() =>
+                      toggleAvail.mutate({ id: item.id, data: { available: !item.available } })
+                    }
+                  />
+                ))}
+              </div>
             )}
           </div>
-          <div className="px-3 py-3 border-t border-border">
-            <button
-              type="button"
-              onClick={() => setCatDialog({ open: true })}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-border py-2 text-xs text-muted-foreground hover:border-foreground hover:text-foreground transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" /> Add Category
-            </button>
-          </div>
-        </aside>
-
-        {/* ── Items grid ──────────────────────────────────────── */}
-        <div className="flex-1 min-w-0">
-          {loadingItems ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-36 rounded-lg" />
-              ))}
-            </div>
-          ) : items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <LayoutGrid className="mb-3 h-10 w-10 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">No items yet.</p>
-              {categories.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setItemSheet({ open: true })}
-                  className="mt-3 text-sm text-muted-foreground underline-offset-4 hover:underline"
-                >
-                  Add the first item
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {items.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  item={item}
-                  onEdit={() => setItemSheet({ open: true, item })}
-                  onDelete={() => setDeleteTarget({ kind: 'item', id: item.id, name: item.name })}
-                  onToggle={() =>
-                    toggleAvail.mutate({ id: item.id, data: { available: !item.available } })
-                  }
-                />
-              ))}
-            </div>
-          )}
         </div>
-      </div>
+      )}
+
+      {/* ── Modifiers tab ────────────────────────────────────── */}
+      {activeTab === 'modifiers' && (
+        <ModifiersTab
+          onEdit={(group) => setMgSheet({ open: true, group })}
+          onDelete={(group) => setMgDeleteTarget(group)}
+        />
+      )}
 
       {/* ── Overlays ──────────────────────────────────────────── */}
       <CategoryDialog
@@ -627,8 +1032,23 @@ function MenuPage() {
         initial={itemSheet.item}
         defaultCategoryId={selectedCatId}
         onSave={(data) => {
-          if (itemSheet.item) updateItem.mutate({ id: itemSheet.item.id, data });
-          else createItem.mutate({ data });
+          const { station, modifierGroupIds, ...rest } = data;
+          const stationVal = station || undefined;
+
+          if (itemSheet.item) {
+            updateItem.mutate({
+              id: itemSheet.item.id,
+              data: {
+                ...rest,
+                station: stationVal as UpdateMenuItemDtoStation | undefined,
+                modifierGroupIds,
+              },
+            });
+          } else {
+            createItem.mutate({
+              data: { ...rest, station: stationVal as CreateMenuItemDtoStation | undefined },
+            });
+          }
         }}
       />
       <DeleteDialog
@@ -640,6 +1060,29 @@ function MenuPage() {
           if (deleteTarget.kind === 'category') deleteCat.mutate({ id: deleteTarget.id });
           else deleteItem.mutate({ id: deleteTarget.id });
           setDeleteTarget(null);
+        }}
+      />
+      <ModifierGroupSheet
+        key={mgSheet.open ? (mgSheet.group?.id ?? 'new-mg') : 'closed-mg'}
+        open={mgSheet.open}
+        onClose={() => setMgSheet((s) => ({ ...s, open: false }))}
+        initial={mgSheet.group}
+        onSave={(data) => {
+          if (mgSheet.group) {
+            updateMg.mutate({ id: mgSheet.group.id, data });
+          } else {
+            createMg.mutate({ data: data as CreateModifierGroupDto });
+          }
+        }}
+      />
+      <DeleteDialog
+        open={mgDeleteTarget !== null}
+        onClose={() => setMgDeleteTarget(null)}
+        label={mgDeleteTarget?.name ?? ''}
+        onConfirm={() => {
+          if (!mgDeleteTarget) return;
+          deleteMg.mutate({ id: mgDeleteTarget.id });
+          setMgDeleteTarget(null);
         }}
       />
     </div>
