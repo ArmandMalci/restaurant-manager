@@ -32,6 +32,7 @@ function SettingsPage() {
 
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [notifError, setNotifError] = useState<string | null>(null);
 
   const { canInstall, install } = useInstallPrompt();
   const [installed, setInstalled] = useState(false);
@@ -48,6 +49,9 @@ function SettingsPage() {
 
   async function toggleNotifications() {
     setNotifLoading(true);
+    setNotifError(null);
+    const prev = notifEnabled;
+
     try {
       if (notifEnabled) {
         await unsubscribe();
@@ -57,6 +61,9 @@ function SettingsPage() {
 
         setNotifEnabled(ok);
       }
+    } catch {
+      setNotifEnabled(prev);
+      setNotifError('Permission denied — notifications are blocked in your browser.');
     } finally {
       setNotifLoading(false);
     }
@@ -248,6 +255,8 @@ function SettingsPage() {
                 {notifLoading ? 'Updating…' : notifEnabled ? 'Disable' : 'Enable'}
               </Button>
             </div>
+
+            {notifError && <p className="text-xs text-destructive">{notifError}</p>}
 
             {canInstall && !installed && (
               <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/30 px-4 py-3">
