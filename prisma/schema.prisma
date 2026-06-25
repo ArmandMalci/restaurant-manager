@@ -41,6 +41,7 @@ model Table {
   number    Int         @unique
   seats     Int
   status    TableStatus @default(available)
+  seatedAt  DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
@@ -82,6 +83,9 @@ model Order {
   staffId   String
   status    OrderStatus @default(draft)
   notes     String?
+  sentAt    DateTime?
+  readyAt   DateTime?
+  servedAt  DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
@@ -100,6 +104,10 @@ model OrderItem {
   quantity   Int
   status     OrderItemStatus @default(pending)
   notes      String?
+  firedAt    DateTime?
+  readyAt    DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 
   order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   menuItem MenuItem @relation(fields: [menuItemId], references: [id])
@@ -108,7 +116,7 @@ model OrderItem {
 }
 
 model Reservation {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   tableId    String
   guestName  String
   guestEmail String?
@@ -116,8 +124,9 @@ model Reservation {
   partySize  Int
   date       DateTime
   notes      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  seatedAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   table Table @relation(fields: [tableId], references: [id])
 
