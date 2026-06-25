@@ -5,6 +5,8 @@ import type {
   UpdateMenuCategoryDto,
   CreateMenuItemDto,
   UpdateMenuItemDto,
+  CreateModifierGroupDto,
+  UpdateModifierGroupDto,
 } from '@restaurant/shared';
 
 @Injectable()
@@ -78,5 +80,73 @@ export class MenuService {
     await this.findOneItem(id);
 
     return this.prisma.menuItem.update({ where: { id }, data: { available } });
+  }
+
+  // ── Modifier Groups ──────────────────────────────────────────────────
+
+  public findAllModifierGroups() {
+    return this.prisma.modifierGroup.findMany({
+      orderBy: { name: 'asc' },
+      include: { options: { orderBy: { sortOrder: 'asc' } } },
+    });
+  }
+
+  private async findOneModifierGroup(id: string) {
+    const group = await this.prisma.modifierGroup.findUnique({ where: { id } });
+
+    if (!group) throw new NotFoundException('Modifier group not found');
+
+    return group;
+  }
+
+  public createModifierGroup(dto: CreateModifierGroupDto) {
+    return this.prisma.modifierGroup.create({
+      data: {
+        name: dto.name,
+        selectionType: dto.selectionType,
+        required: dto.required,
+        options: {
+          create: dto.options.map((o, i) => ({
+            name: o.name,
+            priceDelta: o.priceDelta,
+            sortOrder: o.sortOrder ?? i,
+          })),
+        },
+      },
+      include: { options: { orderBy: { sortOrder: 'asc' } } },
+    });
+  }
+
+  public async updateModifierGroup(id: string, dto: UpdateModifierGroupDto) {
+    await this.findOneModifierGroup(id);
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.modifierGroup.update({
+        where: { id },
+        data: { name: dto.name, selectionType: dto.selectionType, required: dto.required },
+      });
+      if (dto.options) {
+        await tx.modifierOption.deleteMany({ where: { groupId: id } });
+        await tx.modifierOption.createMany({
+          data: dto.options.map((o, i) => ({
+            groupId: id,
+            name: o.name,
+            priceDelta: o.priceDelta,
+            sortOrder: o.sortOrder ?? i,
+          })),
+        });
+      }
+
+      return tx.modifierGroup.findUnique({
+        where: { id },
+        include: { options: { orderBy: { sortOrder: 'asc' } } },
+      });
+    });
+  }
+
+  public async removeModifierGroup(id: string) {
+    await this.findOneModifierGroup(id);
+
+    return this.prisma.modifierGroup.delete({ where: { id } });
   }
 }

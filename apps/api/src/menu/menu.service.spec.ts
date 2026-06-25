@@ -30,7 +30,29 @@ const prismaMock = {
     update: jest.fn(),
     delete: jest.fn(),
   },
+  modifierGroup: {
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  modifierOption: {
+    deleteMany: jest.fn(),
+    createMany: jest.fn(),
+  },
+  menuItemModifierGroup: {
+    deleteMany: jest.fn(),
+    upsert: jest.fn(),
+  },
+  $transaction: jest.fn(),
 };
+
+// Self-referential $transaction: passes itself as the tx so mock calls propagate
+prismaMock.$transaction.mockImplementation(
+  // biome-ignore lint/suspicious/noExplicitAny: test mock
+  (fn: (tx: any) => unknown) => fn(prismaMock),
+);
 
 describe('MenuService', () => {
   let service: MenuService;
@@ -199,6 +221,36 @@ describe('MenuService', () => {
         where: { id: 'item-1' },
         data: { available: false },
       });
+    });
+  });
+
+  describe('modifier groups', () => {
+    it('creates a group with its options inline', async () => {
+      prismaMock.modifierGroup.create.mockResolvedValue({ id: 'g1', name: 'Temp', options: [] });
+      await service.createModifierGroup({
+        name: 'Temp',
+        selectionType: 'single',
+        required: true,
+        options: [{ name: 'Rare', priceDelta: 0, sortOrder: 0 }],
+      });
+      expect(prismaMock.modifierGroup.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ name: 'Temp', options: { create: expect.any(Array) } }),
+        }),
+      );
+    });
+
+    it('replaces options on update', async () => {
+      prismaMock.modifierGroup.findUnique.mockResolvedValue({ id: 'g1', name: 'Temp' });
+      prismaMock.modifierOption.deleteMany.mockResolvedValue({ count: 2 });
+      prismaMock.modifierOption.createMany.mockResolvedValue({ count: 1 });
+      await service.updateModifierGroup('g1', {
+        options: [{ name: 'Medium', priceDelta: 0, sortOrder: 0 }],
+      });
+      expect(prismaMock.modifierOption.deleteMany).toHaveBeenCalledWith({
+        where: { groupId: 'g1' },
+      });
+      expect(prismaMock.modifierOption.createMany).toHaveBeenCalled();
     });
   });
 });
