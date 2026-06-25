@@ -45,19 +45,30 @@ export class MenuService {
 
   // ── Items ────────────────────────────────────────────────────────────
 
-  public findAllItems(categoryId?: string) {
-    return this.prisma.menuItem.findMany({
+  public async findAllItems(categoryId?: string) {
+    const items = await this.prisma.menuItem.findMany({
       where: categoryId ? { categoryId } : undefined,
       orderBy: [{ category: { sortOrder: 'asc' } }, { name: 'asc' }],
+      include: { modifierGroups: { select: { modifierGroupId: true } } },
     });
+
+    return items.map(({ modifierGroups, ...item }) => ({
+      ...item,
+      modifierGroupIds: modifierGroups.map((m) => m.modifierGroupId),
+    }));
   }
 
   public async findOneItem(id: string) {
-    const item = await this.prisma.menuItem.findUnique({ where: { id } });
+    const item = await this.prisma.menuItem.findUnique({
+      where: { id },
+      include: { modifierGroups: { select: { modifierGroupId: true } } },
+    });
 
     if (!item) throw new NotFoundException('Menu item not found');
 
-    return item;
+    const { modifierGroups, ...rest } = item;
+
+    return { ...rest, modifierGroupIds: modifierGroups.map((m) => m.modifierGroupId) };
   }
 
   public createItem(dto: CreateMenuItemDto) {
@@ -66,8 +77,25 @@ export class MenuService {
 
   public async updateItem(id: string, dto: UpdateMenuItemDto) {
     await this.findOneItem(id);
+    const { modifierGroupIds, ...rest } = dto;
 
-    return this.prisma.menuItem.update({ where: { id }, data: dto });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.menuItem.update({ where: { id }, data: rest });
+      if (modifierGroupIds) {
+        await tx.menuItemModifierGroup.deleteMany({
+          where: { menuItemId: id, modifierGroupId: { notIn: modifierGroupIds } },
+        });
+        for (const gid of modifierGroupIds) {
+          await tx.menuItemModifierGroup.upsert({
+            where: { menuItemId_modifierGroupId: { menuItemId: id, modifierGroupId: gid } },
+            create: { menuItemId: id, modifierGroupId: gid },
+            update: {},
+          });
+        }
+      }
+    });
+
+    return this.findOneItem(id);
   }
 
   public async removeItem(id: string) {

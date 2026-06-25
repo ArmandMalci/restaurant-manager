@@ -11,8 +11,10 @@ const mockItem = {
   price: 8.5,
   categoryId: 'cat-1',
   available: true,
+  station: null,
   createdAt: new Date(),
   updatedAt: new Date(),
+  modifierGroups: [] as { modifierGroupId: string }[],
 };
 
 const prismaMock = {
@@ -136,7 +138,7 @@ describe('MenuService', () => {
       prismaMock.menuItem.findMany.mockResolvedValue([mockItem]);
       const result = await service.findAllItems();
 
-      expect(result).toEqual([mockItem]);
+      expect(result).toEqual([expect.objectContaining({ id: 'item-1', modifierGroupIds: [] })]);
       expect(prismaMock.menuItem.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: undefined }),
       );
@@ -154,7 +156,9 @@ describe('MenuService', () => {
   describe('findOneItem', () => {
     it('returns item when found', async () => {
       prismaMock.menuItem.findUnique.mockResolvedValue(mockItem);
-      expect(await service.findOneItem('item-1')).toEqual(mockItem);
+      expect(await service.findOneItem('item-1')).toEqual(
+        expect.objectContaining({ id: 'item-1', modifierGroupIds: [] }),
+      );
     });
 
     it('throws NotFoundException when not found', async () => {
@@ -184,7 +188,8 @@ describe('MenuService', () => {
 
   describe('updateItem', () => {
     it('updates item when it exists', async () => {
-      prismaMock.menuItem.findUnique.mockResolvedValue(mockItem);
+      // first call: findOneItem guard; second call: trailing findOneItem return
+      prismaMock.menuItem.findUnique.mockResolvedValue({ ...mockItem, price: 10.0 });
       prismaMock.menuItem.update.mockResolvedValue({ ...mockItem, price: 10.0 });
       const result = await service.updateItem('item-1', { price: 10.0 });
 
@@ -221,6 +226,29 @@ describe('MenuService', () => {
         where: { id: 'item-1' },
         data: { available: false },
       });
+    });
+  });
+
+  describe('item station + modifier attach', () => {
+    it('updates station and syncs modifier group join', async () => {
+      prismaMock.menuItem.findUnique.mockResolvedValue({
+        id: 'i1',
+        name: 'Steak',
+        modifierGroups: [{ modifierGroupId: 'g1' }],
+      });
+      prismaMock.menuItem.update.mockResolvedValue({ id: 'i1' });
+      prismaMock.menuItemModifierGroup = {
+        deleteMany: jest.fn().mockResolvedValue({}),
+        upsert: jest.fn().mockResolvedValue({}),
+      } as never;
+      await service.updateItem('i1', { station: 'grill', modifierGroupIds: ['g1', 'g2'] });
+      expect(prismaMock.menuItem.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ station: 'grill' }) }),
+      );
+      expect(
+        (prismaMock as never as { menuItemModifierGroup: { upsert: jest.Mock } })
+          .menuItemModifierGroup.upsert,
+      ).toHaveBeenCalledTimes(2);
     });
   });
 
