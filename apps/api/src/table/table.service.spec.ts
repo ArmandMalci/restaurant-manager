@@ -101,16 +101,48 @@ describe('TableService', () => {
       const result = await service.setStatus('tbl-1', { status: 'occupied' });
 
       expect(result.status).toBe('occupied');
-      expect(prismaMock.table.update).toHaveBeenCalledWith({
-        where: { id: 'tbl-1' },
-        data: { status: 'occupied' },
-      });
+      expect(prismaMock.table.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'tbl-1' },
+          data: expect.objectContaining({ status: 'occupied' }),
+        }),
+      );
     });
 
     it('throws NotFoundException when table missing', async () => {
       prismaMock.table.findUnique.mockResolvedValue(null);
       await expect(service.setStatus('x', { status: 'reserved' })).rejects.toThrow(
         NotFoundException,
+      );
+    });
+
+    it('sets seatedAt when a table becomes occupied', async () => {
+      prismaMock.table.findUnique.mockResolvedValue({
+        id: 'tbl-1',
+        number: 5,
+        status: 'available',
+      });
+      prismaMock.table.update.mockResolvedValue({ id: 'tbl-1' });
+
+      await service.setStatus('tbl-1', { status: 'occupied' });
+
+      expect(prismaMock.table.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: 'occupied', seatedAt: expect.any(Date) }),
+        }),
+      );
+    });
+
+    it('clears seatedAt when a table becomes available', async () => {
+      prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 5, status: 'occupied' });
+      prismaMock.table.update.mockResolvedValue({ id: 'tbl-1' });
+
+      await service.setStatus('tbl-1', { status: 'available' });
+
+      expect(prismaMock.table.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: 'available', seatedAt: null }),
+        }),
       );
     });
   });

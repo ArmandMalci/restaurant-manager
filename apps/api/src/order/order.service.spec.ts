@@ -39,6 +39,7 @@ const prismaMock = {
   orderItem: {
     findUnique: jest.fn(),
     update: jest.fn(),
+    updateMany: jest.fn(),
   },
   table: {
     findUnique: jest.fn(),
@@ -158,6 +159,71 @@ describe('OrderService', () => {
     it('throws NotFoundException when order missing', async () => {
       prismaMock.order.findUnique.mockResolvedValue(null);
       await expect(service.remove('x')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('updateStatus timestamps', () => {
+    it('stamps sentAt and fires items when status becomes sent', async () => {
+      prismaMock.order.findUnique.mockResolvedValue({ ...mockOrder, sentAt: null });
+      prismaMock.order.update.mockResolvedValue({ ...mockOrder, status: 'sent' });
+      prismaMock.orderItem.updateMany.mockResolvedValue({ count: 1 });
+
+      await service.updateStatus('ord-1', { status: 'sent' });
+
+      expect(prismaMock.order.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: 'sent', sentAt: expect.any(Date) }),
+        }),
+      );
+      expect(prismaMock.orderItem.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { orderId: 'ord-1', firedAt: null },
+          data: { firedAt: expect.any(Date) },
+        }),
+      );
+    });
+  });
+
+  describe('updateItemStatus rollup', () => {
+    it('promotes the order to ready and notifies when the last item becomes ready', async () => {
+      prismaMock.order.findUnique
+        .mockResolvedValueOnce({ ...mockOrder }) // findOne(orderId)
+        .mockResolvedValueOnce({
+          ...mockOrder,
+          status: 'in_progress',
+          readyAt: null,
+          items: [{ ...mockItem, status: 'ready' }],
+        }); // rollup check
+      prismaMock.orderItem.findUnique.mockResolvedValue({ ...mockItem, readyAt: null });
+      prismaMock.orderItem.update.mockResolvedValue({ ...mockItem, status: 'ready' });
+      prismaMock.order.update.mockResolvedValue({ ...mockOrder, status: 'ready' });
+      prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 5 });
+
+      await service.updateItemStatus('ord-1', 'item-1', { status: 'ready' });
+
+      expect(prismaMock.order.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: 'ready', readyAt: expect.any(Date) }),
+        }),
+      );
+      expect(mockNotifications.sendToStaff).toHaveBeenCalled();
+    });
+
+    it('does NOT promote when other items are still pending', async () => {
+      prismaMock.order.findUnique.mockResolvedValueOnce({ ...mockOrder }).mockResolvedValueOnce({
+        ...mockOrder,
+        status: 'in_progress',
+        items: [
+          { ...mockItem, status: 'ready' },
+          { ...mockItem, id: 'item-2', status: 'pending' },
+        ],
+      });
+      prismaMock.orderItem.findUnique.mockResolvedValue({ ...mockItem, readyAt: null });
+      prismaMock.orderItem.update.mockResolvedValue({ ...mockItem, status: 'ready' });
+
+      await service.updateItemStatus('ord-1', 'item-1', { status: 'ready' });
+
+      expect(prismaMock.order.update).not.toHaveBeenCalled();
     });
   });
 });

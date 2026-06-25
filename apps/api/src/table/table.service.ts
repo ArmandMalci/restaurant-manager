@@ -36,7 +36,11 @@ export class TableService {
 
   public async setStatus(id: string, dto: SetTableStatusDto) {
     await this.findOne(id);
+    const data: Record<string, unknown> = { status: dto.status };
 
-    return this.prisma.table.update({ where: { id }, data: { status: dto.status } });
+    if (dto.status === 'occupied') data.seatedAt = new Date();
+    if (dto.status === 'available') data.seatedAt = null;
+
+    return this.prisma.table.update({ where: { id }, data });
   }
 }

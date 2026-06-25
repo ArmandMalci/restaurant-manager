@@ -60,11 +60,21 @@ export class OrderService {
 
   public async updateStatus(id: string, dto: UpdateOrderStatusDto) {
     const existing = await this.findOne(id);
-    const order = await this.prisma.order.update({
-      where: { id },
-      data: { status: dto.status as never },
-      include: WITH_ITEMS,
-    });
+    const now = new Date();
+    const data: Record<string, unknown> = { status: dto.status as never };
+
+    if (dto.status === 'sent' && !existing.sentAt) data.sentAt = now;
+    if (dto.status === 'ready' && !existing.readyAt) data.readyAt = now;
+    if (dto.status === 'served' && !existing.servedAt) data.servedAt = now;
+
+    const order = await this.prisma.order.update({ where: { id }, data, include: WITH_ITEMS });
+
+    if (dto.status === 'sent') {
+      await this.prisma.orderItem.updateMany({
+        where: { orderId: id, firedAt: null },
+        data: { firedAt: now },
+      });
+    }
 
     if (dto.status === 'ready') {
       const table = await this.prisma.table.findUnique({ where: { id: existing.tableId } });
@@ -84,9 +94,39 @@ export class OrderService {
 
     if (!item || item.orderId !== orderId) throw new NotFoundException('Order item not found');
 
-    return this.prisma.orderItem.update({
+    const now = new Date();
+    const updated = await this.prisma.orderItem.update({
       where: { id: itemId },
-      data: { status: dto.status as never },
+      data: {
+        status: dto.status as never,
+        ...(dto.status === 'ready' && !item.readyAt ? { readyAt: now } : {}),
+      },
+    });
+
+    if (dto.status === 'ready') await this.promoteIfAllItemsReady(orderId, now);
+
+    return updated;
+  }
+
+  private async promoteIfAllItemsReady(orderId: string, now: Date) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: WITH_ITEMS,
+    });
+
+    if (!order || order.status === 'ready' || order.status === 'served') return;
+    if (order.items.length === 0 || !order.items.every((i) => i.status === 'ready')) return;
+
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'ready' as never, readyAt: order.readyAt ?? now },
+    });
+
+    const table = await this.prisma.table.findUnique({ where: { id: order.tableId } });
+
+    await this.notifications.sendToStaff(order.staffId, {
+      title: 'Order Ready',
+      body: `Table ${table?.number ?? '?'} order is ready to serve`,
     });
   }
 
