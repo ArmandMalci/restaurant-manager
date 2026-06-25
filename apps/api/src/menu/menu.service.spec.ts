@@ -150,6 +150,7 @@ describe('MenuService', () => {
         categoryId: 'cat-1',
         description: null,
         available: true,
+        station: null,
       });
 
       expect(result).toEqual(mockItem);

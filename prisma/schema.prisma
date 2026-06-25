@@ -61,20 +61,57 @@ model MenuCategory {
 }
 
 model MenuItem {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
+  price       Decimal         @db.Decimal(10, 2)
   categoryId  String
-  available   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  available   Boolean         @default(true)
+  station     KitchenStation?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
-  category        MenuCategory     @relation(fields: [categoryId], references: [id])
+  category        MenuCategory           @relation(fields: [categoryId], references: [id])
   orderItems      OrderItem[]
   inventoryUsages InventoryUsage[]
+  modifierGroups  MenuItemModifierGroup[]
 
   @@map("menu_items")
+}
+
+model ModifierGroup {
+  id            String                @id @default(uuid())
+  name          String
+  selectionType ModifierSelectionType @default(single)
+  required      Boolean               @default(false)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  options       ModifierOption[]
+  menuItems     MenuItemModifierGroup[]
+
+  @@map("modifier_groups")
+}
+
+model ModifierOption {
+  id         String        @id @default(uuid())
+  groupId    String
+  name       String
+  priceDelta Decimal       @default(0) @db.Decimal(10, 2)
+  sortOrder  Int           @default(0)
+  group      ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("modifier_options")
+}
+
+model MenuItemModifierGroup {
+  menuItemId      String
+  modifierGroupId String
+  sortOrder       Int           @default(0)
+  menuItem        MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+  @@id([menuItemId, modifierGroupId])
+  @@map("menu_item_modifier_groups")
 }
 
 model Order {
@@ -186,6 +223,18 @@ model Bill {
   order Order @relation(fields: [orderId], references: [id])
 
   @@map("bills")
+}
+
+enum KitchenStation {
+  grill
+  cold
+  bar
+  pass
+}
+
+enum ModifierSelectionType {
+  single
+  multi
 }
 
 enum StaffRole {
