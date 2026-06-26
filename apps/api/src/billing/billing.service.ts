@@ -23,6 +23,7 @@ export class BillingService {
         items: {
           include: {
             menuItem: true,
+            modifiers: true,
           },
         },
       },
@@ -43,7 +44,9 @@ export class BillingService {
     }
 
     const subtotal = order.items.reduce((sum, item) => {
-      return sum.plus(new Prisma.Decimal(item.quantity).times(item.menuItem.price));
+      const base = Number(item.unitPrice) > 0 ? new Prisma.Decimal(item.unitPrice) : new Prisma.Decimal(item.menuItem.price);
+      const delta = item.modifiers.reduce((d, m) => d.plus(new Prisma.Decimal(m.priceDelta)), new Prisma.Decimal(0));
+      return sum.plus(new Prisma.Decimal(item.quantity).times(base.plus(delta)));
     }, new Prisma.Decimal(0));
 
     const discountPctDecimal = new Prisma.Decimal(discountPct);

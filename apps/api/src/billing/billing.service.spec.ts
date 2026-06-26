@@ -37,18 +37,22 @@ describe('BillingService', () => {
           {
             id: 'item-1',
             quantity: 2,
+            unitPrice: 0,
             menuItem: {
               id: 'menu-1',
               price: new Prisma.Decimal('10.00'),
             },
+            modifiers: [],
           },
           {
             id: 'item-2',
             quantity: 1,
+            unitPrice: 0,
             menuItem: {
               id: 'menu-2',
               price: new Prisma.Decimal('5.00'),
             },
+            modifiers: [],
           },
         ],
       };
@@ -102,6 +106,16 @@ describe('BillingService', () => {
 
       await expect(service.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
     });
+  });
+
+  it('subtotal includes modifier deltas using snapshot unitPrice', async () => {
+    prismaMock.order.findUnique.mockResolvedValue({
+      id: 'o1', status: 'served', bill: null,
+      items: [{ quantity: 2, unitPrice: 20, menuItem: { price: 99 }, modifiers: [{ priceDelta: 3 }] }],
+    });
+    prismaMock.bill.create.mockImplementation(({ data }) => Promise.resolve(data));
+    const bill = await service.create({ orderId: 'o1', discountPct: 0 });
+    expect(Number(bill.subtotal)).toBe(46);
   });
 
   describe('pay', () => {
