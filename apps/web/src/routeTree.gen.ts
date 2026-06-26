@@ -23,6 +23,7 @@ import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
 import { Route as AppOrderIndexRouteImport } from './routes/_app/order/index'
 import { Route as AppNotificationsIndexRouteImport } from './routes/_app/notifications/index'
 import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
+import { Route as AppKdsIndexRouteImport } from './routes/_app/kds/index'
 import { Route as AppInventoryIndexRouteImport } from './routes/_app/inventory/index'
 import { Route as AppFloorIndexRouteImport } from './routes/_app/floor/index'
 import { Route as AppDoorIndexRouteImport } from './routes/_app/door/index'
@@ -99,6 +100,11 @@ const AppMenuIndexRoute = AppMenuIndexRouteImport.update({
   path: '/menu/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppKdsIndexRoute = AppKdsIndexRouteImport.update({
+  id: '/kds/',
+  path: '/kds/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInventoryIndexRoute = AppInventoryIndexRouteImport.update({
   id: '/inventory/',
   path: '/inventory/',
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/door/': typeof AppDoorIndexRoute
   '/floor/': typeof AppFloorIndexRoute
   '/inventory/': typeof AppInventoryIndexRoute
+  '/kds/': typeof AppKdsIndexRoute
   '/menu/': typeof AppMenuIndexRoute
   '/notifications/': typeof AppNotificationsIndexRoute
   '/order/': typeof AppOrderIndexRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/door': typeof AppDoorIndexRoute
   '/floor': typeof AppFloorIndexRoute
   '/inventory': typeof AppInventoryIndexRoute
+  '/kds': typeof AppKdsIndexRoute
   '/menu': typeof AppMenuIndexRoute
   '/notifications': typeof AppNotificationsIndexRoute
   '/order': typeof AppOrderIndexRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/_app/door/': typeof AppDoorIndexRoute
   '/_app/floor/': typeof AppFloorIndexRoute
   '/_app/inventory/': typeof AppInventoryIndexRoute
+  '/_app/kds/': typeof AppKdsIndexRoute
   '/_app/menu/': typeof AppMenuIndexRoute
   '/_app/notifications/': typeof AppNotificationsIndexRoute
   '/_app/order/': typeof AppOrderIndexRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/door/'
     | '/floor/'
     | '/inventory/'
+    | '/kds/'
     | '/menu/'
     | '/notifications/'
     | '/order/'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/door'
     | '/floor'
     | '/inventory'
+    | '/kds'
     | '/menu'
     | '/notifications'
     | '/order'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '/_app/door/'
     | '/_app/floor/'
     | '/_app/inventory/'
+    | '/_app/kds/'
     | '/_app/menu/'
     | '/_app/notifications/'
     | '/_app/order/'
@@ -375,6 +387,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMenuIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/kds/': {
+      id: '/_app/kds/'
+      path: '/kds'
+      fullPath: '/kds/'
+      preLoaderRoute: typeof AppKdsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/inventory/': {
       id: '/_app/inventory/'
       path: '/inventory'
@@ -435,6 +454,7 @@ interface AppRouteChildren {
   AppDoorIndexRoute: typeof AppDoorIndexRoute
   AppFloorIndexRoute: typeof AppFloorIndexRoute
   AppInventoryIndexRoute: typeof AppInventoryIndexRoute
+  AppKdsIndexRoute: typeof AppKdsIndexRoute
   AppMenuIndexRoute: typeof AppMenuIndexRoute
   AppNotificationsIndexRoute: typeof AppNotificationsIndexRoute
   AppOrderIndexRoute: typeof AppOrderIndexRoute
@@ -455,6 +475,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDoorIndexRoute: AppDoorIndexRoute,
   AppFloorIndexRoute: AppFloorIndexRoute,
   AppInventoryIndexRoute: AppInventoryIndexRoute,
+  AppKdsIndexRoute: AppKdsIndexRoute,
   AppMenuIndexRoute: AppMenuIndexRoute,
   AppNotificationsIndexRoute: AppNotificationsIndexRoute,
   AppOrderIndexRoute: AppOrderIndexRoute,
