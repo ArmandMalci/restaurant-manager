@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
-import { Plus, Pencil, Trash2, Users, X, LayoutGrid } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, Pencil, Trash2, Users, X, LayoutGrid, Map } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -14,10 +14,14 @@ import {
   useTableControllerUpdate,
   useTableControllerRemove,
   useTableControllerSetStatus,
+  useTableControllerSaveLayout,
   invalidateTableControllerGetAll,
 } from '@/api/tables/tables';
 import type { TableStatus } from '@restaurant/shared';
-import type { TableDto } from '@/api/restaurantManagerAPI.schemas';
+import type { TableDto, TableDtoShape } from '@/api/restaurantManagerAPI.schemas';
+import { FloorMap } from './-floor-map';
+import type { PositionOverride } from './-floor-map';
+import { TableActionSheet } from './-table-action-sheet';
 
 export const Route = createFileRoute('/_app/floor/')({
   component: TablesPage,
@@ -221,29 +225,40 @@ function DeleteDialog({ tableNumber, onConfirm, onClose }: DeleteDialogProps) {
   );
 }
 
-// ── Table card ────────────────────────────────────────────────────────────
+// ── Table card (grid view) ────────────────────────────────────────────────
 
 interface TableCardProps {
   table: TableDto;
   onEdit: () => void;
   onDelete: () => void;
   onCycleStatus: () => void;
+  onTableClick: (table: TableDto) => void;
 }
 
-function TableCard({ table, onEdit, onDelete, onCycleStatus }: TableCardProps) {
+function TableCard({ table, onEdit, onDelete, onCycleStatus, onTableClick }: TableCardProps) {
   const statusKey = table.status as TableStatus;
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm hover:border-accent/40 hover:shadow-md transition-all duration-200">
+    <div
+      className="group relative flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm hover:border-accent/40 hover:shadow-md transition-all duration-200 cursor-pointer"
+      onClick={() => onTableClick(table)}
+      role="button"
+      aria-label={`Table ${table.number}`}
+    >
       {/* Hover actions */}
       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <Button variant="ghost" size="icon-xs" onClick={onEdit} aria-label="Edit table">
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          aria-label="Edit table"
+        >
           <Pencil />
         </Button>
         <Button
           variant="ghost"
           size="icon-xs"
-          onClick={onDelete}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
           aria-label="Delete table"
           className="hover:text-destructive"
         >
@@ -264,7 +279,7 @@ function TableCard({ table, onEdit, onDelete, onCycleStatus }: TableCardProps) {
       <div className="border-t border-border px-3 py-2 flex justify-center">
         <button
           type="button"
-          onClick={onCycleStatus}
+          onClick={(e) => { e.stopPropagation(); onCycleStatus(); }}
           title={`Switch to ${STATUS_LABELS[NEXT_STATUS[statusKey]]}`}
           className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -283,6 +298,8 @@ type ModalState =
   | { type: 'edit'; table: TableDto }
   | { type: 'delete'; table: TableDto };
 
+type ViewMode = 'map' | 'grid';
+
 function TablesPage() {
   const [modal, setModal] = useState<ModalState>({ type: 'none' });
   const qc = useQueryClient();
@@ -292,10 +309,91 @@ function TablesPage() {
   const updateTable = useTableControllerUpdate();
   const deleteTable = useTableControllerRemove();
   const setStatus = useTableControllerSetStatus();
+  const saveLayout = useTableControllerSaveLayout();
+
+  // Determine default view: map if any table has posX set
+  const hasMapData = useMemo(() => tables.some((t) => t.posX != null), [tables]);
+  const [viewMode, setViewMode] = useState<ViewMode | null>(null);
+  const effectiveView: ViewMode = viewMode ?? (hasMapData ? 'map' : 'grid');
+
+  // Edit-layout state
+  const [editMode, setEditMode] = useState(false);
+  const [positions, setPositions] = useState<Record<string, PositionOverride>>({});
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  // Action sheet
+  const [selectedTable, setSelectedTable] = useState<TableDto | null>(null);
 
   const available = tables.filter((t) => t.status === 'available').length;
   const occupied = tables.filter((t) => t.status === 'occupied').length;
   const reserved = tables.filter((t) => t.status === 'reserved').length;
+
+  function handleTableClick(table: TableDto) {
+    if (!editMode) {
+      setSelectedTable(table);
+    }
+  }
+
+  function handleEnterEditMode() {
+    // Snapshot current server positions as local state
+    const snap: Record<string, PositionOverride> = {};
+    for (const t of tables) {
+      if (t.posX != null && t.posY != null) {
+        snap[t.id] = { posX: t.posX, posY: t.posY, shape: t.shape as TableDtoShape };
+      }
+    }
+    setPositions(snap);
+    setEditMode(true);
+  }
+
+  function handleCancelEdit() {
+    setPositions({});
+    setDraggingId(null);
+    setEditMode(false);
+  }
+
+  function handleDrop(tableId: string, posX: number, posY: number) {
+    setPositions((prev) => {
+      const existing = prev[tableId];
+      const shape: TableDtoShape =
+        existing?.shape ?? (tables.find((t) => t.id === tableId)?.shape as TableDtoShape) ?? 'square';
+      return { ...prev, [tableId]: { posX, posY, shape } };
+    });
+    setDraggingId(null);
+  }
+
+  function handleShapeToggle(tableId: string) {
+    setPositions((prev) => {
+      const existing = prev[tableId];
+      if (!existing) return prev;
+      return {
+        ...prev,
+        [tableId]: {
+          ...existing,
+          shape: existing.shape === 'round' ? 'square' : 'round',
+        },
+      };
+    });
+  }
+
+  function handleSaveLayout() {
+    const items = Object.entries(positions).map(([id, pos]) => ({
+      id,
+      posX: pos.posX,
+      posY: pos.posY,
+      shape: pos.shape,
+    }));
+    saveLayout.mutate(
+      { data: { tables: items } },
+      {
+        onSuccess: () => {
+          invalidateTableControllerGetAll(qc);
+          setPositions({});
+          setEditMode(false);
+        },
+      },
+    );
+  }
 
   if (isLoading) {
     return (
@@ -327,10 +425,70 @@ function TablesPage() {
         title="Floor"
         subtitle={`${tables.length} table${tables.length !== 1 ? 's' : ''}`}
         action={
-          <Button onClick={() => setModal({ type: 'create' })}>
-            <Plus />
-            Add table
-          </Button>
+          editMode ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+              <Button
+                onClick={handleSaveLayout}
+                disabled={saveLayout.isPending}
+              >
+                {saveLayout.isPending ? 'Saving…' : 'Save layout'}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              {/* View toggle */}
+              <div className="flex rounded-md border border-border overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('map')}
+                  className={
+                    effectiveView === 'map'
+                      ? 'px-2.5 py-1.5 bg-accent text-accent-foreground'
+                      : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
+                  }
+                  aria-label="Map view"
+                  title="Map view"
+                >
+                  <Map className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={
+                    effectiveView === 'grid'
+                      ? 'px-2.5 py-1.5 bg-accent text-accent-foreground'
+                      : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
+                  }
+                  aria-label="Grid view"
+                  title="Grid view"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+              </div>
+
+              {effectiveView === 'map' && (
+                <button
+                  type="button"
+                  onClick={handleEnterEditMode}
+                  className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  Edit layout
+                </button>
+              )}
+
+              <Button onClick={() => setModal({ type: 'create' })}>
+                <Plus />
+                Add table
+              </Button>
+            </div>
+          )
         }
       />
 
@@ -343,12 +501,23 @@ function TablesPage() {
         </div>
       )}
 
-      {/* Grid */}
+      {/* Content */}
       {tables.length === 0 ? (
         <EmptyState
           icon={LayoutGrid}
           title="No tables yet"
           description="Add your first table to start tracking status and capacity."
+        />
+      ) : effectiveView === 'map' ? (
+        <FloorMap
+          tables={tables}
+          onTableClick={handleTableClick}
+          editMode={editMode}
+          positions={positions}
+          onDrop={handleDrop}
+          onDragStart={setDraggingId}
+          draggingId={draggingId}
+          onShapeToggle={handleShapeToggle}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -358,6 +527,7 @@ function TablesPage() {
               table={table}
               onEdit={() => setModal({ type: 'edit', table })}
               onDelete={() => setModal({ type: 'delete', table })}
+              onTableClick={handleTableClick}
               onCycleStatus={() =>
                 setStatus.mutate(
                   { id: table.id, data: { status: NEXT_STATUS[table.status as TableStatus] } },
@@ -368,6 +538,12 @@ function TablesPage() {
           ))}
         </div>
       )}
+
+      {/* Action sheet */}
+      <TableActionSheet
+        table={selectedTable}
+        onClose={() => setSelectedTable(null)}
+      />
 
       {/* Dialogs */}
       {modal.type === 'create' && (
