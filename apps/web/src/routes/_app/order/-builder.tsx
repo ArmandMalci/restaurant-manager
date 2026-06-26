@@ -47,9 +47,11 @@ interface PendingItem {
 
 interface OrderBuilderProps {
   onClose: () => void;
+  /** Pre-select this table when the builder opens (from floor map deep-link). */
+  initialTableId?: string;
 }
 
-export function OrderBuilder({ onClose }: OrderBuilderProps) {
+export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
   const qc = useQueryClient();
   const createOrder = useOrderControllerCreate();
 
@@ -58,7 +60,7 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
   const { data: menuItems = [] } = useMenuControllerGetItems();
   const { data: allGroups = [] } = useMenuControllerGetModifierGroups();
 
-  const [tableId, setTableId] = useState('');
+  const [tableId, setTableId] = useState(initialTableId ?? '');
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
   const [lines, setLines] = useState<LineItem[]>([]);
   const [orderNotes, setOrderNotes] = useState('');

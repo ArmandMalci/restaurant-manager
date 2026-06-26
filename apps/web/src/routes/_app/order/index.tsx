@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,6 +25,9 @@ import { OrderBuilder } from './-builder';
 
 export const Route = createFileRoute('/_app/order/')({
   component: OrdersPage,
+  validateSearch: (search: Record<string, unknown>): { tableId?: string } => ({
+    tableId: typeof search.tableId === 'string' ? search.tableId : undefined,
+  }),
 });
 
 const ORDER_STATUSES: OrderStatus[] = ['draft', 'sent', 'in_progress', 'ready', 'served'];
@@ -272,7 +275,17 @@ function OrdersSkeleton() {
 // ── Main page ─────────────────────────────────────────────────────────
 
 function OrdersPage() {
+  const { tableId: initialTableId } = Route.useSearch();
   const [showCreate, setShowCreate] = useState(false);
+
+  // Auto-open the builder when navigated here with a tableId
+  useEffect(() => {
+    if (initialTableId) {
+      setShowCreate(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { data: orders = [], isLoading } = useOrderControllerGetAll();
   const { data: tables = [] } = useTableControllerGetAll();
   const { data: menuItems = [] } = useMenuControllerGetItems();
@@ -289,7 +302,12 @@ function OrdersPage() {
   return (
     <>
       {/* Full-screen builder overlay */}
-      {showCreate && <OrderBuilder onClose={() => setShowCreate(false)} />}
+      {showCreate && (
+        <OrderBuilder
+          onClose={() => setShowCreate(false)}
+          initialTableId={initialTableId}
+        />
+      )}
 
       <div className="flex flex-col h-full p-6 gap-4">
         <PageHeader
