@@ -4,6 +4,7 @@ import {
   ClipboardList,
   DoorOpen,
   Receipt,
+  ChefHat,
   UtensilsCrossed,
   Package,
   BarChart3,
@@ -33,6 +34,10 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: '/door', label: 'Door', icon: DoorOpen },
       { to: '/checkout', label: 'Checkout', icon: Receipt },
     ],
+  },
+  {
+    label: 'Kitchen',
+    items: [{ to: '/kds', label: 'KDS', icon: ChefHat }],
   },
   {
     label: 'Back office',

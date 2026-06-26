@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { NAV_GROUPS } from './nav';
 
 describe('NAV_GROUPS', () => {
-  it('exposes Service and Back office groups', () => {
-    expect(NAV_GROUPS.map((g) => g.label)).toEqual(['Service', 'Back office']);
+  it('exposes Service, Kitchen, and Back office groups', () => {
+    expect(NAV_GROUPS.map((g) => g.label)).toEqual(['Service', 'Kitchen', 'Back office']);
   });
 
   it('routes to the migrated service paths', () => {
