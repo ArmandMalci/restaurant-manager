@@ -43,4 +43,15 @@ export class TableService {
 
     return this.prisma.table.update({ where: { id }, data });
   }
+
+  public saveLayout(tables: { id: string; posX: number; posY: number; shape: string }[]) {
+    return this.prisma.$transaction(
+      tables.map((t) =>
+        this.prisma.table.update({
+          where: { id: t.id },
+          data: { posX: t.posX, posY: t.posY, shape: t.shape },
+        }),
+      ),
+    );
+  }
 }

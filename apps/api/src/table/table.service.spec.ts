@@ -8,6 +8,9 @@ const mockTable = {
   number: 1,
   seats: 4,
   status: 'available' as const,
+  posX: null,
+  posY: null,
+  shape: 'square' as const,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -20,6 +23,7 @@ const prismaMock = {
     update: jest.fn(),
     delete: jest.fn(),
   },
+  $transaction: jest.fn(),
 };
 
 describe('TableService', () => {
@@ -59,7 +63,7 @@ describe('TableService', () => {
   describe('create', () => {
     it('creates and returns table', async () => {
       prismaMock.table.create.mockResolvedValue(mockTable);
-      const result = await service.create({ number: 1, seats: 4, status: 'available' });
+      const result = await service.create({ number: 1, seats: 4, status: 'available', posX: null, posY: null, shape: 'square' });
 
       expect(result).toEqual(mockTable);
     });
@@ -144,6 +148,22 @@ describe('TableService', () => {
           data: expect.objectContaining({ status: 'available', seatedAt: null }),
         }),
       );
+    });
+  });
+
+  describe('saveLayout', () => {
+    it('saves layout positions for each table in a transaction', async () => {
+      prismaMock.$transaction.mockImplementation((ops) => Promise.resolve(ops));
+      prismaMock.table.update.mockImplementation((args) => args);
+
+      await service.saveLayout([
+        { id: 't1', posX: 10, posY: 20, shape: 'round' },
+        { id: 't2', posX: 30, posY: 40, shape: 'square' },
+      ]);
+
+      expect(prismaMock.table.update).toHaveBeenCalledWith({ where: { id: 't1' }, data: { posX: 10, posY: 20, shape: 'round' } });
+      expect(prismaMock.table.update).toHaveBeenCalledWith({ where: { id: 't2' }, data: { posX: 30, posY: 40, shape: 'square' } });
+      expect(prismaMock.$transaction).toHaveBeenCalled();
     });
   });
 });
