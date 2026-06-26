@@ -217,6 +217,23 @@ export class ServiceSnapshotDto {
   @ApiProperty({ type: [ServiceFloorTableDto] }) public floor!: ServiceFloorTableDto[];
 }
 
+// ── KDS ───────────────────────────────────────────────────────────────────────
+
+export class KdsTicketItemDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public name!: string;
+  @ApiProperty() public quantity!: number;
+  @ApiProperty({ enum: ['grill', 'cold', 'bar', 'pass'], nullable: true }) public station!: string | null;
+  @ApiProperty() public status!: string;
+  @ApiProperty({ type: [String] }) public modifiers!: string[];
+}
+export class KdsTicketDto {
+  @ApiProperty() public orderId!: string;
+  @ApiProperty({ type: Number, nullable: true }) public tableNumber!: number | null;
+  @ApiProperty({ type: String, nullable: true }) public firedAt!: string | null;
+  @ApiProperty({ type: [KdsTicketItemDto] }) public items!: KdsTicketItemDto[];
+}
+
 // ── Reports ───────────────────────────────────────────────────────────────────
 
 export class TopItemDto {

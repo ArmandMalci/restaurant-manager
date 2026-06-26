@@ -746,6 +746,39 @@ export interface ServiceSnapshotDto {
   floor: ServiceFloorTableDto[];
 }
 
+/**
+ * @nullable
+ */
+export type KdsTicketItemDtoStation =
+  | (typeof KdsTicketItemDtoStation)[keyof typeof KdsTicketItemDtoStation]
+  | null;
+
+export const KdsTicketItemDtoStation = {
+  grill: 'grill',
+  cold: 'cold',
+  bar: 'bar',
+  pass: 'pass',
+} as const;
+
+export interface KdsTicketItemDto {
+  id: string;
+  name: string;
+  quantity: number;
+  /** @nullable */
+  station: KdsTicketItemDtoStation;
+  status: string;
+  modifiers: string[];
+}
+
+export interface KdsTicketDto {
+  orderId: string;
+  /** @nullable */
+  tableNumber: number | null;
+  /** @nullable */
+  firedAt: string | null;
+  items: KdsTicketItemDto[];
+}
+
 export type AuthControllerLoginBody = {
   email: string;
   password: string;

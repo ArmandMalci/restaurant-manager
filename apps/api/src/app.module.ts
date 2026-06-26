@@ -15,6 +15,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { ShiftModule } from './shift/shift.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ServiceModule } from './service/service.module';
+import { KdsModule } from './kds/kds.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ServiceModule } from './service/service.module';
     ShiftModule,
     NotificationsModule,
     ServiceModule,
+    KdsModule,
   ],
   controllers: [HealthController],
 })

@@ -2195,6 +2195,36 @@
           "service"
         ]
       }
+    },
+    "/api/kds/tickets": {
+      "get": {
+        "operationId": "KdsController_getTickets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KdsTicketDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Active kitchen tickets (oldest first)",
+        "tags": [
+          "kds"
+        ]
+      }
     }
   },
   "info": {
@@ -3743,6 +3773,75 @@
           "pulse",
           "attention",
           "floor"
+        ]
+      },
+      "KdsTicketItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "station": {
+            "type": "string",
+            "enum": [
+              "grill",
+              "cold",
+              "bar",
+              "pass"
+            ],
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "modifiers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "quantity",
+          "station",
+          "status",
+          "modifiers"
+        ]
+      },
+      "KdsTicketDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "tableNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "firedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KdsTicketItemDto"
+            }
+          }
+        },
+        "required": [
+          "orderId",
+          "tableNumber",
+          "firedAt",
+          "items"
         ]
       }
     }
