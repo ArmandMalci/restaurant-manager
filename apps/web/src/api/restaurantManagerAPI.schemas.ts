@@ -283,14 +283,24 @@ export interface SetTableStatusDto {
   status: SetTableStatusDtoStatus;
 }
 
+export interface OrderItemModifierDto {
+  id: string;
+  orderItemId: string;
+  modifierOptionId: string;
+  name: string;
+  priceDelta: number;
+}
+
 export interface OrderItemDto {
   id: string;
   orderId: string;
   menuItemId: string;
   quantity: number;
+  unitPrice: number;
   status: string;
   /** @nullable */
   notes?: string | null;
+  modifiers: OrderItemModifierDto[];
 }
 
 export interface OrderDto {
@@ -318,6 +328,8 @@ export type CreateOrderDtoItemsItem = {
    * @nullable
    */
   notes?: string | null;
+  /** @items.pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  modifierOptionIds?: string[];
 };
 
 export interface CreateOrderDto {

@@ -2702,6 +2702,33 @@
           "status"
         ]
       },
+      "OrderItemModifierDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "orderItemId": {
+            "type": "string"
+          },
+          "modifierOptionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priceDelta": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "orderItemId",
+          "modifierOptionId",
+          "name",
+          "priceDelta"
+        ]
+      },
       "OrderItemDto": {
         "type": "object",
         "properties": {
@@ -2717,12 +2744,21 @@
           "quantity": {
             "type": "number"
           },
+          "unitPrice": {
+            "type": "number"
+          },
           "status": {
             "type": "string"
           },
           "notes": {
             "type": "string",
             "nullable": true
+          },
+          "modifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemModifierDto"
+            }
           }
         },
         "required": [
@@ -2730,7 +2766,9 @@
           "orderId",
           "menuItemId",
           "quantity",
-          "status"
+          "unitPrice",
+          "status",
+          "modifiers"
         ]
       },
       "OrderDto": {
@@ -2812,6 +2850,15 @@
                   "type": "string",
                   "maxLength": 500,
                   "nullable": true
+                },
+                "modifierOptionIds": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  }
                 }
               },
               "required": [

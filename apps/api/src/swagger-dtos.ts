@@ -65,13 +65,23 @@ export class TableDto {
 
 // ── Orders ────────────────────────────────────────────────────────────────────
 
+export class OrderItemModifierDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public orderItemId!: string;
+  @ApiProperty() public modifierOptionId!: string;
+  @ApiProperty() public name!: string;
+  @ApiProperty() public priceDelta!: number;
+}
+
 export class OrderItemDto {
   @ApiProperty() public id!: string;
   @ApiProperty() public orderId!: string;
   @ApiProperty() public menuItemId!: string;
   @ApiProperty() public quantity!: number;
+  @ApiProperty() public unitPrice!: number;
   @ApiProperty() public status!: string;
   @ApiProperty({ type: String, nullable: true, required: false }) public notes!: string | null;
+  @ApiProperty({ type: [OrderItemModifierDto] }) public modifiers!: OrderItemModifierDto[];
 }
 
 export class OrderDto {
