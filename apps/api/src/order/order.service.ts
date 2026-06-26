@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   CreateOrderDto,
@@ -7,7 +7,7 @@ import type {
 } from '@restaurant/shared';
 import { NotificationsService } from '../notifications/notifications.service';
 
-const WITH_ITEMS = { items: { orderBy: { id: 'asc' as const } } };
+const WITH_ITEMS = { items: { orderBy: { id: 'asc' as const }, include: { modifiers: true } } };
 
 @Injectable()
 export class OrderService {
@@ -33,19 +33,46 @@ export class OrderService {
   }
 
   public async create(dto: CreateOrderDto, staffId: string) {
-    const order = await this.prisma.order.create({
-      data: {
-        tableId: dto.tableId,
-        staffId,
-        notes: dto.notes ?? null,
-        items: {
-          create: dto.items.map((i) => ({
-            menuItemId: i.menuItemId,
-            quantity: i.quantity,
-            notes: i.notes ?? null,
-          })),
+    const menuItemIds = [...new Set(dto.items.map((i) => i.menuItemId))];
+    const menuItems = await this.prisma.menuItem.findMany({
+      where: { id: { in: menuItemIds } },
+      include: { modifierGroups: { include: { modifierGroup: { include: { options: true } } } } },
+    });
+    const byId = new Map(menuItems.map((m) => [m.id, m]));
+
+    const itemsCreate = dto.items.map((i) => {
+      const mi = byId.get(i.menuItemId);
+      if (!mi) throw new BadRequestException(`Menu item ${i.menuItemId} not found`);
+
+      const groups = mi.modifierGroups.map((mg) => mg.modifierGroup);
+      const optionById = new Map(groups.flatMap((g) => g.options).map((o) => [o.id, o]));
+      const chosen = i.modifierOptionIds ?? [];
+
+      for (const oid of chosen) {
+        if (!optionById.has(oid)) throw new BadRequestException(`Option ${oid} is not valid for ${mi.name}`);
+      }
+      for (const g of groups) {
+        const inGroup = g.options.filter((o) => chosen.includes(o.id));
+        if (g.required && inGroup.length === 0) throw new BadRequestException(`"${g.name}" is required for ${mi.name}`);
+        if (g.selectionType === 'single' && inGroup.length > 1) throw new BadRequestException(`Choose one for "${g.name}"`);
+      }
+
+      return {
+        menuItemId: i.menuItemId,
+        quantity: i.quantity,
+        notes: i.notes ?? null,
+        unitPrice: mi.price,
+        modifiers: {
+          create: chosen.map((oid) => {
+            const o = optionById.get(oid)!;
+            return { modifierOptionId: oid, name: o.name, priceDelta: o.priceDelta };
+          }),
         },
-      },
+      };
+    });
+
+    const order = await this.prisma.order.create({
+      data: { tableId: dto.tableId, staffId, notes: dto.notes ?? null, items: { create: itemsCreate } },
       include: WITH_ITEMS,
     });
     const table = await this.prisma.table.findUnique({ where: { id: dto.tableId } });

@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -43,6 +43,9 @@ const prismaMock = {
   },
   table: {
     findUnique: jest.fn(),
+  },
+  menuItem: {
+    findMany: jest.fn(),
   },
 };
 
@@ -96,12 +99,15 @@ describe('OrderService', () => {
 
   describe('create', () => {
     it('creates order with items for the authenticated staff', async () => {
+      prismaMock.menuItem.findMany.mockResolvedValue([
+        { id: 'mi-1', price: 2, modifierGroups: [] },
+      ]);
       prismaMock.order.create.mockResolvedValue(mockOrder);
       prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 1 });
       const dto = {
         tableId: 'tbl-1',
         notes: null,
-        items: [{ menuItemId: 'mi-1', quantity: 2, notes: null }],
+        items: [{ menuItemId: 'mi-1', quantity: 2, notes: null, modifierOptionIds: [] }],
       };
       const result = await service.create(dto, 'staff-1');
 
@@ -224,6 +230,48 @@ describe('OrderService', () => {
       await service.updateItemStatus('ord-1', 'item-1', { status: 'ready' });
 
       expect(prismaMock.order.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('create with modifiers', () => {
+    const steak = {
+      id: 'mi-1', name: 'Steak', price: 20,
+      modifierGroups: [{ modifierGroup: { id: 'g1', name: 'Temp', selectionType: 'single', required: true,
+        options: [{ id: 'o1', name: 'Rare', priceDelta: 0 }, { id: 'o2', name: 'Well', priceDelta: 0 }] } }],
+    };
+
+    it('snapshots unitPrice + modifier rows', async () => {
+      prismaMock.menuItem.findMany.mockResolvedValue([steak]);
+      prismaMock.order.create.mockResolvedValue({ ...mockOrder });
+      prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 5 });
+
+      await service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['o1'] }] }, 'staff-1');
+
+      const arg = prismaMock.order.create.mock.calls[0][0];
+      const item = arg.data.items.create[0];
+      expect(item.unitPrice).toBe(20);
+      expect(item.modifiers.create).toEqual([{ modifierOptionId: 'o1', name: 'Rare', priceDelta: 0 }]);
+    });
+
+    it('rejects an option not attached to the item', async () => {
+      prismaMock.menuItem.findMany.mockResolvedValue([steak]);
+      await expect(
+        service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['bogus'] }] }, 'staff-1'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects when a required group has no selection', async () => {
+      prismaMock.menuItem.findMany.mockResolvedValue([steak]);
+      await expect(
+        service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: [] }] }, 'staff-1'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects >1 option in a single group', async () => {
+      prismaMock.menuItem.findMany.mockResolvedValue([steak]);
+      await expect(
+        service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['o1', 'o2'] }] }, 'staff-1'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });
