@@ -42,6 +42,9 @@ model Table {
   seats     Int
   status    TableStatus @default(available)
   seatedAt  DateTime?
+  posX      Float?
+  posY      Float?
+  shape     String      @default("square")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
