@@ -143,13 +143,26 @@ model OrderItem {
   notes      String?
   firedAt    DateTime?
   readyAt    DateTime?
+  unitPrice  Decimal         @db.Decimal(10, 2) @default(0)
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
-  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+  order     Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem  MenuItem            @relation(fields: [menuItemId], references: [id])
+  modifiers OrderItemModifier[]
 
   @@map("order_items")
+}
+
+model OrderItemModifier {
+  id               String    @id @default(uuid())
+  orderItemId      String
+  modifierOptionId String
+  name             String
+  priceDelta       Decimal   @db.Decimal(10, 2) @default(0)
+  orderItem        OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@map("order_item_modifiers")
 }
 
 model Reservation {
