@@ -16,7 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { TableService } from './table.service';
-import { CreateTableDto, UpdateTableDto, SetTableStatusDto } from './dto/table.dto';
+import { CreateTableDto, UpdateTableDto, SetTableStatusDto, SaveTableLayoutDto } from './dto/table.dto';
 
 @ApiTags('tables')
 @ApiBearerAuth()
@@ -47,6 +47,16 @@ export class TableController {
   @ApiResponse({ status: 201, type: TableDto })
   public create(@Body() dto: CreateTableDto) {
     return this.tables.create(dto);
+  }
+
+  @Patch('layout')
+  @UseGuards(RolesGuard)
+  @Roles('manager')
+  @ApiOperation({ summary: 'Save table layout positions' })
+  @ApiBody({ type: SaveTableLayoutDto })
+  @ApiResponse({ status: 200, type: [TableDto] })
+  public saveLayout(@Body() dto: SaveTableLayoutDto) {
+    return this.tables.saveLayout(dto.tables);
   }
 
   @Patch(':id')

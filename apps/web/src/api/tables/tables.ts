@@ -23,6 +23,7 @@ import type {
 
 import type {
   CreateTableDto,
+  SaveTableLayoutDto,
   SetTableStatusDto,
   TableDto,
   UpdateTableDto,
@@ -509,6 +510,84 @@ export const useTableControllerRemove = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   return useMutation(getTableControllerRemoveMutationOptions(options), queryClient);
+};
+/**
+ * @summary Save table layout positions
+ */
+export const tableControllerSaveLayout = (
+  saveTableLayoutDto: SaveTableLayoutDto,
+  signal?: AbortSignal,
+) => {
+  return customInstance<TableDto[]>({
+    url: `/api/tables/layout`,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    data: saveTableLayoutDto,
+    signal,
+  });
+};
+
+export const getTableControllerSaveLayoutMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof tableControllerSaveLayout>>,
+    TError,
+    { data: SaveTableLayoutDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof tableControllerSaveLayout>>,
+  TError,
+  { data: SaveTableLayoutDto },
+  TContext
+> => {
+  const mutationKey = ['tableControllerSaveLayout'];
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof tableControllerSaveLayout>>,
+    { data: SaveTableLayoutDto }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return tableControllerSaveLayout(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TableControllerSaveLayoutMutationResult = NonNullable<
+  Awaited<ReturnType<typeof tableControllerSaveLayout>>
+>;
+export type TableControllerSaveLayoutMutationBody = SaveTableLayoutDto;
+export type TableControllerSaveLayoutMutationError = unknown;
+
+/**
+ * @summary Save table layout positions
+ */
+export const useTableControllerSaveLayout = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof tableControllerSaveLayout>>,
+      TError,
+      { data: SaveTableLayoutDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof tableControllerSaveLayout>>,
+  TError,
+  { data: SaveTableLayoutDto },
+  TContext
+> => {
+  return useMutation(getTableControllerSaveLayoutMutationOptions(options), queryClient);
 };
 /**
  * @summary Set table status

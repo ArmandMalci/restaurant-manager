@@ -217,11 +217,23 @@ export interface UpdateModifierGroupDto {
   options?: UpdateModifierGroupDtoOptionsItem[];
 }
 
+export type TableDtoShape = (typeof TableDtoShape)[keyof typeof TableDtoShape];
+
+export const TableDtoShape = {
+  square: 'square',
+  round: 'round',
+} as const;
+
 export interface TableDto {
   id: string;
   number: number;
   seats: number;
   status: string;
+  /** @nullable */
+  posX: number | null;
+  /** @nullable */
+  posY: number | null;
+  shape: TableDtoShape;
   createdAt: string;
   updatedAt: string;
 }
@@ -232,6 +244,13 @@ export const CreateTableDtoStatus = {
   available: 'available',
   occupied: 'occupied',
   reserved: 'reserved',
+} as const;
+
+export type CreateTableDtoShape = (typeof CreateTableDtoShape)[keyof typeof CreateTableDtoShape];
+
+export const CreateTableDtoShape = {
+  square: 'square',
+  round: 'round',
 } as const;
 
 export interface CreateTableDto {
@@ -246,6 +265,47 @@ export interface CreateTableDto {
    */
   seats: number;
   status: CreateTableDtoStatus;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  posX?: number | null;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  posY?: number | null;
+  shape?: CreateTableDtoShape;
+}
+
+export type SaveTableLayoutDtoTablesItemShape =
+  (typeof SaveTableLayoutDtoTablesItemShape)[keyof typeof SaveTableLayoutDtoTablesItemShape];
+
+export const SaveTableLayoutDtoTablesItemShape = {
+  square: 'square',
+  round: 'round',
+} as const;
+
+export type SaveTableLayoutDtoTablesItem = {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  id: string;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  posX: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  posY: number;
+  shape: SaveTableLayoutDtoTablesItemShape;
+};
+
+export interface SaveTableLayoutDto {
+  tables: SaveTableLayoutDtoTablesItem[];
 }
 
 export type UpdateTableDtoStatus = (typeof UpdateTableDtoStatus)[keyof typeof UpdateTableDtoStatus];
@@ -254,6 +314,13 @@ export const UpdateTableDtoStatus = {
   available: 'available',
   occupied: 'occupied',
   reserved: 'reserved',
+} as const;
+
+export type UpdateTableDtoShape = (typeof UpdateTableDtoShape)[keyof typeof UpdateTableDtoShape];
+
+export const UpdateTableDtoShape = {
+  square: 'square',
+  round: 'round',
 } as const;
 
 export interface UpdateTableDto {
@@ -268,6 +335,19 @@ export interface UpdateTableDto {
    */
   seats?: number;
   status?: UpdateTableDtoStatus;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  posX?: number | null;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  posY?: number | null;
+  shape?: UpdateTableDtoShape;
 }
 
 export type SetTableStatusDtoStatus =
