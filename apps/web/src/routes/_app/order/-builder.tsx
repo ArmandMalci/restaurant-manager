@@ -9,7 +9,7 @@
  */
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Minus, Plus, Trash2, ShoppingCart, X } from 'lucide-react';
+import { ShoppingCart, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   useMenuControllerGetCategories,
@@ -21,271 +21,18 @@ import {
   useOrderControllerCreate,
   invalidateOrderControllerGetAll,
 } from '@/api/orders/orders';
-import type { ModifierGroupDto, ModifierOptionDto } from '@/api/restaurantManagerAPI.schemas';
+import type { ModifierGroupDto } from '@/api/restaurantManagerAPI.schemas';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-
-// ── Line-item state shape ─────────────────────────────────────────────
-
-interface ChosenOption {
-  id: string;
-  name: string;
-  priceDelta: number;
-}
-
-interface LineItem {
-  menuItemId: string;
-  name: string;
-  basePrice: number;
-  quantity: number;
-  notes: string;
-  selectedOptions: ChosenOption[];
-}
-
-// ── Modifier selection panel ──────────────────────────────────────────
-
-interface ModifierPanelProps {
-  itemName: string;
-  groups: ModifierGroupDto[];
-  onAdd: (options: ChosenOption[]) => void;
-  onCancel: () => void;
-}
-
-function ModifierPanel({ itemName, groups, onAdd, onCancel }: ModifierPanelProps) {
-  // Map: groupId → selected option ids
-  const [selections, setSelections] = useState<Record<string, string[]>>({});
-
-  function toggleSingle(groupId: string, optionId: string) {
-    setSelections((prev) => ({ ...prev, [groupId]: [optionId] }));
-  }
-
-  function toggleMulti(groupId: string, optionId: string) {
-    setSelections((prev) => {
-      const current = prev[groupId] ?? [];
-      return {
-        ...prev,
-        [groupId]: current.includes(optionId)
-          ? current.filter((id) => id !== optionId)
-          : [...current, optionId],
-      };
-    });
-  }
-
-  const requiredSatisfied = groups
-    .filter((g) => g.required)
-    .every((g) => (selections[g.id]?.length ?? 0) >= 1);
-
-  function handleAdd() {
-    const chosen: ChosenOption[] = [];
-    for (const group of groups) {
-      const ids = selections[group.id] ?? [];
-      for (const id of ids) {
-        const opt = group.options.find((o: ModifierOptionDto) => o.id === id);
-        if (opt) {
-          chosen.push({ id: opt.id, name: opt.name, priceDelta: opt.priceDelta });
-        }
-      }
-    }
-    onAdd(chosen);
-  }
-
-  return (
-    <div className="flex flex-col gap-4 p-4 border border-border rounded-xl bg-card shadow-sm">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-foreground">Options for {itemName}</p>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-muted-foreground hover:text-foreground transition-colors rounded p-0.5"
-          aria-label="Cancel modifier selection"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      {groups.map((group) => (
-        <div key={group.id} className="flex flex-col gap-2">
-          <p className="text-xs font-medium text-muted-foreground">
-            {group.name}
-            {group.required && (
-              <span className="ml-1.5 text-destructive font-semibold">required</span>
-            )}
-            {group.selectionType === 'single' && (
-              <span className="ml-1.5 text-muted-foreground">(pick one)</span>
-            )}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {group.options.map((opt: ModifierOptionDto) => {
-              const isSingle = group.selectionType === 'single';
-              const selected = (selections[group.id] ?? []).includes(opt.id);
-              return (
-                <label
-                  key={opt.id}
-                  className={cn(
-                    'flex items-center gap-1.5 cursor-pointer rounded-lg border px-3 py-1.5 text-xs transition-colors',
-                    selected
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-background text-foreground hover:bg-muted',
-                  )}
-                >
-                  <input
-                    type={isSingle ? 'radio' : 'checkbox'}
-                    name={`group-${group.id}`}
-                    value={opt.id}
-                    checked={selected}
-                    onChange={() =>
-                      isSingle
-                        ? toggleSingle(group.id, opt.id)
-                        : toggleMulti(group.id, opt.id)
-                    }
-                    className="sr-only"
-                  />
-                  {opt.name}
-                  {opt.priceDelta !== 0 && (
-                    <span className="text-muted-foreground">
-                      {opt.priceDelta > 0 ? '+' : ''}
-                      {opt.priceDelta.toFixed(2)}
-                    </span>
-                  )}
-                </label>
-              );
-            })}
-          </div>
-        </div>
-      ))}
-
-      <div className="flex gap-2 pt-1">
-        <Button size="sm" onClick={handleAdd} disabled={!requiredSatisfied}>
-          Add to order
-        </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ── Ticket panel ──────────────────────────────────────────────────────
-
-interface TicketPanelProps {
-  lines: LineItem[];
-  notes: string;
-  onNotesChange: (v: string) => void;
-  onQtyChange: (idx: number, qty: number) => void;
-  onRemove: (idx: number) => void;
-  onFire: () => void;
-  isFiring: boolean;
-}
-
-function TicketPanel({
-  lines,
-  notes,
-  onNotesChange,
-  onQtyChange,
-  onRemove,
-  onFire,
-  isFiring,
-}: TicketPanelProps) {
-  const total = lines.reduce((sum, l) => {
-    const optDelta = l.selectedOptions.reduce((s, o) => s + o.priceDelta, 0);
-    return sum + (l.basePrice + optDelta) * l.quantity;
-  }, 0);
-
-  return (
-    <div className="flex flex-col h-full gap-3">
-      <p className="text-sm font-semibold text-foreground">Ticket</p>
-
-      {/* Line rows */}
-      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
-        {lines.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-8">No items yet</p>
-        ) : (
-          lines.map((line, idx) => {
-            const optDelta = line.selectedOptions.reduce((s, o) => s + o.priceDelta, 0);
-            const linePrice = (line.basePrice + optDelta) * line.quantity;
-            return (
-              // biome-ignore lint/suspicious/noArrayIndexKey: ticket lines have no stable id before firing
-              <div
-                key={idx}
-                className="flex items-start gap-2 rounded-lg border border-border bg-background p-2.5"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground leading-snug">{line.name}</p>
-                  {line.selectedOptions.length > 0 && (
-                    <p className="text-xs text-muted-foreground leading-snug mt-0.5">
-                      {line.selectedOptions.map((o) => o.name).join(', ')}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {linePrice.toFixed(2)}
-                  </p>
-                </div>
-
-                {/* Qty stepper */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => onQtyChange(idx, Math.max(1, line.quantity - 1))}
-                    className="flex h-5 w-5 items-center justify-center rounded border border-border text-muted-foreground hover:bg-muted transition-colors"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="h-3 w-3" />
-                  </button>
-                  <span className="w-5 text-center text-xs font-mono">{line.quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => onQtyChange(idx, line.quantity + 1)}
-                    className="flex h-5 w-5 items-center justify-center rounded border border-border text-muted-foreground hover:bg-muted transition-colors"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onRemove(idx)}
-                  className="text-muted-foreground hover:text-destructive rounded p-0.5 transition-colors shrink-0"
-                  aria-label="Remove item"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Notes */}
-      <Input
-        placeholder="Order notes (optional)"
-        value={notes}
-        onChange={(e) => onNotesChange(e.target.value)}
-        className="shrink-0"
-      />
-
-      {/* Total + Fire */}
-      <div className="shrink-0 flex items-center justify-between border-t border-border pt-3">
-        <p className="text-sm font-semibold text-foreground">Total</p>
-        <p className="text-base font-bold text-foreground">{total.toFixed(2)}</p>
-      </div>
-      <Button
-        className="w-full shrink-0"
-        disabled={lines.length === 0 || isFiring}
-        onClick={onFire}
-      >
-        {isFiring ? 'Firing…' : 'Fire order'}
-      </Button>
-    </div>
-  );
-}
+import { ModifierPanel } from './-modifier-panel';
+import type { ChosenOption } from './-modifier-panel';
+import { TicketPanel } from './-ticket-panel';
+import type { LineItem } from './-ticket-panel';
 
 // ── Pending item (awaiting modifier selection) ───────────────────────
 
@@ -318,13 +65,11 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
   const [ticketOpen, setTicketOpen] = useState(false);
 
-  // Filter menu items by selected category
   const visibleItems =
     activeCategoryId === ''
       ? menuItems.filter((m) => m.available)
       : menuItems.filter((m) => m.categoryId === activeCategoryId && m.available);
 
-  // Groups relevant to the pending item
   const pendingGroups = pendingItem
     ? (allGroups as ModifierGroupDto[]).filter((g) =>
         pendingItem.modifierGroupIds.includes(g.id),
@@ -356,7 +101,6 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
     selectedOptions: ChosenOption[],
   ) {
     setLines((prev) => {
-      // Merge with existing line only when options are identical
       const sameKey = (a: ChosenOption[], b: ChosenOption[]) =>
         a.length === b.length && a.every((o, i) => o.id === b[i].id);
       const existingIdx = prev.findIndex(
@@ -412,9 +156,8 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
   const ticketLineCount = lines.reduce((s, l) => s + l.quantity, 0);
 
   return (
-    /* Full-screen overlay */
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
-      {/* ── Top bar ── */}
+      {/* Top bar */}
       <div className="flex items-center justify-between border-b border-border px-4 py-3 shrink-0">
         <p className="text-base font-semibold text-foreground">New order</p>
         <button
@@ -427,9 +170,9 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
         </button>
       </div>
 
-      {/* ── Split body ── */}
+      {/* Split body */}
       <div className="flex flex-1 min-h-0">
-        {/* ── LEFT: table select + category tabs + grid ── */}
+        {/* LEFT: table select + category pills + menu grid */}
         <div className="flex flex-col flex-1 min-w-0 overflow-y-auto p-4 gap-4">
           {/* Table select */}
           <div className="flex flex-col gap-1">
@@ -506,7 +249,7 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
                 </p>
                 <p className="text-xs text-muted-foreground">{item.price.toFixed(2)}</p>
                 {item.modifierGroupIds.length > 0 && (
-                  <span className="text-[10px] text-primary font-medium">+ options</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">+ options</span>
                 )}
               </button>
             ))}
@@ -518,11 +261,12 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
           </div>
         </div>
 
-        {/* ── RIGHT: ticket (hidden on mobile, shown via Sheet) ── */}
+        {/* RIGHT: ticket (≥ md only) */}
         <div className="hidden md:flex flex-col w-80 shrink-0 border-l border-border p-4 overflow-y-auto">
           <TicketPanel
             lines={lines}
             notes={orderNotes}
+            tableId={tableId}
             onNotesChange={setOrderNotes}
             onQtyChange={handleQtyChange}
             onRemove={handleRemove}
@@ -532,7 +276,7 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
         </div>
       </div>
 
-      {/* ── Mobile: floating ticket button + bottom Sheet ── */}
+      {/* Mobile: ticket button */}
       <div className="md:hidden shrink-0 border-t border-border p-3 flex justify-end">
         <Button
           variant="outline"
@@ -550,19 +294,22 @@ export function OrderBuilder({ onClose }: OrderBuilderProps) {
         </Button>
       </div>
 
+      {/* Mobile: ticket as bottom Sheet */}
       <Sheet open={ticketOpen} onOpenChange={setTicketOpen}>
         <SheetContent side="bottom" className="h-[80vh] p-0">
           <SheetHeader className="px-4 pt-4 pb-0">
             <SheetTitle>Ticket</SheetTitle>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 pt-3 pb-0 min-h-0">
+          <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4 min-h-0">
             <TicketPanel
               lines={lines}
               notes={orderNotes}
+              tableId={tableId}
               onNotesChange={setOrderNotes}
               onQtyChange={handleQtyChange}
               onRemove={handleRemove}
               onFire={() => {
+                if (!tableId || lines.length === 0) return;
                 handleFire();
                 setTicketOpen(false);
               }}
