@@ -5,7 +5,6 @@ import { Plus, Trash2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   useOrderControllerGetAll,
-  useOrderControllerCreate,
   useOrderControllerUpdateStatus,
   useOrderControllerUpdateItemStatus,
   useOrderControllerRemove,
@@ -22,6 +21,7 @@ import { ListRow } from '@/components/ui/list-row';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { OrderBuilder } from './-builder';
 
 export const Route = createFileRoute('/_app/order/')({
   component: OrdersPage,
@@ -68,132 +68,6 @@ function timeAgo(date: Date): string {
   const hours = Math.floor(minutes / 60);
 
   return `${hours}h ago`;
-}
-
-// ── Create form ───────────────────────────────────────────────────────
-
-function CreateOrderForm({ onClose }: { onClose: () => void }) {
-  const { data: tables = [] } = useTableControllerGetAll();
-  const { data: menuItems = [] } = useMenuControllerGetItems();
-  const qc = useQueryClient();
-  const createOrder = useOrderControllerCreate();
-  const [tableId, setTableId] = useState('');
-  const [notes, setNotes] = useState('');
-  const [rows, setRows] = useState([{ menuItemId: '', quantity: 1, notes: '' }]);
-
-  const addRow = () => setRows((r) => [...r, { menuItemId: '', quantity: 1, notes: '' }]);
-  const removeRow = (i: number) => setRows((r) => r.filter((_, idx) => idx !== i));
-  const setRow = (i: number, patch: Partial<(typeof rows)[0]>) =>
-    setRows((r) => r.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
-
-  return (
-    <Card size="sm" className="mb-2">
-      <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const items = rows
-              .filter((r) => r.menuItemId)
-              .map((r) => ({
-                menuItemId: r.menuItemId,
-                quantity: r.quantity,
-                notes: r.notes || null,
-              }));
-
-            if (!items.length) return;
-            createOrder.mutate(
-              { data: { tableId, notes: notes || null, items } },
-              {
-                onSuccess: () => {
-                  invalidateOrderControllerGetAll(qc);
-                  onClose();
-                },
-              },
-            );
-          }}
-          className="space-y-3"
-        >
-          <p className="text-sm font-semibold">New Order</p>
-          <div className="flex flex-wrap gap-3">
-            <label className="flex flex-col gap-1 text-xs">
-              Table
-              <select
-                value={tableId}
-                onChange={(e) => setTableId(e.target.value)}
-                required
-                className="focus-visible:ring-ring rounded-md border border-border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-              >
-                <option value="">Select table…</option>
-                {tables.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    Table {t.number}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex min-w-40 flex-1 flex-col gap-1 text-xs">
-              Notes
-              <input
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional"
-                className="focus-visible:ring-ring rounded-md border border-border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-              />
-            </label>
-          </div>
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium text-muted-foreground">Items</p>
-            {rows.map((row, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: order row list has no stable id before submission
-              <div key={i} className="flex flex-wrap items-end gap-2">
-                <select
-                  value={row.menuItemId}
-                  onChange={(e) => setRow(i, { menuItemId: e.target.value })}
-                  required
-                  className="focus-visible:ring-ring min-w-36 flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-                >
-                  <option value="">Select item…</option>
-                  {menuItems.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  min={1}
-                  value={row.quantity}
-                  onChange={(e) => setRow(i, { quantity: Number(e.target.value) })}
-                  className="focus-visible:ring-ring w-14 rounded-md border border-border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2"
-                />
-                {rows.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeRow(i)}
-                    className="text-destructive hover:bg-muted rounded p-1 transition-colors"
-                    aria-label="Remove item row"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            ))}
-            <button type="button" onClick={addRow} className="text-primary text-xs hover:underline">
-              + Add item
-            </button>
-          </div>
-          <div className="flex gap-2">
-            <Button type="submit" variant="outline" size="sm" disabled={createOrder.isPending}>
-              Create
-            </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
-  );
 }
 
 // ── Order card ────────────────────────────────────────────────────────
@@ -413,39 +287,41 @@ function OrdersPage() {
   const totalOrders = orders.length;
 
   return (
-    <div className="flex flex-col h-full p-6 gap-4">
-      <PageHeader
-        title="Orders"
-        subtitle={`${totalOrders} order${totalOrders !== 1 ? 's' : ''} across ${ORDER_STATUSES.length} stages`}
-        action={
-          <Button onClick={() => setShowCreate((s) => !s)}>
-            <Plus className="h-4 w-4" />
-            New order
-          </Button>
-        }
-      />
+    <>
+      {/* Full-screen builder overlay */}
+      {showCreate && <OrderBuilder onClose={() => setShowCreate(false)} />}
 
-      {/* Create form */}
-      {showCreate && <CreateOrderForm onClose={() => setShowCreate(false)} />}
+      <div className="flex flex-col h-full p-6 gap-4">
+        <PageHeader
+          title="Orders"
+          subtitle={`${totalOrders} order${totalOrders !== 1 ? 's' : ''} across ${ORDER_STATUSES.length} stages`}
+          action={
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="h-4 w-4" />
+              New order
+            </Button>
+          }
+        />
 
-      {/* Kanban board — scroll-snap rail */}
-      <div className="overflow-x-auto flex-1 -mx-1 px-1">
-        {isLoading ? (
-          <OrdersSkeleton />
-        ) : (
-          <div className="flex gap-3 h-full snap-x snap-mandatory">
-            {ORDER_STATUSES.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                orders={columnOrders[status]}
-                tableMap={tableMap}
-                menuNameMap={menuNameMap}
-              />
-            ))}
-          </div>
-        )}
+        {/* Kanban board — scroll-snap rail */}
+        <div className="overflow-x-auto flex-1 -mx-1 px-1">
+          {isLoading ? (
+            <OrdersSkeleton />
+          ) : (
+            <div className="flex gap-3 h-full snap-x snap-mandatory">
+              {ORDER_STATUSES.map((status) => (
+                <KanbanColumn
+                  key={status}
+                  status={status}
+                  orders={columnOrders[status]}
+                  tableMap={tableMap}
+                  menuNameMap={menuNameMap}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
