@@ -20,6 +20,7 @@ import {
   invalidateBillingControllerFindOne,
 } from '@/api/billing/billing';
 import type { OrderDto, BillDto } from '@/api/restaurantManagerAPI.schemas';
+import { SplitPanel } from './-split-panel';
 
 export const Route = createFileRoute('/_app/checkout/')({
   component: BillingPage,
@@ -337,16 +338,29 @@ function BillingPage() {
             )}
 
             {activeBillId && bill && (
-              <BillResult
-                bill={bill}
-                onPay={() => payBill.mutate({ id: bill.id })}
-                isPaying={payBill.isPending}
-                payError={payBill.isError}
-                onDone={() => {
-                  setSelectedOrderId(null);
-                  setActiveBillId(null);
-                }}
-              />
+              <div className="space-y-4">
+                <BillResult
+                  bill={bill}
+                  onPay={() => payBill.mutate({ id: bill.id })}
+                  isPaying={payBill.isPending}
+                  payError={payBill.isError}
+                  onDone={() => {
+                    setSelectedOrderId(null);
+                    setActiveBillId(null);
+                  }}
+                />
+                {(() => {
+                  const billOrder = rawOrders.find((o) => o.id === bill.orderId);
+                  if (!billOrder) return null;
+                  return (
+                    <SplitPanel
+                      bill={bill}
+                      order={billOrder}
+                      tableNumber={tableById.get(billOrder.tableId)?.number}
+                    />
+                  );
+                })()}
+              </div>
             )}
           </div>
         </div>
