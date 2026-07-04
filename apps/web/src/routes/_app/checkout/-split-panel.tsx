@@ -89,26 +89,24 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
             />
 
             <div className="space-y-2">
-              {shares.map((amount, i) => {
-                return (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: split index is the bucket's stable identity
-                  <SplitRow
-                    key={i}
-                    index={i}
-                    amount={amount}
-                    disabled={amount <= 0 || amount > bill.remaining}
-                    method={methodFor(i)}
-                    onMethodChange={(m) => setMethods((prev) => ({ ...prev, [i]: m }))}
-                    isRecording={recordPayment.isPending}
-                    onRecord={() =>
-                      recordPayment.mutate({
-                        id: bill.id,
-                        data: { amount, method: methodFor(i) },
-                      })
-                    }
-                  />
-                );
-              })}
+              {shares.map((amount, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: split index is the bucket's stable identity
+                <SplitRow
+                  key={i}
+                  index={i}
+                  amount={amount}
+                  disabled={amount <= 0 || amount > bill.remaining}
+                  method={methodFor(i)}
+                  onMethodChange={(m) => setMethods((prev) => ({ ...prev, [i]: m }))}
+                  isRecording={recordPayment.isPending}
+                  onRecord={() =>
+                    recordPayment.mutate({
+                      id: bill.id,
+                      data: { amount, method: methodFor(i) },
+                    })
+                  }
+                />
+              ))}
             </div>
             {recordPayment.isError && (
               <p className="text-sm text-destructive">Payment failed. Try again.</p>
@@ -122,7 +120,7 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
               <CheckCircle2 className="h-4 w-4" />
               Settled
             </div>
-            <Button variant="outline" className="no-print w-full" onClick={() => window.print()}>
+            <Button className="no-print w-full" onClick={() => window.print()}>
               <Printer className="h-4 w-4" />
               Print receipt
             </Button>

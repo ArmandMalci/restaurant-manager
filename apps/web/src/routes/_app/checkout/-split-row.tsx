@@ -51,7 +51,7 @@ export function SplitRow({
           <SelectItem value={Method.other}>Other</SelectItem>
         </SelectContent>
       </Select>
-      <Button size="sm" disabled={disabled || isRecording} onClick={onRecord}>
+      <Button variant="outline" size="sm" disabled={disabled || isRecording} onClick={onRecord}>
         {isRecording ? 'Recording…' : 'Record payment'}
       </Button>
     </div>

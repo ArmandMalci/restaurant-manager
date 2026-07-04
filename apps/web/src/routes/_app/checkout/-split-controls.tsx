@@ -115,14 +115,12 @@ export function SplitControls({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: shareCount }, (_, i) => {
-                    return (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: split index is the bucket's stable identity
-                      <SelectItem key={i} value={String(i)}>
-                        Split {i + 1}
-                      </SelectItem>
-                    );
-                  })}
+                  {Array.from({ length: shareCount }, (_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: split index is the bucket's stable identity
+                    <SelectItem key={i} value={String(i)}>
+                      Split {i + 1}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
