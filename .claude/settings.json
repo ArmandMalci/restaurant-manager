@@ -34,6 +34,20 @@
     ]
   },
   "permissions": {
-    "deny": ["Read(./.env)", "Read(./.env.*)"]
+    "allow": ["Read(./.env.example)", "Read(./**/.env.example)"],
+    "deny": [
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(./.env.local)",
+      "Read(./**/.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./**/.env.*.local)",
+      "Read(./.env.development)",
+      "Read(./**/.env.development)",
+      "Read(./.env.production)",
+      "Read(./**/.env.production)",
+      "Read(./.env.staging)",
+      "Read(./**/.env.staging)"
+    ]
   }
 }
