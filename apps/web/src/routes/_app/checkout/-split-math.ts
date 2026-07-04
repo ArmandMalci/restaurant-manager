@@ -5,8 +5,8 @@
 import type { OrderItemDto } from '@/api/restaurantManagerAPI.schemas';
 
 export function lineItemTotal(item: OrderItemDto): number {
-  const modifierTotal = item.modifiers.reduce((sum, m) => sum + m.priceDelta, 0);
-  return (item.unitPrice + modifierTotal) * item.quantity;
+  const modifierTotal = item.modifiers.reduce((sum, m) => sum + Number(m.priceDelta), 0);
+  return (Number(item.unitPrice) + modifierTotal) * item.quantity;
 }
 
 /** N shares of `total`, cents-rounded, last share absorbs the remainder. Sums exactly to total. */

@@ -37,9 +37,13 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
     },
   });
 
+  const total = Number(bill.total);
+  const amountPaid = Number(bill.amountPaid);
+  const remaining = Number(bill.remaining);
+
   const shares =
     mode === 'even'
-      ? evenShares(bill.total, shareCount)
+      ? evenShares(total, shareCount)
       : byItemShares(order.items, assignments, shareCount);
 
   function changeShareCount(next: number) {
@@ -58,7 +62,7 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
     return methods[index] ?? Method.cash;
   }
 
-  const isSettled = bill.remaining === 0;
+  const isSettled = remaining === 0;
 
   return (
     <Card>
@@ -72,8 +76,7 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Paid ${bill.amountPaid.toFixed(2)} of ${bill.total.toFixed(2)} · $
-          {bill.remaining.toFixed(2)} remaining
+          Paid ${amountPaid.toFixed(2)} of ${total.toFixed(2)} · ${remaining.toFixed(2)} remaining
         </p>
 
         {!isSettled && (
@@ -95,7 +98,7 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
                   key={i}
                   index={i}
                   amount={amount}
-                  disabled={amount <= 0 || amount > bill.remaining}
+                  disabled={amount <= 0 || amount > remaining}
                   method={methodFor(i)}
                   onMethodChange={(m) => setMethods((prev) => ({ ...prev, [i]: m }))}
                   isRecording={recordPayment.isPending}

@@ -84,15 +84,17 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
     price: number;
     modifierGroupIds: string[];
   }) {
+    const price = Number(item.price);
+
     if (item.modifierGroupIds.length > 0) {
       setPendingItem({
         menuItemId: item.id,
         name: item.name,
-        basePrice: item.price,
+        basePrice: price,
         modifierGroupIds: item.modifierGroupIds,
       });
     } else {
-      addLine(item.id, item.name, item.price, []);
+      addLine(item.id, item.name, price, []);
     }
   }
 
@@ -249,7 +251,7 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
                 <p className="text-xs font-semibold text-foreground leading-snug line-clamp-2">
                   {item.name}
                 </p>
-                <p className="text-xs text-muted-foreground">{item.price.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">{Number(item.price).toFixed(2)}</p>
                 {item.modifierGroupIds.length > 0 && (
                   <span className="text-[10px] text-muted-foreground font-medium">+ options</span>
                 )}

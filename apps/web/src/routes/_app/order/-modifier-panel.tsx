@@ -51,7 +51,7 @@ export function ModifierPanel({ itemName, groups, onAdd, onCancel }: ModifierPan
       for (const id of ids) {
         const opt = group.options.find((o: ModifierOptionDto) => o.id === id);
         if (opt) {
-          chosen.push({ id: opt.id, name: opt.name, priceDelta: opt.priceDelta });
+          chosen.push({ id: opt.id, name: opt.name, priceDelta: Number(opt.priceDelta) });
         }
       }
     }
@@ -108,10 +108,10 @@ export function ModifierPanel({ itemName, groups, onAdd, onCancel }: ModifierPan
                     className="sr-only"
                   />
                   {opt.name}
-                  {opt.priceDelta !== 0 && (
+                  {Number(opt.priceDelta) !== 0 && (
                     <span className="text-muted-foreground">
-                      {opt.priceDelta > 0 ? '+' : ''}
-                      {opt.priceDelta.toFixed(2)}
+                      {Number(opt.priceDelta) > 0 ? '+' : ''}
+                      {Number(opt.priceDelta).toFixed(2)}
                     </span>
                   )}
                 </label>

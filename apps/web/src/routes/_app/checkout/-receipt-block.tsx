@@ -38,7 +38,7 @@ export function ReceiptBlock({ bill, order, tableNumber }: ReceiptBlockProps) {
               {item.quantity}× item
               {item.modifiers.map((m) => (
                 <span key={m.id} className="block pl-3 text-xs text-muted-foreground">
-                  + {m.name} (${m.priceDelta.toFixed(2)})
+                  + {m.name} (${Number(m.priceDelta).toFixed(2)})
                 </span>
               ))}
             </span>
@@ -49,21 +49,21 @@ export function ReceiptBlock({ bill, order, tableNumber }: ReceiptBlockProps) {
       <div className="space-y-1 border-t border-border pt-2 font-mono">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span>${bill.subtotal.toFixed(2)}</span>
+          <span>${Number(bill.subtotal).toFixed(2)}</span>
         </div>
-        {bill.discountPct > 0 && (
+        {Number(bill.discountPct) > 0 && (
           <div className="flex justify-between">
             <span>Discount</span>
-            <span>−{bill.discountPct}%</span>
+            <span>−{Number(bill.discountPct)}%</span>
           </div>
         )}
         <div className="flex justify-between">
           <span>Tax</span>
-          <span>${bill.tax.toFixed(2)}</span>
+          <span>${Number(bill.tax).toFixed(2)}</span>
         </div>
         <div className="flex justify-between font-semibold">
           <span>Total</span>
-          <span>${bill.total.toFixed(2)}</span>
+          <span>${Number(bill.total).toFixed(2)}</span>
         </div>
       </div>
       <div className="space-y-1 border-t border-border pt-2">
@@ -73,7 +73,7 @@ export function ReceiptBlock({ bill, order, tableNumber }: ReceiptBlockProps) {
         {bill.payments.map((p) => (
           <div key={p.id} className="flex justify-between font-mono text-xs">
             <span>{METHOD_LABEL[p.method as CreatePaymentDtoMethod] ?? p.method}</span>
-            <span>${p.amount.toFixed(2)}</span>
+            <span>${Number(p.amount).toFixed(2)}</span>
           </div>
         ))}
       </div>
