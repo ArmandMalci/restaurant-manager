@@ -21,7 +21,7 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { BillDto, CreateBillDto } from '../restaurantManagerAPI.schemas';
+import type { BillDto, CreateBillDto, CreatePaymentDto } from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
@@ -285,4 +285,77 @@ export const useBillingControllerPay = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   return useMutation(getBillingControllerPayMutationOptions(options), queryClient);
+};
+export const billingControllerRecordPayment = (
+  id: string,
+  createPaymentDto: CreatePaymentDto,
+  signal?: AbortSignal,
+) => {
+  return customInstance<BillDto>({
+    url: `/api/billing/${id}/payments`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data: createPaymentDto,
+    signal,
+  });
+};
+
+export const getBillingControllerRecordPaymentMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof billingControllerRecordPayment>>,
+    TError,
+    { id: string; data: CreatePaymentDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof billingControllerRecordPayment>>,
+  TError,
+  { id: string; data: CreatePaymentDto },
+  TContext
+> => {
+  const mutationKey = ['billingControllerRecordPayment'];
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof billingControllerRecordPayment>>,
+    { id: string; data: CreatePaymentDto }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return billingControllerRecordPayment(id, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type BillingControllerRecordPaymentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof billingControllerRecordPayment>>
+>;
+export type BillingControllerRecordPaymentMutationBody = CreatePaymentDto;
+export type BillingControllerRecordPaymentMutationError = unknown;
+
+export const useBillingControllerRecordPayment = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof billingControllerRecordPayment>>,
+      TError,
+      { id: string; data: CreatePaymentDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof billingControllerRecordPayment>>,
+  TError,
+  { id: string; data: CreatePaymentDto },
+  TContext
+> => {
+  return useMutation(getBillingControllerRecordPaymentMutationOptions(options), queryClient);
 };

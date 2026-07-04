@@ -1802,6 +1802,51 @@
         ]
       }
     },
+    "/api/billing/{id}/payments": {
+      "post": {
+        "operationId": "BillingController_recordPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "billing"
+        ]
+      }
+    },
     "/api/inventory": {
       "get": {
         "operationId": "InventoryController_findAll",
@@ -3547,6 +3592,33 @@
           "orderId"
         ]
       },
+      "PaymentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "billId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "method": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "billId",
+          "amount",
+          "method",
+          "createdAt"
+        ]
+      },
       "BillDto": {
         "type": "object",
         "properties": {
@@ -3580,6 +3652,18 @@
           },
           "updatedAt": {
             "type": "string"
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentDto"
+            }
+          },
+          "amountPaid": {
+            "type": "number"
+          },
+          "remaining": {
+            "type": "number"
           }
         },
         "required": [
@@ -3591,7 +3675,34 @@
           "total",
           "paid",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "payments",
+          "amountPaid",
+          "remaining"
+        ]
+      },
+      "CreatePaymentDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "card",
+              "other"
+            ],
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          }
+        },
+        "required": [
+          "amount",
+          "method"
         ]
       },
       "InventoryItemWithStatusDto": {

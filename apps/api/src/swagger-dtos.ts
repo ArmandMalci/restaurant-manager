@@ -137,6 +137,14 @@ export class ReservationDto {
 
 // ── Billing ───────────────────────────────────────────────────────────────────
 
+export class PaymentDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public billId!: string;
+  @ApiProperty() public amount!: number;
+  @ApiProperty() public method!: string;
+  @ApiProperty() public createdAt!: string;
+}
+
 export class BillDto {
   @ApiProperty() public id!: string;
   @ApiProperty() public orderId!: string;
@@ -148,6 +156,9 @@ export class BillDto {
   @ApiProperty({ type: String, nullable: true, required: false }) public paidAt!: string | null;
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
+  @ApiProperty({ type: [PaymentDto] }) public payments!: PaymentDto[];
+  @ApiProperty() public amountPaid!: number;
+  @ApiProperty() public remaining!: number;
 }
 
 // ── Inventory ─────────────────────────────────────────────────────────────────

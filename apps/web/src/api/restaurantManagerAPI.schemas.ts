@@ -673,6 +673,14 @@ export interface CreateBillDto {
   discountPct?: number;
 }
 
+export interface PaymentDto {
+  id: string;
+  billId: string;
+  amount: number;
+  method: string;
+  createdAt: string;
+}
+
 export interface BillDto {
   id: string;
   orderId: string;
@@ -685,6 +693,24 @@ export interface BillDto {
   paidAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  payments: PaymentDto[];
+  amountPaid: number;
+  remaining: number;
+}
+
+export type CreatePaymentDtoMethod =
+  (typeof CreatePaymentDtoMethod)[keyof typeof CreatePaymentDtoMethod];
+
+export const CreatePaymentDtoMethod = {
+  cash: 'cash',
+  card: 'card',
+  other: 'other',
+} as const;
+
+export interface CreatePaymentDto {
+  /** @exclusiveMinimum 0 */
+  amount: number;
+  method: CreatePaymentDtoMethod;
 }
 
 export interface InventoryItemWithStatusDto {

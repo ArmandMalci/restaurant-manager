@@ -13,7 +13,7 @@ import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BillDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BillingService } from './billing.service';
-import { CreateBillDto } from './dto/billing.dto';
+import { CreateBillDto, CreatePaymentDto } from './dto/billing.dto';
 
 @ApiTags('billing')
 @ApiBearerAuth()
@@ -40,5 +40,12 @@ export class BillingController {
   @ApiResponse({ status: 200, type: BillDto })
   public pay(@Param('id') id: string) {
     return this.billing.pay(id);
+  }
+
+  @Post(':id/payments')
+  @ApiBody({ type: CreatePaymentDto })
+  @ApiResponse({ status: 201, type: BillDto })
+  public recordPayment(@Param('id') id: string, @Body() dto: CreatePaymentDto) {
+    return this.billing.recordPayment(id, dto);
   }
 }
