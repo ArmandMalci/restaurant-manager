@@ -236,9 +236,20 @@ model Bill {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  order Order @relation(fields: [orderId], references: [id])
+  order    Order     @relation(fields: [orderId], references: [id])
+  payments Payment[]
 
   @@map("bills")
+}
+
+model Payment {
+  id        String   @id @default(uuid())
+  billId    String
+  amount    Decimal  @db.Decimal(10, 2)
+  method    String
+  createdAt DateTime @default(now())
+  bill      Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  @@map("payments")
 }
 
 enum KitchenStation {

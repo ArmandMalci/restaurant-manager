@@ -26,3 +26,18 @@ export const BillSplitSchema = z.object({
   subtotal: z.number().nonnegative(),
 });
 export type BillSplit = z.infer<typeof BillSplitSchema>;
+
+export const PaymentSchema = z.object({
+  id: z.string().uuid(),
+  billId: z.string().uuid(),
+  amount: z.number().positive(),
+  method: z.enum(['cash', 'card', 'other']),
+  createdAt: z.coerce.date(),
+});
+export type Payment = z.infer<typeof PaymentSchema>;
+
+export const CreatePaymentSchema = z.object({
+  amount: z.number().positive(),
+  method: z.enum(['cash', 'card', 'other']),
+});
+export type CreatePaymentDto = z.infer<typeof CreatePaymentSchema>;
