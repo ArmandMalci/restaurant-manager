@@ -7,7 +7,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { Bill } from '@prisma/client';
-import type { CreateBillDto } from './dto/billing.dto';
+import type { CreateBillDto, CreatePaymentDto } from './dto/billing.dto';
 
 @Injectable()
 export class BillingService {
@@ -67,14 +67,14 @@ export class BillingService {
     });
   }
 
-  public async findOne(id: string): Promise<Bill> {
-    const bill = await this.prisma.bill.findUnique({ where: { id } });
+  public async findOne(id: string): Promise<Bill & { payments: unknown[]; amountPaid: number; remaining: number }> {
+    const bill = await this.prisma.bill.findUnique({ where: { id }, include: { payments: true } });
 
-    if (!bill) {
-      throw new NotFoundException(`Bill ${id} not found`);
-    }
+    if (!bill) throw new NotFoundException(`Bill ${id} not found`);
 
-    return bill;
+    const amountPaid = bill.payments.reduce((s, p) => s + Number(p.amount), 0);
+
+    return { ...bill, amountPaid, remaining: Math.max(0, Number(bill.total) - amountPaid) };
   }
 
   public async pay(id: string): Promise<Bill> {
@@ -88,5 +88,24 @@ export class BillingService {
       where: { id },
       data: { paid: true, paidAt: new Date() },
     });
+  }
+
+  public async recordPayment(id: string, dto: CreatePaymentDto) {
+    const bill = await this.findOne(id);
+
+    if (bill.paid) throw new ConflictException(`Bill ${id} is already paid`);
+
+    const payment = await this.prisma.payment.create({
+      data: { billId: id, amount: dto.amount, method: dto.method },
+    });
+
+    const amountPaid = bill.amountPaid + Number(payment.amount);
+    const total = Number(bill.total);
+
+    if (amountPaid >= total) {
+      await this.prisma.bill.update({ where: { id }, data: { paid: true, paidAt: new Date() } });
+    }
+
+    return this.findOne(id);
   }
 }
