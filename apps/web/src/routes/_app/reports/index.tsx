@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -8,13 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { MetricCell } from '@/components/ui/metric-cell';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 export const Route = createFileRoute('/_app/reports/')({
   component: ReportsPage,
@@ -30,9 +22,9 @@ const ORDER_STATUS_LABELS: Record<string, string> = {
 
 const ORDER_STATUS_CLASSES: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
-  sent: 'bg-accent/10 text-accent-foreground',
-  in_progress: 'bg-warning/10 text-warning-foreground',
-  ready: 'bg-success/10 text-success-foreground',
+  sent: 'bg-accent/10 text-accent',
+  in_progress: 'bg-warning/10 text-warning',
+  ready: 'bg-success/10 text-success',
   served: 'bg-secondary text-secondary-foreground',
 };
 
@@ -54,37 +46,25 @@ function MetricCellSkeleton() {
 
 function ReportsPage() {
   const { data, isLoading, refetch, isFetching } = useReportsControllerGetSummary();
-  const [dateRange, setDateRange] = useState('today');
 
   const totalOrders = data ? Object.values(data.ordersByStatus).reduce((a, b) => a + b, 0) : 0;
   const totalTables = data ? Object.values(data.tablesByStatus).reduce((a, b) => a + b, 0) : 0;
   const occupiedTables = data?.tablesByStatus.occupied ?? 0;
   const occupiedPct = totalTables > 0 ? Math.round((occupiedTables / totalTables) * 100) : 0;
 
+  // ponytail: date-range filter removed — GET /api/reports/summary takes no params.
+  // Re-add once the backend accepts a from/to (or range) query param.
   const headerAction = (
-    <div className="flex items-center gap-2">
-      <Select value={dateRange} onValueChange={(v) => setDateRange(v ?? 'today')}>
-        <SelectTrigger size="sm">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="today">Today</SelectItem>
-          <SelectItem value="week">This week</SelectItem>
-          <SelectItem value="month">This month</SelectItem>
-          <SelectItem value="quarter">This quarter</SelectItem>
-        </SelectContent>
-      </Select>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => refetch()}
-        disabled={isFetching}
-      >
-        <RefreshCw className={cn('h-3.5 w-3.5', isFetching && 'animate-spin')} />
-        Refresh
-      </Button>
-    </div>
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={() => refetch()}
+      disabled={isFetching}
+    >
+      <RefreshCw className={cn('h-3.5 w-3.5', isFetching && 'animate-spin')} />
+      Refresh
+    </Button>
   );
 
   return (
