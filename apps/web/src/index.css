@@ -256,3 +256,16 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Touch-safe hit areas on coarse-pointer (tablet/phone) devices only.
+   Desktop/fine-pointer keeps the dense productivity scale. 44px = 2.75rem. */
+@media (pointer: coarse) {
+  [data-slot='button'],
+  [data-slot='input'],
+  [data-slot='select-trigger'] {
+    min-height: 2.75rem;
+  }
+  [data-slot='button'] {
+    min-width: 2.75rem;
+  }
+}
