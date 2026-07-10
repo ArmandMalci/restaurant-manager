@@ -11,6 +11,7 @@ import {
   useBillingControllerRecordPayment,
   invalidateBillingControllerFindOne,
 } from '@/api/billing/billing';
+import { invalidateOrderControllerGetAll } from '@/api/orders/orders';
 import type { BillDto, OrderDto, CreatePaymentDtoMethod } from '@/api/restaurantManagerAPI.schemas';
 import { CreatePaymentDtoMethod as Method } from '@/api/restaurantManagerAPI.schemas';
 import { evenShares, byItemShares } from './-split-math';
@@ -33,13 +34,21 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
 
   const recordPayment = useBillingControllerRecordPayment({
     mutation: {
-      onSuccess: () => invalidateBillingControllerFindOne(qc, bill.id),
+      onSuccess: () => {
+        invalidateBillingControllerFindOne(qc, bill.id);
+        invalidateOrderControllerGetAll(qc);
+      },
     },
   });
 
   const total = Number(bill.total);
   const amountPaid = Number(bill.amountPaid);
   const remaining = Number(bill.remaining);
+
+  function payInFull() {
+    if (remaining <= 0) return;
+    recordPayment.mutate({ id: bill.id, data: { amount: remaining, method: Method.card } });
+  }
 
   const shares =
     mode === 'even'
@@ -81,6 +90,12 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
 
         {!isSettled && (
           <>
+            <Button className="w-full" disabled={recordPayment.isPending} onClick={payInFull}>
+              {recordPayment.isPending ? 'Processing…' : `Pay in full · $${remaining.toFixed(2)}`}
+            </Button>
+
+            <p className="text-center text-xs text-muted-foreground">or split the bill</p>
+
             <SplitControls
               mode={mode}
               onModeChange={setMode}

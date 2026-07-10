@@ -15,7 +15,6 @@ import { useOrderControllerGetAll, invalidateOrderControllerGetAll } from '@/api
 import { useTableControllerGetAll } from '@/api/tables/tables';
 import {
   useBillingControllerCreate,
-  useBillingControllerPay,
   useBillingControllerFindOne,
   invalidateBillingControllerFindOne,
 } from '@/api/billing/billing';
@@ -150,13 +149,11 @@ function BillDetail({
 
 interface BillResultProps {
   bill: BillDto;
-  onPay: () => void;
-  isPaying: boolean;
-  payError: boolean;
   onDone: () => void;
 }
 
-function BillResult({ bill, onPay, isPaying, payError, onDone }: BillResultProps) {
+/** Read-only bill summary. Settlement happens in SplitPanel below. */
+function BillResult({ bill, onDone }: BillResultProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -178,20 +175,17 @@ function BillResult({ bill, onPay, isPaying, payError, onDone }: BillResultProps
           <MetricCell label="Total" value={`$${Number(bill.total).toFixed(2)}`} />
         </div>
 
-        {!bill.paid ? (
-          <div className="space-y-2 border-t border-border pt-3">
-            <Button onClick={onPay} disabled={isPaying} className="w-full">
-              {isPaying ? 'Processing…' : 'Mark as Paid'}
-            </Button>
-            {payError && <p className="text-sm text-destructive">Payment failed. Try again.</p>}
-          </div>
-        ) : (
+        {bill.paid ? (
           <div className="flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2 text-sm font-medium text-success">
             <CheckCircle className="h-4 w-4" />
             Paid
             {bill.paidAt
               ? ` · ${new Date(bill.paidAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
               : ''}
+          </div>
+        ) : (
+          <div className="rounded-lg bg-muted px-3 py-2 text-sm font-medium text-muted-foreground">
+            Awaiting payment
           </div>
         )}
 
@@ -229,16 +223,8 @@ function BillingPage() {
     query: { enabled: !!activeBillId },
   });
 
-  const payBill = useBillingControllerPay({
-    mutation: {
-      onSuccess: () => {
-        if (activeBillId) invalidateBillingControllerFindOne(qc, activeBillId);
-      },
-    },
-  });
-
   const tableById = new Map(tables.map((t) => [t.id, t]));
-  const billableOrders = rawOrders.filter((o) => BILLABLE_STATUSES.has(o.status));
+  const billableOrders = rawOrders.filter((o) => BILLABLE_STATUSES.has(o.status) && !o.bill?.paid);
   const selectedOrder = billableOrders.find((o) => o.id === selectedOrderId);
 
   function selectOrder(orderId: string) {
@@ -284,7 +270,7 @@ function BillingPage() {
     <div className="p-6">
       <PageHeader title="Checkout" subtitle={subtitle} />
 
-      {billableOrders.length === 0 ? (
+      {billableOrders.length === 0 && !activeBillId ? (
         <EmptyState
           icon={Receipt}
           title="No orders ready for checkout"
@@ -300,19 +286,25 @@ function BillingPage() {
                 Ready for checkout
               </span>
             </div>
-            {billableOrders.map((order) => {
-              const table = tableById.get(order.tableId);
+            {billableOrders.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                No orders ready for checkout
+              </p>
+            ) : (
+              billableOrders.map((order) => {
+                const table = tableById.get(order.tableId);
 
-              return (
-                <CheckoutRow
-                  key={order.id}
-                  order={order}
-                  tableNumber={table?.number}
-                  isSelected={order.id === selectedOrderId}
-                  onSelect={selectOrder}
-                />
-              );
-            })}
+                return (
+                  <CheckoutRow
+                    key={order.id}
+                    order={order}
+                    tableNumber={table?.number}
+                    isSelected={order.id === selectedOrderId}
+                    onSelect={selectOrder}
+                  />
+                );
+              })
+            )}
           </Card>
 
           {/* Detail panel */}
@@ -341,9 +333,6 @@ function BillingPage() {
               <div className="space-y-4">
                 <BillResult
                   bill={bill}
-                  onPay={() => payBill.mutate({ id: bill.id })}
-                  isPaying={payBill.isPending}
-                  payError={payBill.isError}
                   onDone={() => {
                     setSelectedOrderId(null);
                     setActiveBillId(null);
