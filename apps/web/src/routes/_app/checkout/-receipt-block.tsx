@@ -3,9 +3,11 @@
  * Dash-prefixed: not a route.
  */
 import { lineItemTotal } from './-split-math';
+import { useSettingsControllerGet } from '@/api/settings/settings';
 import type { BillDto, OrderDto, CreatePaymentDtoMethod } from '@/api/restaurantManagerAPI.schemas';
 
-const RESTAURANT_NAME = 'RestoManager';
+// ponytail: fallback only — real name/address/phone come from Settings once loaded.
+const DEFAULT_RESTAURANT_NAME = 'RestoManager';
 
 const METHOD_LABEL: Record<string, string> = {
   cash: 'Cash',
@@ -20,13 +22,17 @@ export interface ReceiptBlockProps {
 }
 
 export function ReceiptBlock({ bill, order, tableNumber }: ReceiptBlockProps) {
+  const { data: settings } = useSettingsControllerGet();
+  const contactLine = [settings?.address, settings?.phone].filter(Boolean).join(' · ');
+
   return (
     <div
       id="receipt"
       className="space-y-3 rounded-lg border border-border bg-background p-4 text-sm"
     >
       <div className="text-center">
-        <p className="font-semibold">{RESTAURANT_NAME}</p>
+        <p className="font-semibold">{settings?.name || DEFAULT_RESTAURANT_NAME}</p>
+        {contactLine && <p className="text-xs text-muted-foreground">{contactLine}</p>}
         <p className="text-xs text-muted-foreground">
           {tableNumber !== undefined ? `Table ${tableNumber}` : 'Checkout'}
         </p>
