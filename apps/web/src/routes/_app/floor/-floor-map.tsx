@@ -4,7 +4,7 @@
  *
  * File is dash-prefixed so TanStack Router ignores it as a route.
  */
-import { useRef } from 'react';
+import { useRef, type CSSProperties } from 'react';
 import { Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from '@/components/ui/status';
@@ -33,6 +33,7 @@ export const STATUS_BG: Record<TableStatus, string> = {
 function tileSizeClass(seats: number): string {
   if (seats <= 2) return 'h-14 w-14';
   if (seats <= 4) return 'h-16 w-16';
+
   return 'h-20 w-20';
 }
 
@@ -91,23 +92,22 @@ function Tile({
   const sizeClass = tileSizeClass(table.seats);
   const isRound = shape === 'round';
 
-  return (
-    <div
-      style={{ left: `${posX}%`, top: `${posY}%`, transform: 'translate(-50%, -50%)' }}
-      className={cn(
-        'absolute flex flex-col items-center justify-center border-2 shadow-sm select-none',
-        sizeClass,
-        STATUS_BG[statusKey],
-        isRound ? 'rounded-full' : 'rounded-md',
-        editMode ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
-        isDragging && 'opacity-60 scale-105 z-20',
-        !isDragging && 'hover:shadow-md transition-shadow z-10',
-      )}
-      onPointerDown={editMode ? onPointerDown : undefined}
-      onClick={!editMode ? onClick : undefined}
-      role={editMode ? undefined : 'button'}
-      aria-label={`Table ${table.number}`}
-    >
+  const style: CSSProperties = {
+    left: `${posX}%`,
+    top: `${posY}%`,
+    transform: 'translate(-50%, -50%)',
+  };
+  const className = cn(
+    'absolute flex flex-col items-center justify-center border-2 shadow-sm select-none',
+    sizeClass,
+    STATUS_BG[statusKey],
+    isRound ? 'rounded-full' : 'rounded-md',
+    editMode ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
+    isDragging && 'opacity-60 scale-105 z-20',
+    !isDragging && 'hover:shadow-md transition-shadow z-10',
+  );
+  const content = (
+    <>
       <p className="text-xs font-semibold text-foreground leading-none">T{table.number}</p>
       <p className="flex items-center gap-0.5 text-[10px] text-muted-foreground mt-0.5 leading-none">
         <Users className="h-2.5 w-2.5" />
@@ -131,7 +131,31 @@ function Tile({
           {isRound ? '□' : '○'}
         </button>
       )}
-    </div>
+    </>
+  );
+
+  // Edit mode is a drag surface (pointer-driven, has its own shape-toggle
+  // <button> inside) — a plain div avoids nesting a <button> inside a <button>.
+  // Read-only mode is a real tap target, so it's a semantic <button> and gets
+  // native keyboard (Enter/Space) activation for free.
+  if (editMode) {
+    return (
+      <div style={style} className={className} onPointerDown={onPointerDown}>
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      style={style}
+      className={className}
+      onClick={onClick}
+      aria-label={`Table ${table.number}`}
+    >
+      {content}
+    </button>
   );
 }
 
@@ -152,10 +176,12 @@ export function FloorMap({
   // Resolve position: edit-mode override → server posX/posY → null
   function getPos(table: TableDto): { posX: number; posY: number; shape: TableDtoShape } | null {
     const override = positions[table.id];
+
     if (override) return override;
     if (table.posX != null && table.posY != null) {
       return { posX: table.posX, posY: table.posY, shape: table.shape as TableDtoShape };
     }
+
     return null;
   }
 
@@ -166,12 +192,15 @@ export function FloorMap({
     e.preventDefault();
     onDragStart?.(table.id);
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
     function handleMove(me: PointerEvent) {
-      const rect = canvas!.getBoundingClientRect();
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
       const posX = clamp(((me.clientX - rect.left) / rect.width) * 100, 2, 98);
       const posY = clamp(((me.clientY - rect.top) / rect.height) * 100, 2, 98);
+
       onDrop?.(table.id, posX, posY);
     }
 
@@ -188,9 +217,11 @@ export function FloorMap({
   function handleCanvasPointerUp(e: React.PointerEvent) {
     if (!editMode || !draggingId) return;
     const rect = canvasRef.current?.getBoundingClientRect();
+
     if (!rect) return;
     const posX = clamp(((e.clientX - rect.left) / rect.width) * 100, 2, 98);
     const posY = clamp(((e.clientY - rect.top) / rect.height) * 100, 2, 98);
+
     onDrop?.(draggingId, posX, posY);
   }
 
@@ -207,7 +238,10 @@ export function FloorMap({
         onPointerUp={handleCanvasPointerUp}
       >
         {placed.map((table) => {
-          const pos = getPos(table)!;
+          const pos = getPos(table);
+
+          if (!pos) return null;
+
           return (
             <Tile
               key={table.id}
@@ -246,6 +280,7 @@ export function FloorMap({
           <div className="flex flex-wrap gap-2">
             {unplaced.map((table) => {
               const statusKey = table.status as TableStatus;
+
               return (
                 <div
                   key={table.id}
@@ -268,17 +303,11 @@ export function FloorMap({
                         me.clientX <= rect.right &&
                         me.clientY >= rect.top &&
                         me.clientY <= rect.bottom;
+
                       if (inCanvas) {
-                        const posX = clamp(
-                          ((me.clientX - rect.left) / rect.width) * 100,
-                          2,
-                          98,
-                        );
-                        const posY = clamp(
-                          ((me.clientY - rect.top) / rect.height) * 100,
-                          2,
-                          98,
-                        );
+                        const posX = clamp(((me.clientX - rect.left) / rect.width) * 100, 2, 98);
+                        const posY = clamp(((me.clientY - rect.top) / rect.height) * 100, 2, 98);
+
                         onDrop?.(table.id, posX, posY);
                       }
                     }

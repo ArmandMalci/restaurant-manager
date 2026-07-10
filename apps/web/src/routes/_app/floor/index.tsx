@@ -250,7 +250,10 @@ function TableCard({ table, onEdit, onDelete, onCycleStatus, onTableClick }: Tab
         <Button
           variant="ghost"
           size="icon-xs"
-          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
           aria-label="Edit table"
         >
           <Pencil />
@@ -258,7 +261,10 @@ function TableCard({ table, onEdit, onDelete, onCycleStatus, onTableClick }: Tab
         <Button
           variant="ghost"
           size="icon-xs"
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
           aria-label="Delete table"
           className="hover:text-destructive"
         >
@@ -279,7 +285,10 @@ function TableCard({ table, onEdit, onDelete, onCycleStatus, onTableClick }: Tab
       <div className="border-t border-border px-3 py-2 flex justify-center">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onCycleStatus(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCycleStatus();
+          }}
           title={`Switch to ${STATUS_LABELS[NEXT_STATUS[statusKey]]}`}
           className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
@@ -337,6 +346,7 @@ function TablesPage() {
   function handleEnterEditMode() {
     // Snapshot current server positions as local state
     const snap: Record<string, PositionOverride> = {};
+
     for (const t of tables) {
       if (t.posX != null && t.posY != null) {
         snap[t.id] = { posX: t.posX, posY: t.posY, shape: t.shape as TableDtoShape };
@@ -356,7 +366,10 @@ function TablesPage() {
     setPositions((prev) => {
       const existing = prev[tableId];
       const shape: TableDtoShape =
-        existing?.shape ?? (tables.find((t) => t.id === tableId)?.shape as TableDtoShape) ?? 'square';
+        existing?.shape ??
+        (tables.find((t) => t.id === tableId)?.shape as TableDtoShape) ??
+        'square';
+
       return { ...prev, [tableId]: { posX, posY, shape } };
     });
     setDraggingId(null);
@@ -365,7 +378,9 @@ function TablesPage() {
   function handleShapeToggle(tableId: string) {
     setPositions((prev) => {
       const existing = prev[tableId];
+
       if (!existing) return prev;
+
       return {
         ...prev,
         [tableId]: {
@@ -383,6 +398,7 @@ function TablesPage() {
       posY: pos.posY,
       shape: pos.shape,
     }));
+
     saveLayout.mutate(
       { data: { tables: items } },
       {
@@ -435,23 +451,21 @@ function TablesPage() {
               >
                 Cancel
               </button>
-              <Button
-                onClick={handleSaveLayout}
-                disabled={saveLayout.isPending}
-              >
+              <Button onClick={handleSaveLayout} disabled={saveLayout.isPending}>
                 {saveLayout.isPending ? 'Saving…' : 'Save layout'}
               </Button>
             </div>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              {/* View toggle */}
+              {/* View toggle — secondary/muted selected state; bg-accent is reserved
+                  for the single primary CTA (Add table) per the one-accent-CTA rule. */}
               <div className="flex rounded-md border border-border overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setViewMode('map')}
                   className={
                     effectiveView === 'map'
-                      ? 'px-2.5 py-1.5 bg-accent text-accent-foreground'
+                      ? 'px-2.5 py-1.5 bg-muted text-foreground transition-colors'
                       : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
                   }
                   aria-label="Map view"
@@ -464,7 +478,7 @@ function TablesPage() {
                   onClick={() => setViewMode('grid')}
                   className={
                     effectiveView === 'grid'
-                      ? 'px-2.5 py-1.5 bg-accent text-accent-foreground'
+                      ? 'px-2.5 py-1.5 bg-muted text-foreground transition-colors'
                       : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
                   }
                   aria-label="Grid view"
@@ -541,10 +555,7 @@ function TablesPage() {
       )}
 
       {/* Action sheet */}
-      <TableActionSheet
-        table={selectedTable}
-        onClose={() => setSelectedTable(null)}
-      />
+      <TableActionSheet table={selectedTable} onClose={() => setSelectedTable(null)} />
 
       {/* Dialogs */}
       {modal.type === 'create' && (
@@ -552,7 +563,15 @@ function TablesPage() {
           title="Add Table"
           onSave={(data) => {
             createTable.mutate(
-              { data },
+              {
+                // Default posX/posY so the new table is visible on the map right
+                // away — without this, FloorMap only renders `placed` tables and
+                // the new one is invisible until someone drags it in via Edit
+                // layout. Stagger by current table count so sequential adds
+                // don't all land on the exact same spot (still just a starting
+                // point — Edit layout remains the real placement tool).
+                data: { ...data, posX: 8 + ((tables.length * 14) % 84), posY: 12, shape: 'square' },
+              },
               {
                 onSuccess: () => {
                   invalidateTableControllerGetAll(qc);
