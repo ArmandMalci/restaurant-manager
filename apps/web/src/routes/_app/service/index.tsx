@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { CircleCheck } from 'lucide-react';
 import { useServiceControllerGetSnapshot } from '@/api/service/service';
 import { PageHeader } from '@/components/ui/page-header';
@@ -7,6 +7,7 @@ import { ListRow } from '@/components/ui/list-row';
 import { StatusDot } from '@/components/ui/status';
 import type { Tone } from '@/components/ui/status';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 
@@ -37,8 +38,8 @@ function asTone(s: string): Tone {
 }
 
 function formatAge(ageMin: number): string {
-  if (ageMin > 0) return `${ageMin}m`;
-  if (ageMin < 0) return `in ${-ageMin}m`;
+  if (ageMin > 0) return formatMins(ageMin);
+  if (ageMin < 0) return `in ${formatMins(-ageMin)}`;
 
   return 'now';
 }
@@ -145,7 +146,7 @@ function ServicePage() {
           <MetricCell
             label="Kitchen load"
             value={String(pulse?.kitchen.ticketCount ?? 0)}
-            sub={`${pulse?.kitchen.oldestMin ?? 0}m oldest`}
+            sub={`${formatMins(pulse?.kitchen.oldestMin ?? 0)} oldest`}
           />
         </div>
       )}
@@ -198,14 +199,16 @@ function ServicePage() {
           </p>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
             {floor.map((t) => (
-              <div
+              <Button
                 key={t.id}
+                variant="outline"
+                render={<Link to="/floor" />}
                 title={`Table ${t.number} — ${t.status}${t.ageMin != null ? ` (${t.ageMin}m)` : ''}`}
-                className="bg-card border-border flex items-center gap-1.5 rounded-lg border px-2 py-1.5"
+                className="h-auto min-h-11 justify-start gap-1.5 bg-card px-2 py-1.5 font-normal"
               >
                 <StatusDot tone={statusToTone(t.status)} size="sm" />
                 <span className="text-foreground text-xs font-medium">T{t.number}</span>
-              </div>
+              </Button>
             ))}
           </div>
         </div>
