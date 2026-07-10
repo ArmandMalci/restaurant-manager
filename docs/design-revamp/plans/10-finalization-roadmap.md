@@ -54,14 +54,16 @@ Implementations land in Tier 2 (spine).
 
 ---
 
-## Tier 2 — Critical spine + money (the loop connects here)
+## Tier 2 — Critical spine + money (the loop connects here) — DONE ([Plan 12](12-tier2-spine.md))
 
-- [ ] **T2.1 · Checkout settle → clear** — Implement D1: single settlement, `paid` status, settled tables leave the queue.
-- [ ] **T2.2 · Order loads the table's ticket** — Implement D2: builder hydrates from the table's open order.
-- [ ] **T2.3 · KDS cook-bump** — Per-item "ready" bump (D3); replace the board-wide `isBumping` flag with per-item pending
+> **D1 implemented via DERIVE-from-`bill.paid`, not a `paid` enum** (domain-judge recommendation — avoids a manual-transition attack surface, no migration). `pay()` was deleted (it flipped paid with no Payment row → $0≠total receipt); settlement is now the single `recordPayment` path (atomic `$transaction`, Decimal reconciliation). **Verified end-to-end against the running app:** resume existing bill → Pay-in-full → order leaves the queue (derived). D2 add-items endpoint domain-judged + verified (builder loads "Table 6 · open order"). D3/T2.4/T2.5 verified (floor/door/inventory responsive checked at 390px).
+
+- [x] **T2.1 · Checkout settle → clear** — Implement D1: single settlement, `paid` status, settled tables leave the queue.
+- [x] **T2.2 · Order loads the table's ticket** — Implement D2: builder hydrates from the table's open order.
+- [x] **T2.3 · KDS cook-bump** — Per-item "ready" bump (D3); replace the board-wide `isBumping` flag with per-item pending
   state (fixes "one bump freezes the board"); add a short undo window on an accidental bump.
-- [ ] **T2.4 · Menu category actions reachable** — Make category edit/delete always-visible (drop `group-hover`), ≥44px.
-- [ ] **T2.5 · Worst responsive breaks** — Floor phone header overlap; Inventory phone table (scroll or card-collapse);
+- [x] **T2.4 · Menu category actions reachable** — Make category edit/delete always-visible (drop `group-hover`), ≥44px.
+- [x] **T2.5 · Worst responsive breaks** — Floor phone header overlap; Inventory phone table (scroll or card-collapse);
   Door row keeps the guest name on phone; Login card fills the panel instead of floating at top.
 
 ---
