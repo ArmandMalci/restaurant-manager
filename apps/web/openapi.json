@@ -10,9 +10,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Health"
-        ]
+        "tags": ["Health"]
       }
     },
     "/api/auth/login": {
@@ -34,10 +32,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "email",
-                  "password"
-                ]
+                "required": ["email", "password"]
               }
             }
           }
@@ -47,9 +42,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/api/auth/refresh": {
@@ -61,9 +54,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/api/auth/logout": {
@@ -75,9 +66,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/api/menu/categories": {
@@ -105,9 +94,7 @@
           }
         ],
         "summary": "List all menu categories",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "post": {
         "operationId": "MenuController_createCategory",
@@ -140,9 +127,7 @@
           }
         ],
         "summary": "Create a menu category",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       }
     },
     "/api/menu/categories/{id}": {
@@ -176,9 +161,7 @@
           }
         ],
         "summary": "Get a category by id",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "patch": {
         "operationId": "MenuController_updateCategory",
@@ -220,9 +203,7 @@
           }
         ],
         "summary": "Update a menu category",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "delete": {
         "operationId": "MenuController_removeCategory",
@@ -247,9 +228,7 @@
           }
         ],
         "summary": "Delete a menu category",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       }
     },
     "/api/menu/items": {
@@ -286,9 +265,7 @@
           }
         ],
         "summary": "List menu items, optionally filtered by category",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "post": {
         "operationId": "MenuController_createItem",
@@ -321,9 +298,7 @@
           }
         ],
         "summary": "Create a menu item",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       }
     },
     "/api/menu/items/{id}": {
@@ -357,9 +332,7 @@
           }
         ],
         "summary": "Get a menu item by id",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "patch": {
         "operationId": "MenuController_updateItem",
@@ -401,9 +374,7 @@
           }
         ],
         "summary": "Update a menu item",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "delete": {
         "operationId": "MenuController_removeItem",
@@ -428,9 +399,7 @@
           }
         ],
         "summary": "Delete a menu item",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       }
     },
     "/api/menu/items/{id}/availability": {
@@ -457,9 +426,7 @@
                     "type": "boolean"
                   }
                 },
-                "required": [
-                  "available"
-                ]
+                "required": ["available"]
               }
             }
           }
@@ -482,9 +449,7 @@
           }
         ],
         "summary": "Toggle item availability",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       }
     },
     "/api/menu/modifier-groups": {
@@ -512,9 +477,7 @@
           }
         ],
         "summary": "List modifier groups with options",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "post": {
         "operationId": "MenuController_createModifierGroup",
@@ -547,9 +510,7 @@
           }
         ],
         "summary": "Create a modifier group",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       }
     },
     "/api/menu/modifier-groups/{id}": {
@@ -593,9 +554,7 @@
           }
         ],
         "summary": "Update a modifier group",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       },
       "delete": {
         "operationId": "MenuController_removeModifierGroup",
@@ -620,9 +579,7 @@
           }
         ],
         "summary": "Delete a modifier group",
-        "tags": [
-          "menu"
-        ]
+        "tags": ["menu"]
       }
     },
     "/api/tables": {
@@ -650,9 +607,7 @@
           }
         ],
         "summary": "List all tables",
-        "tags": [
-          "tables"
-        ]
+        "tags": ["tables"]
       },
       "post": {
         "operationId": "TableController_create",
@@ -685,9 +640,7 @@
           }
         ],
         "summary": "Create a table",
-        "tags": [
-          "tables"
-        ]
+        "tags": ["tables"]
       }
     },
     "/api/tables/{id}": {
@@ -721,9 +674,7 @@
           }
         ],
         "summary": "Get a table by id",
-        "tags": [
-          "tables"
-        ]
+        "tags": ["tables"]
       },
       "patch": {
         "operationId": "TableController_update",
@@ -765,9 +716,7 @@
           }
         ],
         "summary": "Update a table",
-        "tags": [
-          "tables"
-        ]
+        "tags": ["tables"]
       },
       "delete": {
         "operationId": "TableController_remove",
@@ -792,9 +741,7 @@
           }
         ],
         "summary": "Delete a table",
-        "tags": [
-          "tables"
-        ]
+        "tags": ["tables"]
       }
     },
     "/api/tables/layout": {
@@ -832,9 +779,7 @@
           }
         ],
         "summary": "Save table layout positions",
-        "tags": [
-          "tables"
-        ]
+        "tags": ["tables"]
       }
     },
     "/api/tables/{id}/status": {
@@ -878,9 +823,7 @@
           }
         ],
         "summary": "Set table status",
-        "tags": [
-          "tables"
-        ]
+        "tags": ["tables"]
       }
     },
     "/api/orders": {
@@ -917,9 +860,7 @@
           }
         ],
         "summary": "List orders, optionally filtered by status",
-        "tags": [
-          "orders"
-        ]
+        "tags": ["orders"]
       },
       "post": {
         "operationId": "OrderController_create",
@@ -952,9 +893,7 @@
           }
         ],
         "summary": "Create an order with items",
-        "tags": [
-          "orders"
-        ]
+        "tags": ["orders"]
       }
     },
     "/api/orders/{id}": {
@@ -988,9 +927,7 @@
           }
         ],
         "summary": "Get an order with its items",
-        "tags": [
-          "orders"
-        ]
+        "tags": ["orders"]
       },
       "delete": {
         "operationId": "OrderController_remove",
@@ -1015,9 +952,7 @@
           }
         ],
         "summary": "Delete an order",
-        "tags": [
-          "orders"
-        ]
+        "tags": ["orders"]
       }
     },
     "/api/orders/{id}/status": {
@@ -1061,9 +996,7 @@
           }
         ],
         "summary": "Update order status",
-        "tags": [
-          "orders"
-        ]
+        "tags": ["orders"]
       }
     },
     "/api/orders/{id}/items/{itemId}/status": {
@@ -1115,9 +1048,7 @@
           }
         ],
         "summary": "Update order item status",
-        "tags": [
-          "orders"
-        ]
+        "tags": ["orders"]
       }
     },
     "/api/notifications/vapid-public-key": {
@@ -1129,9 +1060,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/api/notifications/subscribe": {
@@ -1158,9 +1087,7 @@
             "bearer": []
           }
         ],
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       },
       "delete": {
         "operationId": "NotificationsController_unsubscribe",
@@ -1177,9 +1104,7 @@
                     "format": "uri"
                   }
                 },
-                "required": [
-                  "endpoint"
-                ]
+                "required": ["endpoint"]
               }
             }
           }
@@ -1194,9 +1119,7 @@
             "bearer": []
           }
         ],
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/api/reservations": {
@@ -1233,9 +1156,7 @@
           }
         ],
         "summary": "List reservations, optionally filtered by date (YYYY-MM-DD)",
-        "tags": [
-          "reservations"
-        ]
+        "tags": ["reservations"]
       },
       "post": {
         "operationId": "ReservationController_create",
@@ -1268,9 +1189,7 @@
           }
         ],
         "summary": "Create a reservation",
-        "tags": [
-          "reservations"
-        ]
+        "tags": ["reservations"]
       }
     },
     "/api/reservations/{id}": {
@@ -1304,9 +1223,7 @@
           }
         ],
         "summary": "Get a reservation by id",
-        "tags": [
-          "reservations"
-        ]
+        "tags": ["reservations"]
       },
       "patch": {
         "operationId": "ReservationController_update",
@@ -1348,9 +1265,7 @@
           }
         ],
         "summary": "Update a reservation",
-        "tags": [
-          "reservations"
-        ]
+        "tags": ["reservations"]
       },
       "delete": {
         "operationId": "ReservationController_remove",
@@ -1375,9 +1290,7 @@
           }
         ],
         "summary": "Delete a reservation",
-        "tags": [
-          "reservations"
-        ]
+        "tags": ["reservations"]
       }
     },
     "/api/staff": {
@@ -1414,9 +1327,7 @@
           }
         ],
         "summary": "List all staff, optionally filtered by role",
-        "tags": [
-          "staff"
-        ]
+        "tags": ["staff"]
       },
       "post": {
         "operationId": "StaffController_create",
@@ -1449,9 +1360,7 @@
           }
         ],
         "summary": "Create a staff member",
-        "tags": [
-          "staff"
-        ]
+        "tags": ["staff"]
       }
     },
     "/api/staff/{id}": {
@@ -1485,9 +1394,7 @@
           }
         ],
         "summary": "Get a staff member by id",
-        "tags": [
-          "staff"
-        ]
+        "tags": ["staff"]
       },
       "patch": {
         "operationId": "StaffController_update",
@@ -1529,9 +1436,7 @@
           }
         ],
         "summary": "Update a staff member",
-        "tags": [
-          "staff"
-        ]
+        "tags": ["staff"]
       },
       "delete": {
         "operationId": "StaffController_remove",
@@ -1556,9 +1461,7 @@
           }
         ],
         "summary": "Delete a staff member",
-        "tags": [
-          "staff"
-        ]
+        "tags": ["staff"]
       }
     },
     "/api/staff/{id}/active": {
@@ -1602,9 +1505,7 @@
           }
         ],
         "summary": "Set staff active status",
-        "tags": [
-          "staff"
-        ]
+        "tags": ["staff"]
       }
     },
     "/api/reports/summary": {
@@ -1629,9 +1530,7 @@
           }
         ],
         "summary": "Get operational summary: orders, tables, reservations, top items",
-        "tags": [
-          "reports"
-        ]
+        "tags": ["reports"]
       }
     },
     "/api/settings": {
@@ -1656,9 +1555,7 @@
           }
         ],
         "summary": "Get restaurant settings",
-        "tags": [
-          "settings"
-        ]
+        "tags": ["settings"]
       },
       "patch": {
         "operationId": "SettingsController_update",
@@ -1691,9 +1588,7 @@
           }
         ],
         "summary": "Update restaurant settings",
-        "tags": [
-          "settings"
-        ]
+        "tags": ["settings"]
       }
     },
     "/api/billing": {
@@ -1727,9 +1622,7 @@
             "bearer": []
           }
         ],
-        "tags": [
-          "billing"
-        ]
+        "tags": ["billing"]
       }
     },
     "/api/billing/{id}": {
@@ -1762,44 +1655,7 @@
             "bearer": []
           }
         ],
-        "tags": [
-          "billing"
-        ]
-      }
-    },
-    "/api/billing/{id}/pay": {
-      "patch": {
-        "operationId": "BillingController_pay",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BillDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "billing"
-        ]
+        "tags": ["billing"]
       }
     },
     "/api/billing/{id}/payments": {
@@ -1842,9 +1698,7 @@
             "bearer": []
           }
         ],
-        "tags": [
-          "billing"
-        ]
+        "tags": ["billing"]
       }
     },
     "/api/inventory": {
@@ -1872,9 +1726,7 @@
           }
         ],
         "summary": "List all inventory items",
-        "tags": [
-          "inventory"
-        ]
+        "tags": ["inventory"]
       },
       "post": {
         "operationId": "InventoryController_create",
@@ -1907,9 +1759,7 @@
           }
         ],
         "summary": "Create an inventory item",
-        "tags": [
-          "inventory"
-        ]
+        "tags": ["inventory"]
       }
     },
     "/api/inventory/{id}": {
@@ -1943,9 +1793,7 @@
           }
         ],
         "summary": "Get an inventory item by id",
-        "tags": [
-          "inventory"
-        ]
+        "tags": ["inventory"]
       },
       "patch": {
         "operationId": "InventoryController_update",
@@ -1987,9 +1835,7 @@
           }
         ],
         "summary": "Update an inventory item",
-        "tags": [
-          "inventory"
-        ]
+        "tags": ["inventory"]
       },
       "delete": {
         "operationId": "InventoryController_remove",
@@ -2014,9 +1860,7 @@
           }
         ],
         "summary": "Delete an inventory item",
-        "tags": [
-          "inventory"
-        ]
+        "tags": ["inventory"]
       }
     },
     "/api/inventory/{id}/adjust": {
@@ -2060,9 +1904,7 @@
           }
         ],
         "summary": "Adjust stock level",
-        "tags": [
-          "inventory"
-        ]
+        "tags": ["inventory"]
       }
     },
     "/api/shifts": {
@@ -2107,9 +1949,7 @@
           }
         ],
         "summary": "List shifts, optionally filtered by date range (YYYY-MM-DD)",
-        "tags": [
-          "shifts"
-        ]
+        "tags": ["shifts"]
       },
       "post": {
         "operationId": "ShiftController_create",
@@ -2142,9 +1982,7 @@
           }
         ],
         "summary": "Create a shift",
-        "tags": [
-          "shifts"
-        ]
+        "tags": ["shifts"]
       }
     },
     "/api/shifts/{id}": {
@@ -2178,9 +2016,7 @@
           }
         ],
         "summary": "Get a shift by id",
-        "tags": [
-          "shifts"
-        ]
+        "tags": ["shifts"]
       },
       "patch": {
         "operationId": "ShiftController_update",
@@ -2222,9 +2058,7 @@
           }
         ],
         "summary": "Update a shift",
-        "tags": [
-          "shifts"
-        ]
+        "tags": ["shifts"]
       },
       "delete": {
         "operationId": "ShiftController_remove",
@@ -2249,9 +2083,7 @@
           }
         ],
         "summary": "Delete a shift",
-        "tags": [
-          "shifts"
-        ]
+        "tags": ["shifts"]
       }
     },
     "/api/service/snapshot": {
@@ -2276,9 +2108,7 @@
           }
         ],
         "summary": "Live service snapshot: pulse, attention queue, floor",
-        "tags": [
-          "service"
-        ]
+        "tags": ["service"]
       }
     },
     "/api/kds/tickets": {
@@ -2306,9 +2136,7 @@
           }
         ],
         "summary": "Active kitchen tickets (oldest first)",
-        "tags": [
-          "kds"
-        ]
+        "tags": ["kds"]
       }
     }
   },
@@ -2342,11 +2170,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "sortOrder"
-        ]
+        "required": ["id", "name", "sortOrder"]
       },
       "CreateMenuCategoryDto": {
         "type": "object",
@@ -2363,9 +2187,7 @@
             "maximum": 9007199254740991
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "UpdateMenuCategoryDto": {
         "type": "object",
@@ -2407,12 +2229,7 @@
           },
           "station": {
             "type": "string",
-            "enum": [
-              "grill",
-              "cold",
-              "bar",
-              "pass"
-            ],
+            "enum": ["grill", "cold", "bar", "pass"],
             "nullable": true
           },
           "modifierGroupIds": {
@@ -2478,20 +2295,11 @@
             "x-nestjs_zod-uses-3-point-1-syntax": true,
             "x-nestjs_zod-empty-type": true,
             "type": "string",
-            "enum": [
-              "grill",
-              "cold",
-              "bar",
-              "pass"
-            ],
+            "enum": ["grill", "cold", "bar", "pass"],
             "nullable": true
           }
         },
-        "required": [
-          "categoryId",
-          "name",
-          "price"
-        ]
+        "required": ["categoryId", "name", "price"]
       },
       "UpdateMenuItemDto": {
         "type": "object",
@@ -2532,12 +2340,7 @@
             "x-nestjs_zod-uses-3-point-1-syntax": true,
             "x-nestjs_zod-empty-type": true,
             "type": "string",
-            "enum": [
-              "grill",
-              "cold",
-              "bar",
-              "pass"
-            ],
+            "enum": ["grill", "cold", "bar", "pass"],
             "nullable": true
           },
           "modifierGroupIds": {
@@ -2570,13 +2373,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "id",
-          "groupId",
-          "name",
-          "priceDelta",
-          "sortOrder"
-        ]
+        "required": ["id", "groupId", "name", "priceDelta", "sortOrder"]
       },
       "ModifierGroupDto": {
         "type": "object",
@@ -2600,13 +2397,7 @@
             }
           }
         },
-        "required": [
-          "id",
-          "name",
-          "selectionType",
-          "required",
-          "options"
-        ]
+        "required": ["id", "name", "selectionType", "required", "options"]
       },
       "CreateModifierGroupDto": {
         "type": "object",
@@ -2619,10 +2410,7 @@
           "selectionType": {
             "default": "single",
             "type": "string",
-            "enum": [
-              "single",
-              "multi"
-            ]
+            "enum": ["single", "multi"]
           },
           "required": {
             "default": false,
@@ -2650,15 +2438,11 @@
                   "maximum": 9007199254740991
                 }
               },
-              "required": [
-                "name"
-              ]
+              "required": ["name"]
             }
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "UpdateModifierGroupDto": {
         "type": "object",
@@ -2671,10 +2455,7 @@
           "selectionType": {
             "default": "single",
             "type": "string",
-            "enum": [
-              "single",
-              "multi"
-            ]
+            "enum": ["single", "multi"]
           },
           "required": {
             "default": false,
@@ -2702,9 +2483,7 @@
                   "maximum": 9007199254740991
                 }
               },
-              "required": [
-                "name"
-              ]
+              "required": ["name"]
             }
           }
         }
@@ -2734,10 +2513,7 @@
           },
           "shape": {
             "type": "string",
-            "enum": [
-              "square",
-              "round"
-            ]
+            "enum": ["square", "round"]
           },
           "createdAt": {
             "type": "string"
@@ -2777,11 +2553,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "available",
-              "occupied",
-              "reserved"
-            ],
+            "enum": ["available", "occupied", "reserved"],
             "x-nestjs_zod-uses-3-point-1-syntax": true
           },
           "posX": {
@@ -2805,18 +2577,11 @@
           "shape": {
             "default": "square",
             "type": "string",
-            "enum": [
-              "square",
-              "round"
-            ],
+            "enum": ["square", "round"],
             "x-nestjs_zod-uses-3-point-1-syntax": true
           }
         },
-        "required": [
-          "number",
-          "seats",
-          "status"
-        ]
+        "required": ["number", "seats", "status"]
       },
       "SaveTableLayoutDto": {
         "type": "object",
@@ -2843,24 +2608,14 @@
                 },
                 "shape": {
                   "type": "string",
-                  "enum": [
-                    "square",
-                    "round"
-                  ]
+                  "enum": ["square", "round"]
                 }
               },
-              "required": [
-                "id",
-                "posX",
-                "posY",
-                "shape"
-              ]
+              "required": ["id", "posX", "posY", "shape"]
             }
           }
         },
-        "required": [
-          "tables"
-        ]
+        "required": ["tables"]
       },
       "UpdateTableDto": {
         "type": "object",
@@ -2881,11 +2636,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "available",
-              "occupied",
-              "reserved"
-            ],
+            "enum": ["available", "occupied", "reserved"],
             "x-nestjs_zod-uses-3-point-1-syntax": true
           },
           "posX": {
@@ -2909,10 +2660,7 @@
           "shape": {
             "default": "square",
             "type": "string",
-            "enum": [
-              "square",
-              "round"
-            ],
+            "enum": ["square", "round"],
             "x-nestjs_zod-uses-3-point-1-syntax": true
           }
         }
@@ -2922,16 +2670,10 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "available",
-              "occupied",
-              "reserved"
-            ]
+            "enum": ["available", "occupied", "reserved"]
           }
         },
-        "required": [
-          "status"
-        ]
+        "required": ["status"]
       },
       "OrderItemModifierDto": {
         "type": "object",
@@ -2952,13 +2694,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "id",
-          "orderItemId",
-          "modifierOptionId",
-          "name",
-          "priceDelta"
-        ]
+        "required": ["id", "orderItemId", "modifierOptionId", "name", "priceDelta"]
       },
       "OrderItemDto": {
         "type": "object",
@@ -2992,14 +2728,89 @@
             }
           }
         },
+        "required": ["id", "orderId", "menuItemId", "quantity", "unitPrice", "status", "modifiers"]
+      },
+      "PaymentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "billId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "method": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "billId", "amount", "method", "createdAt"]
+      },
+      "BillDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "discountPct": {
+            "type": "number"
+          },
+          "tax": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          },
+          "paid": {
+            "type": "boolean"
+          },
+          "paidAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentDto"
+            }
+          },
+          "amountPaid": {
+            "type": "number"
+          },
+          "remaining": {
+            "type": "number"
+          }
+        },
         "required": [
           "id",
           "orderId",
-          "menuItemId",
-          "quantity",
-          "unitPrice",
-          "status",
-          "modifiers"
+          "subtotal",
+          "discountPct",
+          "tax",
+          "total",
+          "paid",
+          "createdAt",
+          "updatedAt",
+          "payments",
+          "amountPaid",
+          "remaining"
         ]
       },
       "OrderDto": {
@@ -3027,6 +2838,15 @@
               "$ref": "#/components/schemas/OrderItemDto"
             }
           },
+          "bill": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BillDto"
+              }
+            ]
+          },
           "createdAt": {
             "type": "string"
           },
@@ -3034,15 +2854,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "tableId",
-          "staffId",
-          "status",
-          "items",
-          "createdAt",
-          "updatedAt"
-        ]
+        "required": ["id", "tableId", "staffId", "status", "items", "createdAt", "updatedAt"]
       },
       "CreateOrderDto": {
         "type": "object",
@@ -3092,52 +2904,32 @@
                   }
                 }
               },
-              "required": [
-                "menuItemId",
-                "quantity"
-              ]
+              "required": ["menuItemId", "quantity"]
             },
             "x-nestjs_zod-uses-3-point-1-syntax": true
           }
         },
-        "required": [
-          "tableId",
-          "items"
-        ]
+        "required": ["tableId", "items"]
       },
       "UpdateOrderStatusDto": {
         "type": "object",
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "draft",
-              "sent",
-              "in_progress",
-              "ready",
-              "served"
-            ]
+            "enum": ["draft", "sent", "in_progress", "ready", "served"]
           }
         },
-        "required": [
-          "status"
-        ]
+        "required": ["status"]
       },
       "UpdateOrderItemStatusDto": {
         "type": "object",
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "pending",
-              "in_progress",
-              "ready"
-            ]
+            "enum": ["pending", "in_progress", "ready"]
           }
         },
-        "required": [
-          "status"
-        ]
+        "required": ["status"]
       },
       "SubscribeDtoClass": {
         "type": "object",
@@ -3158,17 +2950,11 @@
                 "minLength": 1
               }
             },
-            "required": [
-              "p256dh",
-              "auth"
-            ],
+            "required": ["p256dh", "auth"],
             "x-nestjs_zod-self-required": true
           }
         },
-        "required": [
-          "endpoint",
-          "keys"
-        ]
+        "required": ["endpoint", "keys"]
       },
       "ReservationDto": {
         "type": "object",
@@ -3208,14 +2994,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "guestName",
-          "partySize",
-          "date",
-          "createdAt",
-          "updatedAt"
-        ]
+        "required": ["id", "guestName", "partySize", "date", "createdAt", "updatedAt"]
       },
       "CreateReservationDto": {
         "type": "object",
@@ -3266,12 +3045,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "tableId",
-          "guestName",
-          "partySize",
-          "date"
-        ]
+        "required": ["tableId", "guestName", "partySize", "date"]
       },
       "UpdateReservationDto": {
         "type": "object",
@@ -3348,15 +3122,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "email",
-          "role",
-          "active",
-          "createdAt",
-          "updatedAt"
-        ]
+        "required": ["id", "name", "email", "role", "active", "createdAt", "updatedAt"]
       },
       "CreateStaffDto": {
         "type": "object",
@@ -3373,12 +3139,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "manager",
-              "waiter",
-              "kitchen",
-              "host"
-            ]
+            "enum": ["manager", "waiter", "kitchen", "host"]
           },
           "active": {
             "default": true,
@@ -3389,12 +3150,7 @@
             "minLength": 8
           }
         },
-        "required": [
-          "name",
-          "email",
-          "role",
-          "password"
-        ]
+        "required": ["name", "email", "role", "password"]
       },
       "UpdateStaffDto": {
         "type": "object",
@@ -3411,12 +3167,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "manager",
-              "waiter",
-              "kitchen",
-              "host"
-            ]
+            "enum": ["manager", "waiter", "kitchen", "host"]
           },
           "active": {
             "default": true,
@@ -3435,9 +3186,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "active"
-        ]
+        "required": ["active"]
       },
       "TopItemDto": {
         "type": "object",
@@ -3452,11 +3201,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "menuItemId",
-          "name",
-          "totalQuantity"
-        ]
+        "required": ["menuItemId", "name", "totalQuantity"]
       },
       "ReportSummaryDto": {
         "type": "object",
@@ -3483,12 +3228,7 @@
             }
           }
         },
-        "required": [
-          "ordersByStatus",
-          "tablesByStatus",
-          "reservationsToday",
-          "topItems"
-        ]
+        "required": ["ordersByStatus", "tablesByStatus", "reservationsToday", "topItems"]
       },
       "RestaurantSettingsDto": {
         "type": "object",
@@ -3523,11 +3263,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "updatedAt"
-        ]
+        "required": ["id", "name", "updatedAt"]
       },
       "UpdateSettingsDto": {
         "type": "object",
@@ -3588,98 +3324,7 @@
             "maximum": 100
           }
         },
-        "required": [
-          "orderId"
-        ]
-      },
-      "PaymentDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "billId": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "number"
-          },
-          "method": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "billId",
-          "amount",
-          "method",
-          "createdAt"
-        ]
-      },
-      "BillDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "orderId": {
-            "type": "string"
-          },
-          "subtotal": {
-            "type": "number"
-          },
-          "discountPct": {
-            "type": "number"
-          },
-          "tax": {
-            "type": "number"
-          },
-          "total": {
-            "type": "number"
-          },
-          "paid": {
-            "type": "boolean"
-          },
-          "paidAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string"
-          },
-          "payments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PaymentDto"
-            }
-          },
-          "amountPaid": {
-            "type": "number"
-          },
-          "remaining": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "orderId",
-          "subtotal",
-          "discountPct",
-          "tax",
-          "total",
-          "paid",
-          "createdAt",
-          "updatedAt",
-          "payments",
-          "amountPaid",
-          "remaining"
-        ]
+        "required": ["orderId"]
       },
       "CreatePaymentDto": {
         "type": "object",
@@ -3692,18 +3337,11 @@
           },
           "method": {
             "type": "string",
-            "enum": [
-              "cash",
-              "card",
-              "other"
-            ],
+            "enum": ["cash", "card", "other"],
             "x-nestjs_zod-uses-3-point-1-syntax": true
           }
         },
-        "required": [
-          "amount",
-          "method"
-        ]
+        "required": ["amount", "method"]
       },
       "InventoryItemWithStatusDto": {
         "type": "object",
@@ -3754,11 +3392,7 @@
           },
           "unit": {
             "type": "string",
-            "enum": [
-              "kg",
-              "litre",
-              "unit"
-            ]
+            "enum": ["kg", "litre", "unit"]
           },
           "quantity": {
             "type": "number",
@@ -3769,12 +3403,7 @@
             "minimum": 0
           }
         },
-        "required": [
-          "name",
-          "unit",
-          "quantity",
-          "minStock"
-        ]
+        "required": ["name", "unit", "quantity", "minStock"]
       },
       "UpdateInventoryItemDto": {
         "type": "object",
@@ -3786,11 +3415,7 @@
           },
           "unit": {
             "type": "string",
-            "enum": [
-              "kg",
-              "litre",
-              "unit"
-            ]
+            "enum": ["kg", "litre", "unit"]
           },
           "quantity": {
             "type": "number",
@@ -3810,17 +3435,10 @@
           },
           "reason": {
             "type": "string",
-            "enum": [
-              "delivery",
-              "waste",
-              "correction"
-            ]
+            "enum": ["delivery", "waste", "correction"]
           }
         },
-        "required": [
-          "delta",
-          "reason"
-        ]
+        "required": ["delta", "reason"]
       },
       "ShiftDto": {
         "type": "object",
@@ -3842,12 +3460,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "staffId",
-          "startTime",
-          "createdAt"
-        ]
+        "required": ["id", "staffId", "startTime", "createdAt"]
       },
       "CreateShiftDto": {
         "type": "object",
@@ -3869,10 +3482,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "staffId",
-          "startTime"
-        ]
+        "required": ["staffId", "startTime"]
       },
       "UpdateShiftDto": {
         "type": "object",
@@ -3906,10 +3516,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "ticketCount",
-          "oldestMin"
-        ]
+        "required": ["ticketCount", "oldestMin"]
       },
       "ServicePulseDto": {
         "type": "object",
@@ -3953,10 +3560,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "kind",
-          "id"
-        ]
+        "required": ["kind", "id"]
       },
       "ServiceAttentionDto": {
         "type": "object",
@@ -3983,15 +3587,7 @@
             "$ref": "#/components/schemas/ServiceAttentionRefDto"
           }
         },
-        "required": [
-          "id",
-          "type",
-          "tone",
-          "title",
-          "subtitle",
-          "ageMin",
-          "ref"
-        ]
+        "required": ["id", "type", "tone", "title", "subtitle", "ageMin", "ref"]
       },
       "ServiceFloorTableDto": {
         "type": "object",
@@ -4010,12 +3606,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "id",
-          "number",
-          "status",
-          "ageMin"
-        ]
+        "required": ["id", "number", "status", "ageMin"]
       },
       "ServiceSnapshotDto": {
         "type": "object",
@@ -4036,11 +3627,7 @@
             }
           }
         },
-        "required": [
-          "pulse",
-          "attention",
-          "floor"
-        ]
+        "required": ["pulse", "attention", "floor"]
       },
       "KdsTicketItemDto": {
         "type": "object",
@@ -4056,12 +3643,7 @@
           },
           "station": {
             "type": "string",
-            "enum": [
-              "grill",
-              "cold",
-              "bar",
-              "pass"
-            ],
+            "enum": ["grill", "cold", "bar", "pass"],
             "nullable": true
           },
           "status": {
@@ -4074,14 +3656,7 @@
             }
           }
         },
-        "required": [
-          "id",
-          "name",
-          "quantity",
-          "station",
-          "status",
-          "modifiers"
-        ]
+        "required": ["id", "name", "quantity", "station", "status", "modifiers"]
       },
       "KdsTicketDto": {
         "type": "object",
@@ -4104,12 +3679,7 @@
             }
           }
         },
-        "required": [
-          "orderId",
-          "tableNumber",
-          "firedAt",
-          "items"
-        ]
+        "required": ["orderId", "tableNumber", "firedAt", "items"]
       }
     }
   }

@@ -83,6 +83,14 @@ describe('OrderService', () => {
         expect.objectContaining({ where: { status: 'draft' } }),
       );
     });
+
+    it('includes the bill relation so callers can derive settled-ness', async () => {
+      prismaMock.order.findMany.mockResolvedValue([mockOrder]);
+      await service.findAll();
+      expect(prismaMock.order.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ include: expect.objectContaining({ bill: true }) }),
+      );
+    });
   });
 
   describe('findOne', () => {
@@ -235,9 +243,23 @@ describe('OrderService', () => {
 
   describe('create with modifiers', () => {
     const steak = {
-      id: 'mi-1', name: 'Steak', price: 20,
-      modifierGroups: [{ modifierGroup: { id: 'g1', name: 'Temp', selectionType: 'single', required: true,
-        options: [{ id: 'o1', name: 'Rare', priceDelta: 0 }, { id: 'o2', name: 'Well', priceDelta: 0 }] } }],
+      id: 'mi-1',
+      name: 'Steak',
+      price: 20,
+      modifierGroups: [
+        {
+          modifierGroup: {
+            id: 'g1',
+            name: 'Temp',
+            selectionType: 'single',
+            required: true,
+            options: [
+              { id: 'o1', name: 'Rare', priceDelta: 0 },
+              { id: 'o2', name: 'Well', priceDelta: 0 },
+            ],
+          },
+        },
+      ],
     };
 
     it('snapshots unitPrice + modifier rows', async () => {
@@ -245,32 +267,63 @@ describe('OrderService', () => {
       prismaMock.order.create.mockResolvedValue({ ...mockOrder });
       prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 5 });
 
-      await service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['o1'] }] }, 'staff-1');
+      await service.create(
+        {
+          tableId: 'tbl-1',
+          notes: null,
+          items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['o1'] }],
+        },
+        'staff-1',
+      );
 
       const arg = prismaMock.order.create.mock.calls[0][0];
       const item = arg.data.items.create[0];
+
       expect(item.unitPrice).toBe(20);
-      expect(item.modifiers.create).toEqual([{ modifierOptionId: 'o1', name: 'Rare', priceDelta: 0 }]);
+      expect(item.modifiers.create).toEqual([
+        { modifierOptionId: 'o1', name: 'Rare', priceDelta: 0 },
+      ]);
     });
 
     it('rejects an option not attached to the item', async () => {
       prismaMock.menuItem.findMany.mockResolvedValue([steak]);
       await expect(
-        service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['bogus'] }] }, 'staff-1'),
+        service.create(
+          {
+            tableId: 'tbl-1',
+            notes: null,
+            items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['bogus'] }],
+          },
+          'staff-1',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('rejects when a required group has no selection', async () => {
       prismaMock.menuItem.findMany.mockResolvedValue([steak]);
       await expect(
-        service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: [] }] }, 'staff-1'),
+        service.create(
+          {
+            tableId: 'tbl-1',
+            notes: null,
+            items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: [] }],
+          },
+          'staff-1',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('rejects >1 option in a single group', async () => {
       prismaMock.menuItem.findMany.mockResolvedValue([steak]);
       await expect(
-        service.create({ tableId: 'tbl-1', notes: null, items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['o1', 'o2'] }] }, 'staff-1'),
+        service.create(
+          {
+            tableId: 'tbl-1',
+            notes: null,
+            items: [{ menuItemId: 'mi-1', quantity: 1, modifierOptionIds: ['o1', 'o2'] }],
+          },
+          'staff-1',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });

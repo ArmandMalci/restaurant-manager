@@ -383,6 +383,31 @@ export interface OrderItemDto {
   modifiers: OrderItemModifierDto[];
 }
 
+export interface PaymentDto {
+  id: string;
+  billId: string;
+  amount: number;
+  method: string;
+  createdAt: string;
+}
+
+export interface BillDto {
+  id: string;
+  orderId: string;
+  subtotal: number;
+  discountPct: number;
+  tax: number;
+  total: number;
+  paid: boolean;
+  /** @nullable */
+  paidAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  payments: PaymentDto[];
+  amountPaid: number;
+  remaining: number;
+}
+
 export interface OrderDto {
   id: string;
   tableId: string;
@@ -391,6 +416,8 @@ export interface OrderDto {
   /** @nullable */
   notes?: string | null;
   items: OrderItemDto[];
+  /** @nullable */
+  bill?: BillDto | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -671,31 +698,6 @@ export interface CreateBillDto {
    * @maximum 100
    */
   discountPct?: number;
-}
-
-export interface PaymentDto {
-  id: string;
-  billId: string;
-  amount: number;
-  method: string;
-  createdAt: string;
-}
-
-export interface BillDto {
-  id: string;
-  orderId: string;
-  subtotal: number;
-  discountPct: number;
-  tax: number;
-  total: number;
-  paid: boolean;
-  /** @nullable */
-  paidAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  payments: PaymentDto[];
-  amountPaid: number;
-  remaining: number;
 }
 
 export type CreatePaymentDtoMethod =

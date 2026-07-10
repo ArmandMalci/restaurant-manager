@@ -19,7 +19,7 @@ export class OrderService {
   public findAll(status?: string) {
     return this.prisma.order.findMany({
       where: status ? { status: status as never } : undefined,
-      include: WITH_ITEMS,
+      include: { ...WITH_ITEMS, bill: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -42,6 +42,7 @@ export class OrderService {
 
     const itemsCreate = dto.items.map((i) => {
       const mi = byId.get(i.menuItemId);
+
       if (!mi) throw new BadRequestException(`Menu item ${i.menuItemId} not found`);
 
       const groups = mi.modifierGroups.map((mg) => mg.modifierGroup);
@@ -49,12 +50,16 @@ export class OrderService {
       const chosen = i.modifierOptionIds ?? [];
 
       for (const oid of chosen) {
-        if (!optionById.has(oid)) throw new BadRequestException(`Option ${oid} is not valid for ${mi.name}`);
+        if (!optionById.has(oid))
+          throw new BadRequestException(`Option ${oid} is not valid for ${mi.name}`);
       }
       for (const g of groups) {
         const inGroup = g.options.filter((o) => chosen.includes(o.id));
-        if (g.required && inGroup.length === 0) throw new BadRequestException(`"${g.name}" is required for ${mi.name}`);
-        if (g.selectionType === 'single' && inGroup.length > 1) throw new BadRequestException(`Choose one for "${g.name}"`);
+
+        if (g.required && inGroup.length === 0)
+          throw new BadRequestException(`"${g.name}" is required for ${mi.name}`);
+        if (g.selectionType === 'single' && inGroup.length > 1)
+          throw new BadRequestException(`Choose one for "${g.name}"`);
       }
 
       return {
@@ -64,7 +69,10 @@ export class OrderService {
         unitPrice: mi.price,
         modifiers: {
           create: chosen.map((oid) => {
-            const o = optionById.get(oid)!;
+            const o = optionById.get(oid);
+
+            if (!o) throw new BadRequestException(`Option ${oid} is not valid for ${mi.name}`);
+
             return { modifierOptionId: oid, name: o.name, priceDelta: o.priceDelta };
           }),
         },
@@ -72,7 +80,12 @@ export class OrderService {
     });
 
     const order = await this.prisma.order.create({
-      data: { tableId: dto.tableId, staffId, notes: dto.notes ?? null, items: { create: itemsCreate } },
+      data: {
+        tableId: dto.tableId,
+        staffId,
+        notes: dto.notes ?? null,
+        items: { create: itemsCreate },
+      },
       include: WITH_ITEMS,
     });
     const table = await this.prisma.table.findUnique({ where: { id: dto.tableId } });

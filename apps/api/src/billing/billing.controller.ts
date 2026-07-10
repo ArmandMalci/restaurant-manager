@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BillDto } from '../swagger-dtos';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -33,13 +23,6 @@ export class BillingController {
   @ApiResponse({ status: 200, type: BillDto })
   public findOne(@Param('id') id: string) {
     return this.billing.findOne(id);
-  }
-
-  @Patch(':id/pay')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({ status: 200, type: BillDto })
-  public pay(@Param('id') id: string) {
-    return this.billing.pay(id);
   }
 
   @Post(':id/payments')

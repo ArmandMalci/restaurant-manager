@@ -10,7 +10,7 @@
  * used at runtime for validation.
  */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 // ── Menu ──────────────────────────────────────────────────────────────────────
 
@@ -94,6 +94,10 @@ export class OrderDto {
   @ApiProperty() public status!: string;
   @ApiProperty({ type: String, nullable: true, required: false }) public notes!: string | null;
   @ApiProperty({ type: [OrderItemDto] }) public items!: OrderItemDto[];
+  // Present only where the query includes it (currently: GET /orders list) — used to
+  // derive settled-ness (bill.paid) so the checkout queue can filter without a status enum.
+  @ApiPropertyOptional({ type: () => BillDto, nullable: true })
+  public bill?: BillDto | null;
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
 }
@@ -237,7 +241,9 @@ export class KdsTicketItemDto {
   @ApiProperty() public id!: string;
   @ApiProperty() public name!: string;
   @ApiProperty() public quantity!: number;
-  @ApiProperty({ enum: ['grill', 'cold', 'bar', 'pass'], nullable: true }) public station!: string | null;
+  @ApiProperty({ enum: ['grill', 'cold', 'bar', 'pass'], nullable: true }) public station!:
+    | string
+    | null;
   @ApiProperty() public status!: string;
   @ApiProperty({ type: [String] }) public modifiers!: string[];
 }

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import type { Bill } from '@prisma/client';
+import type { Bill, Payment } from '@prisma/client';
 import type { CreateBillDto, CreatePaymentDto } from './dto/billing.dto';
 
 @Injectable()
@@ -44,8 +44,15 @@ export class BillingService {
     }
 
     const subtotal = order.items.reduce((sum, item) => {
-      const base = Number(item.unitPrice) > 0 ? new Prisma.Decimal(item.unitPrice) : new Prisma.Decimal(item.menuItem.price);
-      const delta = item.modifiers.reduce((d, m) => d.plus(new Prisma.Decimal(m.priceDelta)), new Prisma.Decimal(0));
+      const base =
+        Number(item.unitPrice) > 0
+          ? new Prisma.Decimal(item.unitPrice)
+          : new Prisma.Decimal(item.menuItem.price);
+      const delta = item.modifiers.reduce(
+        (d, m) => d.plus(new Prisma.Decimal(m.priceDelta)),
+        new Prisma.Decimal(0),
+      );
+
       return sum.plus(new Prisma.Decimal(item.quantity).times(base.plus(delta)));
     }, new Prisma.Decimal(0));
 
@@ -67,44 +74,46 @@ export class BillingService {
     });
   }
 
-  public async findOne(id: string): Promise<Bill & { payments: unknown[]; amountPaid: number; remaining: number }> {
+  public async findOne(
+    id: string,
+  ): Promise<Bill & { payments: Payment[]; amountPaid: number; remaining: number }> {
     const bill = await this.prisma.bill.findUnique({ where: { id }, include: { payments: true } });
 
     if (!bill) throw new NotFoundException(`Bill ${id} not found`);
 
-    const amountPaid = bill.payments.reduce((s, p) => s + Number(p.amount), 0);
+    const amountPaid = bill.payments.reduce(
+      (s, p) => s.plus(new Prisma.Decimal(p.amount)),
+      new Prisma.Decimal(0),
+    );
 
-    return { ...bill, amountPaid, remaining: Math.max(0, Number(bill.total) - amountPaid) };
-  }
-
-  public async pay(id: string): Promise<Bill> {
-    const bill = await this.findOne(id);
-
-    if (bill.paid) {
-      throw new ConflictException(`Bill ${id} is already paid`);
-    }
-
-    return this.prisma.bill.update({
-      where: { id },
-      data: { paid: true, paidAt: new Date() },
-    });
+    return {
+      ...bill,
+      amountPaid: amountPaid.toNumber(),
+      remaining: Prisma.Decimal.max(0, new Prisma.Decimal(bill.total).minus(amountPaid)).toNumber(),
+    };
   }
 
   public async recordPayment(id: string, dto: CreatePaymentDto) {
-    const bill = await this.findOne(id);
+    const bill = await this.prisma.bill.findUnique({ where: { id }, include: { payments: true } });
 
+    if (!bill) throw new NotFoundException(`Bill ${id} not found`);
     if (bill.paid) throw new ConflictException(`Bill ${id} is already paid`);
 
-    const payment = await this.prisma.payment.create({
-      data: { billId: id, amount: dto.amount, method: dto.method },
+    // Decimal end-to-end: no JS Number/float touches the paid-flip decision.
+    const existingPaid = bill.payments.reduce(
+      (s, p) => s.plus(new Prisma.Decimal(p.amount)),
+      new Prisma.Decimal(0),
+    );
+    const amountPaid = existingPaid.plus(new Prisma.Decimal(dto.amount));
+    const shouldMarkPaid = amountPaid.greaterThanOrEqualTo(new Prisma.Decimal(bill.total));
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.payment.create({ data: { billId: id, amount: dto.amount, method: dto.method } });
+
+      if (shouldMarkPaid) {
+        await tx.bill.update({ where: { id }, data: { paid: true, paidAt: new Date() } });
+      }
     });
-
-    const amountPaid = bill.amountPaid + Number(payment.amount);
-    const total = Number(bill.total);
-
-    if (amountPaid >= total) {
-      await this.prisma.bill.update({ where: { id }, data: { paid: true, paidAt: new Date() } });
-    }
 
     return this.findOne(id);
   }

@@ -223,69 +223,6 @@ export const invalidateBillingControllerFindOne = async (
   return queryClient;
 };
 
-export const billingControllerPay = (id: string, signal?: AbortSignal) => {
-  return customInstance<BillDto>({ url: `/api/billing/${id}/pay`, method: 'PATCH', signal });
-};
-
-export const getBillingControllerPayMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof billingControllerPay>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof billingControllerPay>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  const mutationKey = ['billingControllerPay'];
-  const { mutation: mutationOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof billingControllerPay>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
-
-    return billingControllerPay(id);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type BillingControllerPayMutationResult = NonNullable<
-  Awaited<ReturnType<typeof billingControllerPay>>
->;
-
-export type BillingControllerPayMutationError = unknown;
-
-export const useBillingControllerPay = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof billingControllerPay>>,
-      TError,
-      { id: string },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof billingControllerPay>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  return useMutation(getBillingControllerPayMutationOptions(options), queryClient);
-};
 export const billingControllerRecordPayment = (
   id: string,
   createPaymentDto: CreatePaymentDto,

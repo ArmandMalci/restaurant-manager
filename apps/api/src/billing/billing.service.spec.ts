@@ -4,7 +4,7 @@ import { BillingService } from './billing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
-const prismaMock = {
+const prismaMockBase = {
   order: {
     findUnique: jest.fn(),
   },
@@ -16,6 +16,11 @@ const prismaMock = {
   payment: {
     create: jest.fn(),
   },
+};
+
+const prismaMock = {
+  ...prismaMockBase,
+  $transaction: jest.fn((cb: (tx: typeof prismaMockBase) => unknown) => cb(prismaMockBase)),
 };
 
 describe('BillingService', () => {
@@ -113,52 +118,46 @@ describe('BillingService', () => {
 
   it('subtotal includes modifier deltas using snapshot unitPrice', async () => {
     prismaMock.order.findUnique.mockResolvedValue({
-      id: 'o1', status: 'served', bill: null,
-      items: [{ quantity: 2, unitPrice: 20, menuItem: { price: 99 }, modifiers: [{ priceDelta: 3 }] }],
+      id: 'o1',
+      status: 'served',
+      bill: null,
+      items: [
+        { quantity: 2, unitPrice: 20, menuItem: { price: 99 }, modifiers: [{ priceDelta: 3 }] },
+      ],
     });
     prismaMock.bill.create.mockImplementation(({ data }) => Promise.resolve(data));
     const bill = await service.create({ orderId: 'o1', discountPct: 0 });
+
     expect(Number(bill.subtotal)).toBe(46);
-  });
-
-  describe('pay', () => {
-    it('throws ConflictException when bill is already paid', async () => {
-      const paidBill = {
-        id: 'bill-1',
-        orderId: 'order-1',
-        subtotal: new Prisma.Decimal('25.00'),
-        discountPct: new Prisma.Decimal('0'),
-        tax: new Prisma.Decimal('2.50'),
-        total: new Prisma.Decimal('27.50'),
-        paid: true,
-        paidAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        payments: [],
-      };
-
-      prismaMock.bill.findUnique.mockResolvedValue(paidBill);
-
-      await expect(service.pay('bill-1')).rejects.toThrow(ConflictException);
-
-      expect(prismaMock.bill.update).not.toHaveBeenCalled();
-    });
   });
 
   describe('recordPayment', () => {
     const unpaidBill = {
-      id: 'bill-1', orderId: 'order-1',
-      subtotal: new Prisma.Decimal('20.00'), discountPct: new Prisma.Decimal('0'),
-      tax: new Prisma.Decimal('2.00'), total: new Prisma.Decimal('22.00'),
-      paid: false, paidAt: null, createdAt: new Date(), updatedAt: new Date(),
+      id: 'bill-1',
+      orderId: 'order-1',
+      subtotal: new Prisma.Decimal('20.00'),
+      discountPct: new Prisma.Decimal('0'),
+      tax: new Prisma.Decimal('2.00'),
+      total: new Prisma.Decimal('22.00'),
+      paid: false,
+      paidAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       payments: [],
     };
 
     it('records a partial payment and leaves the bill unpaid', async () => {
-      prismaMock.bill.findUnique
-        .mockResolvedValueOnce(unpaidBill)
-        .mockResolvedValueOnce({ ...unpaidBill, payments: [{ amount: new Prisma.Decimal('10.00') }] });
-      prismaMock.payment.create.mockResolvedValue({ id: 'p1', billId: 'bill-1', amount: new Prisma.Decimal('10.00'), method: 'cash', createdAt: new Date() });
+      prismaMock.bill.findUnique.mockResolvedValueOnce(unpaidBill).mockResolvedValueOnce({
+        ...unpaidBill,
+        payments: [{ amount: new Prisma.Decimal('10.00') }],
+      });
+      prismaMock.payment.create.mockResolvedValue({
+        id: 'p1',
+        billId: 'bill-1',
+        amount: new Prisma.Decimal('10.00'),
+        method: 'cash',
+        createdAt: new Date(),
+      });
 
       const result = await service.recordPayment('bill-1', { amount: 10, method: 'cash' });
 
@@ -170,29 +169,83 @@ describe('BillingService', () => {
 
     it('marks the bill paid once payments cover the total', async () => {
       prismaMock.bill.findUnique
-        .mockResolvedValueOnce({ ...unpaidBill, payments: [{ amount: new Prisma.Decimal('12.00') }] })
+        .mockResolvedValueOnce({
+          ...unpaidBill,
+          payments: [{ amount: new Prisma.Decimal('12.00') }],
+        })
         .mockResolvedValueOnce({
           ...unpaidBill,
           paid: true,
           paidAt: new Date(),
-          payments: [{ amount: new Prisma.Decimal('12.00') }, { amount: new Prisma.Decimal('10.00') }],
+          payments: [
+            { amount: new Prisma.Decimal('12.00') },
+            { amount: new Prisma.Decimal('10.00') },
+          ],
         });
-      prismaMock.payment.create.mockResolvedValue({ id: 'p2', billId: 'bill-1', amount: new Prisma.Decimal('10.00'), method: 'card', createdAt: new Date() });
+      prismaMock.payment.create.mockResolvedValue({
+        id: 'p2',
+        billId: 'bill-1',
+        amount: new Prisma.Decimal('10.00'),
+        method: 'card',
+        createdAt: new Date(),
+      });
       prismaMock.bill.update.mockResolvedValue({ ...unpaidBill, paid: true, paidAt: new Date() });
 
       const result = await service.recordPayment('bill-1', { amount: 10, method: 'card' });
 
       expect(prismaMock.bill.update).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: 'bill-1' }, data: expect.objectContaining({ paid: true }) }),
+        expect.objectContaining({
+          where: { id: 'bill-1' },
+          data: expect.objectContaining({ paid: true }),
+        }),
       );
       expect(result.remaining).toBe(0);
     });
 
     it('throws ConflictException when the bill is already paid', async () => {
-      prismaMock.bill.findUnique.mockResolvedValue({ ...unpaidBill, paid: true, paidAt: new Date() });
+      prismaMock.bill.findUnique.mockResolvedValue({
+        ...unpaidBill,
+        paid: true,
+        paidAt: new Date(),
+      });
 
-      await expect(service.recordPayment('bill-1', { amount: 5, method: 'cash' })).rejects.toThrow(ConflictException);
+      await expect(service.recordPayment('bill-1', { amount: 5, method: 'cash' })).rejects.toThrow(
+        ConflictException,
+      );
       expect(prismaMock.payment.create).not.toHaveBeenCalled();
+    });
+
+    it('writes the payment and the paid-flip inside a single transaction', async () => {
+      prismaMock.bill.findUnique
+        .mockResolvedValueOnce({
+          ...unpaidBill,
+          payments: [{ amount: new Prisma.Decimal('20.00') }],
+        })
+        .mockResolvedValueOnce({
+          ...unpaidBill,
+          paid: true,
+          payments: [
+            { amount: new Prisma.Decimal('20.00') },
+            { amount: new Prisma.Decimal('2.00') },
+          ],
+        });
+      prismaMock.payment.create.mockResolvedValue({
+        id: 'p3',
+        billId: 'bill-1',
+        amount: new Prisma.Decimal('2.00'),
+        method: 'cash',
+        createdAt: new Date(),
+      });
+      prismaMock.bill.update.mockResolvedValue({ ...unpaidBill, paid: true });
+
+      await service.recordPayment('bill-1', { amount: 2, method: 'cash' });
+
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+      const order = [prismaMock.payment.create, prismaMock.bill.update].map(
+        (fn) => fn.mock.invocationCallOrder[0],
+      );
+
+      expect(order[0]).toBeLessThan(order[1]);
     });
   });
 });
