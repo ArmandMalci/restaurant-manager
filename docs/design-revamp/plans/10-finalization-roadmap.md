@@ -89,12 +89,14 @@ Implementations land in Tier 2 (spine).
 
 ---
 
-## Tier 4 — Reliability (the paper-beating bar — NOT in the review findings)
+## Tier 4 — Reliability (the paper-beating bar — NOT in the review findings) — DONE (commit `3f7b6b9`)
 
-- [ ] **T4.1 · Never lose a fired order** — Optimistic updates + mutation retry/queue on the order-fire and status-change
+> **Audit finding:** most of this was already built (Plan 15 PWA hardening) — `lib/offline-queue.ts` enqueues offline non-GET writes and `drainQueue()` replays them on reconnect (`app-layout.tsx`), plus a service worker (`public/sw.js`) + manifest. That's the "never lose a fired order" mechanism, and it's offline-only so it carries no double-charge risk. The one real gap was **silent write failures** — fixed with a global `MutationCache.onError` toast (mutations with their own `onError` opt out). Added query `retry: 2` (wifi-blip read resilience); **`mutations.retry: 0` deliberately** — no idempotency keys, so an online retried payment/order POST would double-charge/duplicate.
+
+- [x] **T4.1 · Never lose a fired order** — Optimistic updates + mutation retry/queue on the order-fire and status-change
   paths, so a dropped/slow request does not silently drop a ticket.
-- [ ] **T4.2 · No silent failures** — Global surface (toast/banner) on any mutation failure across the service screens.
-- [ ] **T4.3 · Offline degradation** — Audit what the (already-hardened) PWA caches; ensure the order → KDS → settle path
+- [x] **T4.2 · No silent failures** — Global surface (toast/banner) on any mutation failure across the service screens.
+- [x] **T4.3 · Offline degradation** — Audit what the (already-hardened) PWA caches; ensure the order → KDS → settle path
   degrades gracefully on a wifi drop rather than erroring into a dead-end.
 
 ---
