@@ -21,6 +21,7 @@ const mockOrderService = {
   findAll: jest.fn(),
   findOne: jest.fn(),
   create: jest.fn(),
+  addItems: jest.fn(),
   updateStatus: jest.fn(),
   updateItemStatus: jest.fn(),
   remove: jest.fn(),
@@ -112,6 +113,36 @@ describe('OrderController', () => {
         expect.objectContaining({ tableId: '00000000-0000-0000-0000-000000000001' }),
         STAFF_ID,
       );
+    });
+  });
+
+  describe('POST /orders/:id/items', () => {
+    it('returns 201 and delegates to service with the order id', async () => {
+      const updated = { ...mockOrder, items: [{ id: 'oi-2', menuItemId: 'mi-2', quantity: 1 }] };
+
+      mockOrderService.addItems.mockResolvedValue(updated);
+      const res = await app.inject({
+        method: 'POST',
+        url: '/orders/ord-1/items',
+        payload: { items: [{ menuItemId: '00000000-0000-0000-0000-000000000003', quantity: 1 }] },
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(mockOrderService.addItems).toHaveBeenCalledWith(
+        'ord-1',
+        expect.objectContaining({ items: expect.any(Array) }),
+      );
+    });
+
+    it('returns 404 when order not found', async () => {
+      mockOrderService.addItems.mockRejectedValue(new NotFoundException());
+      const res = await app.inject({
+        method: 'POST',
+        url: '/orders/missing/items',
+        payload: { items: [{ menuItemId: '00000000-0000-0000-0000-000000000003', quantity: 1 }] },
+      });
+
+      expect(res.statusCode).toBe(404);
     });
   });
 

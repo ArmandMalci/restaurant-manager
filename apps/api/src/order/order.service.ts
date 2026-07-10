@@ -1,7 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
+  AddOrderItemsDto,
   CreateOrderDto,
+  CreateOrderItemDto,
   UpdateOrderStatusDto,
   UpdateOrderItemStatusDto,
 } from '@restaurant/shared';
@@ -33,14 +40,83 @@ export class OrderService {
   }
 
   public async create(dto: CreateOrderDto, staffId: string) {
-    const menuItemIds = [...new Set(dto.items.map((i) => i.menuItemId))];
+    const itemsCreate = await this.buildItemsCreateData(dto.items);
+
+    const order = await this.prisma.order.create({
+      data: {
+        tableId: dto.tableId,
+        staffId,
+        notes: dto.notes ?? null,
+        items: { create: itemsCreate },
+      },
+      include: WITH_ITEMS,
+    });
+    const table = await this.prisma.table.findUnique({ where: { id: dto.tableId } });
+
+    await this.notifications.sendToRole('kitchen', {
+      title: 'New Order',
+      body: `New order received for Table ${table?.number ?? '?'}`,
+    });
+
+    return order;
+  }
+
+  public async addItems(orderId: string, dto: AddOrderItemsDto) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { bill: true },
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+    // Bill totals are a one-time snapshot — appending after billing would under-bill the guest.
+    if (order.bill)
+      throw new ConflictException(
+        `Order ${orderId} already has a bill and cannot accept new items`,
+      );
+
+    const itemsCreate = await this.buildItemsCreateData(dto.items);
+    const pastDraft = order.status !== 'draft';
+    const now = new Date();
+
+    const data: Record<string, unknown> = {
+      items: {
+        create: pastDraft ? itemsCreate.map((item) => ({ ...item, firedAt: now })) : itemsCreate,
+      },
+    };
+
+    // promoteIfAllItemsReady early-returns for ready/served, so a freshly-added
+    // pending item would otherwise leave the order falsely "ready".
+    if (order.status === 'ready' || order.status === 'served') {
+      data.status = 'in_progress' as never;
+    }
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data,
+      include: WITH_ITEMS,
+    });
+
+    if (pastDraft) {
+      const table = await this.prisma.table.findUnique({ where: { id: order.tableId } });
+
+      await this.notifications.sendToRole('kitchen', {
+        title: 'Order Updated',
+        body: `New items added to Table ${table?.number ?? '?'}'s order`,
+      });
+    }
+
+    return updated;
+  }
+
+  private async buildItemsCreateData(items: CreateOrderItemDto[]) {
+    const menuItemIds = [...new Set(items.map((i) => i.menuItemId))];
     const menuItems = await this.prisma.menuItem.findMany({
       where: { id: { in: menuItemIds } },
       include: { modifierGroups: { include: { modifierGroup: { include: { options: true } } } } },
     });
     const byId = new Map(menuItems.map((m) => [m.id, m]));
 
-    const itemsCreate = dto.items.map((i) => {
+    return items.map((i) => {
       const mi = byId.get(i.menuItemId);
 
       if (!mi) throw new BadRequestException(`Menu item ${i.menuItemId} not found`);
@@ -78,24 +154,6 @@ export class OrderService {
         },
       };
     });
-
-    const order = await this.prisma.order.create({
-      data: {
-        tableId: dto.tableId,
-        staffId,
-        notes: dto.notes ?? null,
-        items: { create: itemsCreate },
-      },
-      include: WITH_ITEMS,
-    });
-    const table = await this.prisma.table.findUnique({ where: { id: dto.tableId } });
-
-    await this.notifications.sendToRole('kitchen', {
-      title: 'New Order',
-      body: `New order received for Table ${table?.number ?? '?'}`,
-    });
-
-    return order;
   }
 
   public async updateStatus(id: string, dto: UpdateOrderStatusDto) {

@@ -25,7 +25,12 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { OrderService } from './order.service';
-import { CreateOrderDto, UpdateOrderStatusDto, UpdateOrderItemStatusDto } from './dto/order.dto';
+import {
+  AddOrderItemsDto,
+  CreateOrderDto,
+  UpdateOrderStatusDto,
+  UpdateOrderItemStatusDto,
+} from './dto/order.dto';
 
 @ApiTags('orders')
 @ApiBearerAuth()
@@ -55,6 +60,14 @@ export class OrderController {
   @ApiResponse({ status: 201, type: OrderDto })
   public create(@Body() dto: CreateOrderDto, @CurrentUser('id') staffId: string) {
     return this.orders.create(dto, staffId);
+  }
+
+  @Post(':id/items')
+  @ApiOperation({ summary: 'Add items to an existing (unbilled) order' })
+  @ApiBody({ type: AddOrderItemsDto })
+  @ApiResponse({ status: 201, type: OrderDto })
+  public addItems(@Param('id') id: string, @Body() dto: AddOrderItemsDto) {
+    return this.orders.addItems(id, dto);
   }
 
   @Patch(':id/status')

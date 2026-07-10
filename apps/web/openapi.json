@@ -955,6 +955,50 @@
         "tags": ["orders"]
       }
     },
+    "/api/orders/{id}/items": {
+      "post": {
+        "operationId": "OrderController_addItems",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrderItemsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add items to an existing (unbilled) order",
+        "tags": ["orders"]
+      }
+    },
     "/api/orders/{id}/status": {
       "patch": {
         "operationId": "OrderController_updateStatus",
@@ -2910,6 +2954,48 @@
           }
         },
         "required": ["tableId", "items"]
+      },
+      "AddOrderItemsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "menuItemId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "exclusiveMinimum": true
+                },
+                "notes": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "nullable": true
+                },
+                "modifierOptionIds": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  }
+                }
+              },
+              "required": ["menuItemId", "quantity"]
+            },
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          }
+        },
+        "required": ["items"]
       },
       "UpdateOrderStatusDto": {
         "type": "object",

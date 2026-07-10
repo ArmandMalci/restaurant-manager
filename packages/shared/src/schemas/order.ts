@@ -54,6 +54,11 @@ export const CreateOrderSchema = z.object({
 });
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
 
+export const AddOrderItemsSchema = z.object({
+  items: z.array(CreateOrderItemSchema).min(1),
+});
+export type AddOrderItemsDto = z.infer<typeof AddOrderItemsSchema>;
+
 export const UpdateOrderStatusSchema = z.object({ status: OrderStatusSchema });
 export type UpdateOrderStatusDto = z.infer<typeof UpdateOrderStatusSchema>;
 

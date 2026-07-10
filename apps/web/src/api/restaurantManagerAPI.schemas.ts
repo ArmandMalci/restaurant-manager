@@ -451,6 +451,28 @@ export interface CreateOrderDto {
   items: CreateOrderDtoItemsItem[];
 }
 
+export type AddOrderItemsDtoItemsItem = {
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  menuItemId: string;
+  /**
+   * @maximum 9007199254740991
+   * @exclusiveMinimum 0
+   */
+  quantity: number;
+  /**
+   * @maxLength 500
+   * @nullable
+   */
+  notes?: string | null;
+  /** @items.pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  modifierOptionIds?: string[];
+};
+
+export interface AddOrderItemsDto {
+  /** @minItems 1 */
+  items: AddOrderItemsDtoItemsItem[];
+}
+
 export type UpdateOrderStatusDtoStatus =
   (typeof UpdateOrderStatusDtoStatus)[keyof typeof UpdateOrderStatusDtoStatus];
 

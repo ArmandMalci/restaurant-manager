@@ -22,6 +22,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AddOrderItemsDto,
   CreateOrderDto,
   OrderControllerGetAllParams,
   OrderDto,
@@ -445,6 +446,85 @@ export const useOrderControllerRemove = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   return useMutation(getOrderControllerRemoveMutationOptions(options), queryClient);
+};
+/**
+ * @summary Add items to an existing (unbilled) order
+ */
+export const orderControllerAddItems = (
+  id: string,
+  addOrderItemsDto: AddOrderItemsDto,
+  signal?: AbortSignal,
+) => {
+  return customInstance<OrderDto>({
+    url: `/api/orders/${id}/items`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data: addOrderItemsDto,
+    signal,
+  });
+};
+
+export const getOrderControllerAddItemsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof orderControllerAddItems>>,
+    TError,
+    { id: string; data: AddOrderItemsDto },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof orderControllerAddItems>>,
+  TError,
+  { id: string; data: AddOrderItemsDto },
+  TContext
+> => {
+  const mutationKey = ['orderControllerAddItems'];
+  const { mutation: mutationOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof orderControllerAddItems>>,
+    { id: string; data: AddOrderItemsDto }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return orderControllerAddItems(id, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type OrderControllerAddItemsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof orderControllerAddItems>>
+>;
+export type OrderControllerAddItemsMutationBody = AddOrderItemsDto;
+export type OrderControllerAddItemsMutationError = unknown;
+
+/**
+ * @summary Add items to an existing (unbilled) order
+ */
+export const useOrderControllerAddItems = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof orderControllerAddItems>>,
+      TError,
+      { id: string; data: AddOrderItemsDto },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof orderControllerAddItems>>,
+  TError,
+  { id: string; data: AddOrderItemsDto },
+  TContext
+> => {
+  return useMutation(getOrderControllerAddItemsMutationOptions(options), queryClient);
 };
 /**
  * @summary Update order status

@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -325,6 +325,76 @@ describe('OrderService', () => {
           'staff-1',
         ),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('addItems', () => {
+    const fries = { id: 'mi-2', name: 'Fries', price: 5, modifierGroups: [] };
+    const addDto = { items: [{ menuItemId: 'mi-2', quantity: 1, modifierOptionIds: [] }] };
+
+    it('throws NotFoundException when the order does not exist', async () => {
+      prismaMock.order.findUnique.mockResolvedValue(null);
+      await expect(service.addItems('missing', addDto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('rejects (Conflict) when the order already has a bill', async () => {
+      prismaMock.order.findUnique.mockResolvedValue({ ...mockOrder, bill: { id: 'bill-1' } });
+
+      await expect(service.addItems('ord-1', addDto)).rejects.toThrow(ConflictException);
+      expect(prismaMock.order.update).not.toHaveBeenCalled();
+    });
+
+    it('leaves new items unfired and does not notify when the order is still draft', async () => {
+      prismaMock.order.findUnique.mockResolvedValue({ ...mockOrder, status: 'draft', bill: null });
+      prismaMock.menuItem.findMany.mockResolvedValue([fries]);
+      prismaMock.order.update.mockResolvedValue({ ...mockOrder });
+
+      await service.addItems('ord-1', addDto);
+
+      const call = prismaMock.order.update.mock.calls[0][0];
+
+      expect(call.data.items.create[0].firedAt).toBeUndefined();
+      expect(call.data.status).toBeUndefined();
+      expect(mockNotifications.sendToRole).not.toHaveBeenCalled();
+    });
+
+    it('fires new items and notifies the kitchen when the order is past draft', async () => {
+      prismaMock.order.findUnique.mockResolvedValue({
+        ...mockOrder,
+        status: 'in_progress',
+        bill: null,
+      });
+      prismaMock.menuItem.findMany.mockResolvedValue([fries]);
+      prismaMock.order.update.mockResolvedValue({ ...mockOrder, status: 'in_progress' });
+      prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 3 });
+
+      await service.addItems('ord-1', addDto);
+
+      const call = prismaMock.order.update.mock.calls[0][0];
+
+      expect(call.data.items.create[0].firedAt).toBeInstanceOf(Date);
+      expect(call.data.status).toBeUndefined();
+      expect(mockNotifications.sendToRole).toHaveBeenCalledWith(
+        'kitchen',
+        expect.objectContaining({
+          title: expect.any(String),
+          body: expect.stringContaining('Table 3'),
+        }),
+      );
+    });
+
+    it('demotes a ready order to in_progress so the readiness rollup re-fires', async () => {
+      prismaMock.order.findUnique.mockResolvedValue({ ...mockOrder, status: 'ready', bill: null });
+      prismaMock.menuItem.findMany.mockResolvedValue([fries]);
+      prismaMock.order.update.mockResolvedValue({ ...mockOrder, status: 'in_progress' });
+      prismaMock.table.findUnique.mockResolvedValue({ id: 'tbl-1', number: 3 });
+
+      await service.addItems('ord-1', addDto);
+
+      const call = prismaMock.order.update.mock.calls[0][0];
+
+      expect(call.data.status).toBe('in_progress');
+      expect(call.data.items.create[0].firedAt).toBeInstanceOf(Date);
     });
   });
 });
