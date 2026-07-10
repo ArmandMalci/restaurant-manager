@@ -100,10 +100,10 @@ interface TicketCardProps {
   ticket: KdsTicket;
   activeStation: Station;
   onBump: (orderId: string, itemId: string) => void;
-  isBumping: boolean;
+  bumpingKeys: Set<string>;
 }
 
-function TicketCard({ ticket, activeStation, onBump, isBumping }: TicketCardProps) {
+function TicketCard({ ticket, activeStation, onBump, bumpingKeys }: TicketCardProps) {
   const ageMin = calcAgeMin(ticket.firedAt);
   const tone = ageTone(ageMin);
   const borderClass = ageBorderClass(ageMin);
@@ -165,11 +165,13 @@ function TicketCard({ ticket, activeStation, onBump, isBumping }: TicketCardProp
             );
           }
 
+          const isItemBumping = bumpingKeys.has(`${ticket.orderId}:${item.id}`);
+
           return (
             <button
               key={item.id}
               type="button"
-              disabled={isBumping}
+              disabled={isItemBumping}
               onClick={() => onBump(ticket.orderId, item.id)}
               className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted active:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -199,6 +201,7 @@ function TicketCard({ ticket, activeStation, onBump, isBumping }: TicketCardProp
 function KdsPage() {
   const qc = useQueryClient();
   const [activeStation, setActiveStation] = useState<Station>('all');
+  const [bumpingKeys, setBumpingKeys] = useState<Set<string>>(new Set());
 
   const { data: tickets, isLoading } = useKdsControllerGetTickets({
     query: { refetchInterval: 6_000 },
@@ -213,7 +216,20 @@ function KdsPage() {
   });
 
   function handleBump(orderId: string, itemId: string) {
-    updateItemStatus.mutate({ id: orderId, itemId, data: { status: 'ready' } });
+    const key = `${orderId}:${itemId}`;
+    setBumpingKeys((prev) => new Set(prev).add(key));
+    updateItemStatus.mutate(
+      { id: orderId, itemId, data: { status: 'ready' } },
+      {
+        onSettled: () => {
+          setBumpingKeys((prev) => {
+            const next = new Set(prev);
+            next.delete(key);
+            return next;
+          });
+        },
+      },
+    );
   }
 
   const allTickets = tickets ?? [];
@@ -265,7 +281,7 @@ function KdsPage() {
               ticket={ticket}
               activeStation={activeStation}
               onBump={handleBump}
-              isBumping={updateItemStatus.isPending}
+              bumpingKeys={bumpingKeys}
             />
           ))}
         </div>
