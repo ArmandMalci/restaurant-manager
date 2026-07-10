@@ -1,12 +1,29 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState, useMemo } from 'react';
-import { Calendar, dayjsLocalizer, Views } from 'react-big-calendar';
+import { useState, useMemo, useEffect } from 'react';
+import { Calendar, dayjsLocalizer, Views, type View } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useReservationControllerGetAll } from '@/api/reservations/reservations';
 import { useShiftControllerGetAll } from '@/api/shifts/shifts';
 import { useStaffControllerGetAll } from '@/api/staff/staff';
 import { PageHeader } from '@/components/ui/page-header';
+
+// ponytail: single-use, kept local — promote to hooks/ if a second consumer shows up.
+function useIsMobile(breakpointPx = 640): boolean {
+  const query = `(max-width: ${breakpointPx - 1}px)`;
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia(query).matches);
+
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+
+    mql.addEventListener('change', handler);
+
+    return () => mql.removeEventListener('change', handler);
+  }, [query]);
+
+  return isMobile;
+}
 
 export const Route = createFileRoute('/_app/calendar/')({
   component: CalendarPage,
@@ -38,7 +55,15 @@ function CalendarPage() {
   const [tab, setTab] = useState<Tab>('reservations');
   const [currentDate, setCurrentDate] = useState(new Date());
   const { from, to } = weekBounds(currentDate);
+  const isMobile = useIsMobile();
+  const [view, setView] = useState<View>(Views.WEEK);
 
+  useEffect(() => {
+    setView(isMobile ? Views.AGENDA : Views.WEEK);
+  }, [isMobile]);
+
+  // Reservations only support a single `date` filter server-side (no from/to range),
+  // so the visible-week count is computed client-side from the full list instead.
   const { data: reservations = [] } = useReservationControllerGetAll();
   const { data: shifts = [] } = useShiftControllerGetAll(from || to ? { from, to } : undefined);
   const { data: staff = [] } = useStaffControllerGetAll();
@@ -80,7 +105,17 @@ function CalendarPage() {
   );
 
   const activeEvents = tab === 'reservations' ? reservationEvents : shiftEvents;
-  const eventCount = activeEvents.length;
+  const reservationsThisWeek = useMemo(
+    () =>
+      reservationEvents.filter((e) => {
+        const d = dayjs(e.start);
+
+        return !d.isBefore(dayjs(from), 'day') && !d.isAfter(dayjs(to), 'day');
+      }).length,
+    [reservationEvents, from, to],
+  );
+  // Shifts are already server-filtered to [from, to], so their length is week-scoped for free.
+  const eventCount = tab === 'reservations' ? reservationsThisWeek : shiftEvents.length;
 
   return (
     <div className="flex h-full flex-col p-6">
@@ -129,13 +164,18 @@ function CalendarPage() {
           '[&_.rbc-label]:text-muted-foreground [&_.rbc-label]:text-xs',
           '[&_.rbc-off-range-bg]:bg-muted/30',
           '[&_.rbc-selected-cell]:bg-accent/20',
+          // Truncate instead of mid-word-wrapping when overlapping bookings shrink event columns
+          '[&_.rbc-event-content]:overflow-hidden [&_.rbc-event-content]:text-ellipsis [&_.rbc-event-content]:whitespace-nowrap',
+          '[&_.rbc-event]:min-w-11',
+          '[&_.rbc-agenda-table]:text-foreground',
         ].join(' ')}
       >
         <Calendar
           localizer={localizer}
           events={activeEvents}
-          defaultView={Views.WEEK}
-          views={[Views.WEEK, Views.DAY]}
+          view={view}
+          onView={setView}
+          views={isMobile ? [Views.DAY, Views.AGENDA] : [Views.WEEK, Views.DAY]}
           date={currentDate}
           onNavigate={setCurrentDate}
           scrollToTime={new Date(0, 0, 0, 10, 0, 0)}
