@@ -280,7 +280,10 @@ function InventoryPage() {
           }
         />
       ) : (
-        <div className="rounded-lg border">
+        // ponytail: overflow-x-auto over a card/stacked breakpoint layout — phone users can
+        // swipe to reach Status/Actions instead of losing them off-screen; revisit with a
+        // stacked layout if the column count grows.
+        <div className="rounded-lg border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">

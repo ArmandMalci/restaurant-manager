@@ -289,15 +289,33 @@ function ReservationList({
                 <AvatarFallback>{initials(r.guestName)}</AvatarFallback>
               </Avatar>
             }
-            title={r.guestName}
+            title={
+              <span className="flex items-center gap-2">
+                <span className="truncate">{r.guestName}</span>
+                <span className="shrink-0 sm:hidden">
+                  <StatusBadge tone={STATUS_TONE[status]} label={STATUS_LABELS[status]} />
+                </span>
+              </span>
+            }
             subtitle={
               <span className="flex items-center gap-2">
-                <span>{contactLine || tableLabel}</span>
-                {contactLine && <span className="text-muted-foreground/60">{tableLabel}</span>}
+                {/* Phone: name/status are on the title line above, so surface party/time/table here instead of the desktop contact line. */}
+                <span className="flex items-center gap-2 sm:hidden">
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    {r.partySize}
+                  </span>
+                  <span>{dateLine}</span>
+                  <span className="text-muted-foreground/60">{tableLabel}</span>
+                </span>
+                <span className="hidden sm:inline">{contactLine || tableLabel}</span>
+                {contactLine && (
+                  <span className="hidden text-muted-foreground/60 sm:inline">{tableLabel}</span>
+                )}
               </span>
             }
             meta={
-              <span className="flex items-center gap-2">
+              <span className="hidden items-center gap-2 sm:flex">
                 <span className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
                   {r.partySize}

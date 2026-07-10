@@ -62,7 +62,7 @@ function LoginPage() {
       </div>
 
       {/* Sign-in panel */}
-      <div className="bg-background flex flex-col items-center justify-center px-6 py-12 lg:px-16">
+      <div className="bg-background flex flex-1 flex-col items-center justify-center px-6 py-12 lg:px-16">
         {/* Mobile brand mark — only visible below lg */}
         <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
           <div className="bg-sidebar text-sidebar-foreground flex h-12 w-12 items-center justify-center rounded-xl">

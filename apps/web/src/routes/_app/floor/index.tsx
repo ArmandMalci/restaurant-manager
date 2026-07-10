@@ -424,9 +424,10 @@ function TablesPage() {
       <PageHeader
         title="Floor"
         subtitle={`${tables.length} table${tables.length !== 1 ? 's' : ''}`}
+        className="flex-col items-stretch sm:flex-row sm:items-start"
         action={
           editMode ? (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={handleCancelEdit}
@@ -442,7 +443,7 @@ function TablesPage() {
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* View toggle */}
               <div className="flex rounded-md border border-border overflow-hidden">
                 <button
