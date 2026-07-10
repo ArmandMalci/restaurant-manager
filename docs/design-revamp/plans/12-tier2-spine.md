@@ -49,15 +49,15 @@ Proceeding on **derive** unless overruled.
 
 ## Task E — KDS per-item bump (D3, frontend)
 **Files:** `kds/index.tsx`
-- [ ] Replace page-wide `isBumping={updateItemStatus.isPending}` with a local in-flight `Set<`${orderId}:${itemId}`>` — only the tapped item disables; the rest of the board stays live. Optional short undo window.
+- [x] Replace page-wide `isBumping={updateItemStatus.isPending}` with a local in-flight `Set<`${orderId}:${itemId}`>` — only the tapped item disables; the rest of the board stays live. Optional short undo window.
 
 ## Task F — Menu category actions reachable (T2.4, frontend)
 **Files:** `menu/index.tsx`
-- [ ] Category edit/delete controls always-visible (drop `group-hover`), ≥44px.
+- [x] Category edit/delete controls always-visible (drop `group-hover`), ≥44px.
 
 ## Task G — Worst responsive breaks (T2.5, frontend)
 **Files:** `floor/index.tsx`, `inventory/index.tsx`, `door/index.tsx` (+ `list-row.tsx`), `_auth/login.tsx`
-- [ ] Floor phone header no longer overlaps the title; Inventory phone table scrolls or card-collapses; Door row keeps the guest name on phone; Login card fills the panel instead of floating at top.
+- [x] Floor phone header no longer overlaps the title; Inventory phone table scrolls or card-collapses; Door row keeps the guest name on phone; Login card fills the panel instead of floating at top.
 
 ---
 _Pre-existing tangential debt flagged by the judge (not caused here, do NOT fix in this plan): `billing.service.ts:47` subtotal falls back to live menu price when snapshot is 0; 86/available check missing on both create + append (recommended, not blocking)._
