@@ -233,7 +233,9 @@ function BillingPage() {
       setActiveBillId(null);
     } else {
       setSelectedOrderId(orderId);
-      setActiveBillId(null);
+      // If the order already has a bill, resume it — skip the Create Bill form
+      const order = billableOrders.find((o) => o.id === orderId);
+      setActiveBillId(order?.bill?.id ?? null);
       setDiscountPct('0');
     }
   }
