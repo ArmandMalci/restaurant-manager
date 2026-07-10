@@ -10,6 +10,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
   useMenuControllerGetCategories,
@@ -24,12 +25,17 @@ import {
 } from '@/api/orders/orders';
 import type { ModifierGroupDto, OrderDto } from '@/api/restaurantManagerAPI.schemas';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ModifierPanel } from './-modifier-panel';
 import type { ChosenOption } from './-modifier-panel';
 import { TicketPanel } from './-ticket-panel';
@@ -70,6 +76,7 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
   const [orderNotes, setOrderNotes] = useState('');
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
   const [ticketOpen, setTicketOpen] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   // The table's current order: an unbilled order means "append to it"; an
   // unpaid-but-billed order means "already rung up, settle before adding
@@ -86,9 +93,7 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
       : menuItems.filter((m) => m.categoryId === activeCategoryId && m.available);
 
   const pendingGroups = pendingItem
-    ? (allGroups as ModifierGroupDto[]).filter((g) =>
-        pendingItem.modifierGroupIds.includes(g.id),
-      )
+    ? (allGroups as ModifierGroupDto[]).filter((g) => pendingItem.modifierGroupIds.includes(g.id))
     : [];
 
   function handleTapItem(item: {
@@ -123,11 +128,11 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
       const existingIdx = prev.findIndex(
         (l) => l.menuItemId === menuItemId && sameKey(l.selectedOptions, selectedOptions),
       );
+
       if (existingIdx !== -1) {
-        return prev.map((l, i) =>
-          i === existingIdx ? { ...l, quantity: l.quantity + 1 } : l,
-        );
+        return prev.map((l, i) => (i === existingIdx ? { ...l, quantity: l.quantity + 1 } : l));
       }
+
       return [...prev, { menuItemId, name, basePrice, quantity: 1, notes: '', selectedOptions }];
     });
     setPendingItem(null);
@@ -144,6 +149,14 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
 
   function handleRemove(idx: number) {
     setLines((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function handleCloseAttempt() {
+    if (lines.length > 0) {
+      setConfirmDiscard(true);
+    } else {
+      onClose();
+    }
   }
 
   function handleFire() {
@@ -163,8 +176,14 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
             invalidateOrderControllerGetAll(qc);
             setLines([]);
           },
+          onError: () => {
+            toast.error('Failed to add items to the order', {
+              description: 'Nothing was sent to the kitchen. The ticket is unchanged — try again.',
+            });
+          },
         },
       );
+
       return;
     }
 
@@ -174,6 +193,12 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
         onSuccess: () => {
           invalidateOrderControllerGetAll(qc);
           onClose();
+        },
+        onError: () => {
+          toast.error('Order failed to fire', {
+            description:
+              'The ticket was not sent to the kitchen. The order is still here — try again.',
+          });
         },
       },
     );
@@ -208,7 +233,7 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
         <p className="text-base font-semibold text-foreground">{headerTitle}</p>
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleCloseAttempt}
           className="text-muted-foreground hover:text-foreground rounded p-1 transition-colors"
           aria-label="Close builder"
         >
@@ -382,6 +407,26 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Discard confirmation — only prompted when there are unfired lines */}
+      <AlertDialog open={confirmDiscard} onOpenChange={setConfirmDiscard}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard this order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {ticketLineCount} unsaved item{ticketLineCount === 1 ? '' : 's'} on this ticket
+              {existingOpenOrder ? " haven't been added to the order" : " haven't been fired"} yet.
+              Closing now discards them.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={onClose}>
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

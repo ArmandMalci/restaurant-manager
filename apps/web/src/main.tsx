@@ -6,6 +6,7 @@ import { router } from './router';
 import { useAuthStore } from './stores/auth.store';
 import { setupAxiosOfflineInterceptor } from './lib/axios-setup';
 import { ThemeProvider } from './components/theme-provider';
+import { Toaster } from './components/ui/sonner';
 import './index.css';
 
 setupAxiosOfflineInterceptor();
@@ -18,6 +19,7 @@ function Root() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} context={{ auth: { isAuthenticated, user } }} />
+      <Toaster position="top-center" />
     </QueryClientProvider>
   );
 }
