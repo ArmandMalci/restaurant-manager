@@ -45,11 +45,12 @@ Implementations land in Tier 2 (spine).
 
 ## Tier 1 — Systemic (highest leverage: one change clears many findings)
 
-- [ ] **T1.1 · Touch targets** — Bump base `input`/`button`/`select` to a ≥44px tablet touch size (new size default or
-  raised base heights + hit-area padding). Single change that clears ~9 review findings across login, service, order,
-  inventory, reports, checkout, menu, settings, calendar.
-- [ ] **T1.2 · Floor color tokens** — Replace `-floor-map.tsx` hardcoded `bg-emerald-*` / `dark:` literals with semantic
-  status tokens. Removes the clearest design-system violation + the retired `.dark` usage.
+- [x] **T1.1 · Touch targets** — DONE ([Plan 11](11-tier1-systemic.md), commit `f4b0e85`). Reconciled with the dense
+  aesthetic via a `@media (pointer: coarse)` rule on the shared primitives (44px on touch, desktop unchanged) rather than
+  a global bump. Verified: coarse rule shipped, desktop input stays 32px. Note: raw ad-hoc `<button>` icon controls
+  (not the `Button` primitive) are not covered — folded into their Tier 2/3 screen tasks.
+- [x] **T1.2 · Floor color tokens** — DONE ([Plan 11](11-tier1-systemic.md), commit `7ae1749`). `STATUS_BG` now derives
+  from `--success/--info/--warning`; zero legacy palette; recolors per theme (verified default/monokai/gruvbox).
 
 ---
 
@@ -77,6 +78,8 @@ Implementations land in Tier 2 (spine).
   legibility + phone week-grid. (Interactivity/display-only resolves with the D4 shifts-scope decision.)
 - [ ] **T3.7 · Settings** — actually use saved Restaurant Info (receipt/header currently hardcode a different name).
 - [ ] **T3.8 · Floor** — single accent CTA; show reservation context on reserved tables; place newly-created tables on the map.
+  **Also clear the pre-existing lint debt in `-floor-map.tsx`** (surfaced during Plan 11): clickable `Tile` `<div>` needs
+  keyboard support / role (`noStaticElementInteractions`, `useKeyWithClickEvents`), and 2 non-null assertions (lines ~172, ~210).
 
 ---
 

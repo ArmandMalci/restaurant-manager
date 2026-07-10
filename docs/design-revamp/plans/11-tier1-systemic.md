@@ -31,7 +31,7 @@
 
 **Why this shape:** the compact scale (`h-8`/`h-7`) is deliberate (dense-productivity aesthetic, locked in the direction doc). Bumping the base heights globally would reflow every screen and fight the aesthetic. `@media (pointer: coarse)` gives touch devices a safe hit-area while leaving mouse/desktop dense. `min-width` on buttons only enforces a floor, so it is safe on text buttons (already wider) and fixes icon-only buttons (`size-8` = 32px).
 
-- [ ] **Step 1: Add the coarse-pointer rule to `index.css`**
+- [x] **Step 1: Add the coarse-pointer rule to `index.css`**
 
 Append at the end of `apps/web/src/index.css`:
 
@@ -50,19 +50,19 @@ Append at the end of `apps/web/src/index.css`:
 }
 ```
 
-- [ ] **Step 2: Typecheck + build the stylesheet**
+- [x] **Step 2: Typecheck + build the stylesheet**
 
 Run: `pnpm --filter @restaurant/web typecheck`
 Expected: PASS (CSS-only change; no TS impact).
 
-- [ ] **Step 3: Verify in-browser under an emulated touch device**
+- [x] **Step 3: Verify in-browser under an emulated touch device**
 
 Start the app (`run-web` skill / preview tools). Emulate a coarse-pointer viewport (e.g. tablet 768×1024 with touch) and navigate to `/order?tableId=<occupied>` and `/settings`.
 Assert on a rendered `[data-slot='input']` and a `[data-slot='button']` that computed `min-height` ≥ 44px (`preview_inspect` styles: `['min-height']`, or Playwright `getComputedStyle`).
 Then load the same screen at a desktop (fine-pointer) width and confirm the control is still the compact height (rule did NOT apply) — this proves density is preserved.
 Expected: touch ≥44px, desktop unchanged.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/web/src/index.css
@@ -81,7 +81,7 @@ git commit -m "fix(web): touch-safe primitives on coarse-pointer devices (Tier 1
 - Consumes: existing `STATUS_TONE: Record<TableStatus, Tone>` (`available→success`, `occupied→info`, `reserved→warning`) already defined in the file; the `--success/--info/--warning` theme tokens in `index.css`.
 - Produces: `STATUS_BG` keeps the same shape (`Record<TableStatus, string>`) so all call sites are unchanged — only the class values change to token-based.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `apps/web/src/routes/_app/floor/-floor-map.test.tsx`:
 
@@ -100,13 +100,13 @@ describe('floor tile status colors', () => {
 });
 ```
 
-- [ ] **Step 2: Export `STATUS_BG` and run the test to see it fail**
+- [x] **Step 2: Export `STATUS_BG` and run the test to see it fail**
 
 In `-floor-map.tsx`, change `const STATUS_BG` to `export const STATUS_BG` (line 24).
 Run: `pnpm --filter @restaurant/web test -- -floor-map`
 Expected: FAIL — current values contain `emerald`/`sky`/`amber` and `dark:`.
 
-- [ ] **Step 3: Replace the hardcoded map with token classes**
+- [x] **Step 3: Replace the hardcoded map with token classes**
 
 Replace `-floor-map.tsx:24-28` with:
 
@@ -120,17 +120,17 @@ export const STATUS_BG: Record<TableStatus, string> = {
 };
 ```
 
-- [ ] **Step 4: Run the test — verify it passes**
+- [x] **Step 4: Run the test — verify it passes**
 
 Run: `pnpm --filter @restaurant/web test -- -floor-map`
 Expected: PASS.
 
-- [ ] **Step 5: Verify in-browser across themes**
+- [x] **Step 5: Verify in-browser across themes**
 
 Load `/floor` (map view). Confirm available/occupied/reserved tiles render with distinct, on-brand tinted backgrounds. Switch `data-theme` (default → monokai → gruvbox via Settings) and confirm tiles recolor per theme and stay legible (token-driven).
 Expected: distinct, theme-aware tile colors; no regression vs the old palette.
 
-- [ ] **Step 6: Typecheck + commit**
+- [x] **Step 6: Typecheck + commit**
 
 Run: `pnpm --filter @restaurant/web typecheck`
 Expected: PASS.
