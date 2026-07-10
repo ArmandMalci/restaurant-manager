@@ -824,12 +824,19 @@ function MenuPage() {
         }
         action={
           activeTab === 'items' ? (
-            <Button onClick={() => setItemSheet({ open: true })} disabled={categories.length === 0}>
+            <Button
+              onClick={() => setItemSheet({ open: true })}
+              disabled={categories.length === 0}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
               <Plus className="h-4 w-4" />
               Add item
             </Button>
           ) : (
-            <Button onClick={() => setMgSheet({ open: true })}>
+            <Button
+              onClick={() => setMgSheet({ open: true })}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
               <Plus className="h-4 w-4" />
               New group
             </Button>
@@ -899,47 +906,45 @@ function MenuPage() {
                 </div>
               ) : (
                 categories.map((cat) => (
-                  <div key={cat.id} className="group relative">
+                  <div key={cat.id} className="flex items-center gap-0.5">
                     <button
                       type="button"
                       onClick={() => setSelectedCatId(cat.id)}
                       className={cn(
-                        'flex w-full items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
+                        'flex min-w-0 flex-1 items-center justify-between px-3 py-2 rounded-md text-sm transition-colors',
                         selectedCatId === cat.id
                           ? 'bg-primary/10 text-primary font-medium'
                           : 'text-foreground hover:bg-muted',
                       )}
                     >
-                      <span className="truncate pr-10">{cat.name}</span>
+                      <span className="truncate">{cat.name}</span>
                       <span className="ml-2 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                         {countByCat[cat.id] ?? 0}
                       </span>
                     </button>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCatDialog({ open: true, cat });
-                        }}
-                        aria-label="Edit category"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTarget({ kind: 'category', id: cat.id, name: cat.name });
-                        }}
-                        aria-label="Delete category"
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCatDialog({ open: true, cat });
+                      }}
+                      aria-label="Edit category"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget({ kind: 'category', id: cat.id, name: cat.name });
+                      }}
+                      aria-label="Delete category"
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 ))
               )}
