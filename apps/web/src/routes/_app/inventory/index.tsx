@@ -7,6 +7,16 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Table,
   TableHeader,
   TableBody,
@@ -202,6 +212,7 @@ function AdjustDialog({
 function InventoryPage() {
   const [formMode, setFormMode] = useState<'none' | 'create' | { id: string }>('none');
   const [adjustingItem, setAdjustingItem] = useState<InventoryItemWithStatusDto | null>(null);
+  const [deletingItem, setDeletingItem] = useState<InventoryItemWithStatusDto | null>(null);
   const [search, setSearch] = useState('');
 
   const qc = useQueryClient();
@@ -355,10 +366,7 @@ function InventoryPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() =>
-                            window.confirm(`Delete "${item.name}"?`) &&
-                            deleteItem.mutate({ id: item.id })
-                          }
+                          onClick={() => setDeletingItem(item)}
                           aria-label="Delete"
                           className="text-destructive hover:bg-accent rounded p-1.5 transition-colors"
                         >
@@ -387,6 +395,32 @@ function InventoryPage() {
           onClose={() => setAdjustingItem(null)}
         />
       )}
+
+      {/* Delete confirmation */}
+      <AlertDialog
+        open={deletingItem != null}
+        onOpenChange={(open) => !open && setDeletingItem(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete &ldquo;{deletingItem?.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>This can&rsquo;t be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                if (!deletingItem) return;
+                deleteItem.mutate({ id: deletingItem.id });
+                setDeletingItem(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
