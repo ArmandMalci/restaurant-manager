@@ -68,18 +68,22 @@ Implementations land in Tier 2 (spine).
 
 ---
 
-## Tier 3 — High severity, remaining (broad quality)
+## Tier 3 — High severity, remaining (broad quality) — MOSTLY DONE
 
-- [ ] **T3.1 · Order** — `onError` feedback on fire (no silent failure); confirm before the X discards a built ticket.
-- [ ] **T3.2 · Service** — one consistent minute formatter for the attention queue; make the floor mini-grid tiles either
+> **Done** (commits `9bf11fd` order resilience, `749c8b5` service, `1e65bf5` inventory, `795391c` floor, `8a83c7c` reports, `07dbded` calendar, `3e388f7` receipt): T3.1, T3.2, T3.3, T3.4, T3.6, T3.7, and T3.8 (single-CTA + new-table placement + `-floor-map.tsx` a11y). Added toast (`sonner`) + `AlertDialog` infra. tsc-clean; tests pass. Live browser verification paused (web dev server was down).
+> **DEFERRED — T3.5 (Door lifecycle) + D4 + T3.8's "reservation context on reserved tables"**: all need the reservation-status **migration**, which is **BLOCKED** — `prisma migrate dev` demands a reset because a pre-existing committed migration (`20260626000001_add_order_item_modifiers`, commit `2a363be`) was edited after being applied (checksum drift). Resolving needs either a destructive `migrate reset` (drops dev data) or a `migrate resolve`, both a **human call**. This migration drift is itself an operational finding (a fresh deploy hits it).
+> **Also deferred**: `floor/index.tsx` `TableCard` pre-existing a11y lint (spun off as a background task); Reports header controls' sub-44px touch targets.
+
+- [x] **T3.1 · Order** — `onError` feedback on fire (no silent failure); confirm before the X discards a built ticket.
+- [x] **T3.2 · Service** — one consistent minute formatter for the attention queue; make the floor mini-grid tiles either
   tappable or visually non-interactive.
-- [ ] **T3.3 · Reports** — wire the date-range into the query *or* remove the control; fix the 2 low-contrast status tiles.
-- [ ] **T3.4 · Inventory** — replace native `window.confirm` with a themed confirm dialog.
-- [ ] **T3.5 · Door** — seat / no-show / walk-in actions + reservation lifecycle (D4); guest lookup.
-- [ ] **T3.6 · Calendar** — fix "N this week" (filter the query to the visible week, not all-time); overlapping-booking
+- [x] **T3.3 · Reports** — wire the date-range into the query *or* remove the control; fix the 2 low-contrast status tiles.
+- [x] **T3.4 · Inventory** — replace native `window.confirm` with a themed confirm dialog.
+- [ ] **T3.5 · Door** — seat / no-show / walk-in actions + reservation lifecycle (D4); guest lookup. **DEFERRED — blocked on the reservation-status migration (see Tier 3 header note).**
+- [x] **T3.6 · Calendar** — fix "N this week" (filter the query to the visible week, not all-time); overlapping-booking
   legibility + phone week-grid. (Interactivity/display-only resolves with the D4 shifts-scope decision.)
-- [ ] **T3.7 · Settings** — actually use saved Restaurant Info (receipt/header currently hardcode a different name).
-- [ ] **T3.8 · Floor** — single accent CTA; show reservation context on reserved tables; place newly-created tables on the map.
+- [x] **T3.7 · Settings** — actually use saved Restaurant Info (receipt/header currently hardcode a different name).
+- [x] **T3.8 · Floor** — single accent CTA; show reservation context on reserved tables; place newly-created tables on the map.
   **Also clear the pre-existing lint debt in `-floor-map.tsx`** (surfaced during Plan 11): clickable `Tile` `<div>` needs
   keyboard support / role (`noStaticElementInteractions`, `useKeyWithClickEvents`), and 2 non-null assertions (lines ~172, ~210).
 
