@@ -1,0 +1,146 @@
+[
+  {
+    "screen": "login",
+    "viewport": "tablet",
+    "file": "01-login-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "login",
+    "viewport": "phone",
+    "file": "01-login-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "service",
+    "viewport": "tablet",
+    "file": "02-service-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "service",
+    "viewport": "phone",
+    "file": "02-service-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "floor",
+    "viewport": "tablet",
+    "file": "03-floor-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "floor",
+    "viewport": "phone",
+    "file": "03-floor-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "order",
+    "viewport": "tablet",
+    "file": "04-order-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "order",
+    "viewport": "phone",
+    "file": "04-order-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "kds",
+    "viewport": "tablet",
+    "file": "05-kds-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "kds",
+    "viewport": "phone",
+    "file": "05-kds-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "door",
+    "viewport": "tablet",
+    "file": "06-door-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "door",
+    "viewport": "phone",
+    "file": "06-door-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "checkout",
+    "viewport": "tablet",
+    "file": "07-checkout-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "checkout",
+    "viewport": "phone",
+    "file": "07-checkout-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "menu",
+    "viewport": "tablet",
+    "file": "08-menu-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "menu",
+    "viewport": "phone",
+    "file": "08-menu-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "inventory",
+    "viewport": "tablet",
+    "file": "09-inventory-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "inventory",
+    "viewport": "phone",
+    "file": "09-inventory-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "reports",
+    "viewport": "tablet",
+    "file": "10-reports-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "reports",
+    "viewport": "phone",
+    "file": "10-reports-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "calendar",
+    "viewport": "tablet",
+    "file": "11-calendar-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "calendar",
+    "viewport": "phone",
+    "file": "11-calendar-phone.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "settings",
+    "viewport": "tablet",
+    "file": "12-settings-tablet.png",
+    "consoleErrors": []
+  },
+  {
+    "screen": "settings",
+    "viewport": "phone",
+    "file": "12-settings-phone.png",
+    "consoleErrors": []
+  }
+]
