@@ -17,6 +17,13 @@ export interface LineItem {
   selectedOptions: ChosenOption[];
 }
 
+/** An already-fired item on the table's existing open order — read-only. */
+export interface FiredLineItem {
+  id: string;
+  name: string;
+  quantity: number;
+}
+
 interface TicketPanelProps {
   lines: LineItem[];
   notes: string;
@@ -26,6 +33,11 @@ interface TicketPanelProps {
   onRemove: (idx: number) => void;
   onFire: () => void;
   isFiring: boolean;
+  /** Already-fired items on the table's existing open order, shown read-only above the editable lines. */
+  firedItems?: FiredLineItem[];
+  fireLabel?: string;
+  /** Order-level notes only apply when creating a brand-new order. */
+  showNotes?: boolean;
 }
 
 export function TicketPanel({
@@ -37,6 +49,9 @@ export function TicketPanel({
   onRemove,
   onFire,
   isFiring,
+  firedItems,
+  fireLabel = 'Fire order',
+  showNotes = true,
 }: TicketPanelProps) {
   const total = lines.reduce((sum, l) => {
     const optDelta = l.selectedOptions.reduce((s, o) => s + o.priceDelta, 0);
@@ -48,6 +63,27 @@ export function TicketPanel({
   return (
     <div className="flex flex-col h-full gap-3">
       <p className="text-sm font-semibold text-foreground">Ticket</p>
+
+      {/* Already-fired items — read-only */}
+      {firedItems && firedItems.length > 0 && (
+        <div className="shrink-0 space-y-1.5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Already fired
+          </p>
+          {firedItems.map((f) => (
+            <div
+              key={f.id}
+              className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-2.5 py-2 text-xs"
+            >
+              <span className="text-foreground">{f.name}</span>
+              <span className="font-mono text-muted-foreground">×{f.quantity}</span>
+            </div>
+          ))}
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            New items
+          </p>
+        </div>
+      )}
 
       {/* Line rows */}
       <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
@@ -108,13 +144,15 @@ export function TicketPanel({
         )}
       </div>
 
-      {/* Notes */}
-      <Input
-        placeholder="Order notes (optional)"
-        value={notes}
-        onChange={(e) => onNotesChange(e.target.value)}
-        className="shrink-0"
-      />
+      {/* Notes (order-level; only meaningful when creating a new order) */}
+      {showNotes && (
+        <Input
+          placeholder="Order notes (optional)"
+          value={notes}
+          onChange={(e) => onNotesChange(e.target.value)}
+          className="shrink-0"
+        />
+      )}
 
       {/* Total + Fire */}
       <div className="shrink-0 flex items-center justify-between border-t border-border pt-3">
@@ -127,7 +165,7 @@ export function TicketPanel({
       )}
 
       <Button className="w-full shrink-0" disabled={!canFire} onClick={onFire}>
-        {isFiring ? 'Firing…' : 'Fire order'}
+        {isFiring ? 'Firing…' : fireLabel}
       </Button>
     </div>
   );

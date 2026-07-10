@@ -306,6 +306,7 @@ function OrdersPage() {
         <OrderBuilder
           onClose={() => setShowCreate(false)}
           initialTableId={initialTableId}
+          orders={orders}
         />
       )}
 

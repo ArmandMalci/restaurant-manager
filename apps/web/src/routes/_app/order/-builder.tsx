@@ -19,9 +19,10 @@ import {
 import { useTableControllerGetAll } from '@/api/tables/tables';
 import {
   useOrderControllerCreate,
+  useOrderControllerAddItems,
   invalidateOrderControllerGetAll,
 } from '@/api/orders/orders';
-import type { ModifierGroupDto } from '@/api/restaurantManagerAPI.schemas';
+import type { ModifierGroupDto, OrderDto } from '@/api/restaurantManagerAPI.schemas';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -49,11 +50,14 @@ interface OrderBuilderProps {
   onClose: () => void;
   /** Pre-select this table when the builder opens (from floor map deep-link). */
   initialTableId?: string;
+  /** Full orders list (already fetched by the page) — used to find the table's open order. */
+  orders: OrderDto[];
 }
 
-export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
+export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderProps) {
   const qc = useQueryClient();
   const createOrder = useOrderControllerCreate();
+  const addItems = useOrderControllerAddItems();
 
   const { data: tables = [] } = useTableControllerGetAll();
   const { data: categories = [] } = useMenuControllerGetCategories();
@@ -66,6 +70,15 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
   const [orderNotes, setOrderNotes] = useState('');
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
   const [ticketOpen, setTicketOpen] = useState(false);
+
+  // The table's current order: an unbilled order means "append to it"; an
+  // unpaid-but-billed order means "already rung up, settle before adding
+  // more"; anything else (no orders, or all settled) means "start fresh".
+  const tableOrders = tableId ? orders.filter((o) => o.tableId === tableId) : [];
+  const existingOpenOrder = tableOrders.find((o) => !o.bill);
+  const isTableRungUp = !existingOpenOrder && tableOrders.some((o) => o.bill && !o.bill.paid);
+  const tableNumber = tables.find((t) => t.id === tableId)?.number;
+  const menuNameMap = new Map(menuItems.map((m) => [m.id, m.name]));
 
   const visibleItems =
     activeCategoryId === ''
@@ -134,20 +147,29 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
   }
 
   function handleFire() {
-    if (!tableId || lines.length === 0) return;
-    createOrder.mutate(
-      {
-        data: {
-          tableId,
-          notes: orderNotes || null,
-          items: lines.map((l) => ({
-            menuItemId: l.menuItemId,
-            quantity: l.quantity,
-            notes: l.notes || null,
-            modifierOptionIds: l.selectedOptions.map((o) => o.id),
-          })),
+    if (!tableId || lines.length === 0 || isTableRungUp) return;
+    const items = lines.map((l) => ({
+      menuItemId: l.menuItemId,
+      quantity: l.quantity,
+      notes: l.notes || null,
+      modifierOptionIds: l.selectedOptions.map((o) => o.id),
+    }));
+
+    if (existingOpenOrder) {
+      addItems.mutate(
+        { id: existingOpenOrder.id, data: { items } },
+        {
+          onSuccess: () => {
+            invalidateOrderControllerGetAll(qc);
+            setLines([]);
+          },
         },
-      },
+      );
+      return;
+    }
+
+    createOrder.mutate(
+      { data: { tableId, notes: orderNotes || null, items } },
       {
         onSuccess: () => {
           invalidateOrderControllerGetAll(qc);
@@ -158,12 +180,32 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
   }
 
   const ticketLineCount = lines.reduce((s, l) => s + l.quantity, 0);
+  const firedItems = existingOpenOrder
+    ? existingOpenOrder.items.map((item) => ({
+        id: item.id,
+        name: menuNameMap.get(item.menuItemId) ?? `Item ${item.menuItemId.slice(0, 6)}`,
+        quantity: item.quantity,
+      }))
+    : undefined;
+  const rungUpBanner = (
+    <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
+      <p className="font-semibold text-foreground">
+        Table {tableNumber ?? '?'}&rsquo;s check is already rung up
+      </p>
+      <p className="mt-1 text-muted-foreground">Settle it in Checkout before adding more items.</p>
+    </div>
+  );
+  const headerTitle = existingOpenOrder
+    ? `Table ${tableNumber ?? '?'} · open order`
+    : isTableRungUp
+      ? `Table ${tableNumber ?? '?'} · rung up`
+      : 'New order';
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-border px-4 py-3 shrink-0">
-        <p className="text-base font-semibold text-foreground">New order</p>
+        <p className="text-base font-semibold text-foreground">{headerTitle}</p>
         <button
           type="button"
           onClick={onClose}
@@ -246,7 +288,11 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
                 type="button"
                 key={item.id}
                 onClick={() => handleTapItem(item)}
-                className="flex flex-col items-start gap-1 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
+                disabled={isTableRungUp}
+                className={cn(
+                  'flex flex-col items-start gap-1 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
+                  isTableRungUp && 'pointer-events-none opacity-50',
+                )}
               >
                 <p className="text-xs font-semibold text-foreground leading-snug line-clamp-2">
                   {item.name}
@@ -267,16 +313,23 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
 
         {/* RIGHT: ticket (≥ md only) */}
         <div className="hidden md:flex flex-col w-80 shrink-0 border-l border-border p-4 overflow-y-auto">
-          <TicketPanel
-            lines={lines}
-            notes={orderNotes}
-            tableId={tableId}
-            onNotesChange={setOrderNotes}
-            onQtyChange={handleQtyChange}
-            onRemove={handleRemove}
-            onFire={handleFire}
-            isFiring={createOrder.isPending}
-          />
+          {isTableRungUp ? (
+            rungUpBanner
+          ) : (
+            <TicketPanel
+              lines={lines}
+              notes={orderNotes}
+              tableId={tableId}
+              onNotesChange={setOrderNotes}
+              onQtyChange={handleQtyChange}
+              onRemove={handleRemove}
+              onFire={handleFire}
+              isFiring={createOrder.isPending || addItems.isPending}
+              firedItems={firedItems}
+              fireLabel={existingOpenOrder ? 'Add to order' : 'Fire order'}
+              showNotes={!existingOpenOrder}
+            />
+          )}
         </div>
       </div>
 
@@ -305,20 +358,27 @@ export function OrderBuilder({ onClose, initialTableId }: OrderBuilderProps) {
             <SheetTitle>Ticket</SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4 min-h-0">
-            <TicketPanel
-              lines={lines}
-              notes={orderNotes}
-              tableId={tableId}
-              onNotesChange={setOrderNotes}
-              onQtyChange={handleQtyChange}
-              onRemove={handleRemove}
-              onFire={() => {
-                if (!tableId || lines.length === 0) return;
-                handleFire();
-                setTicketOpen(false);
-              }}
-              isFiring={createOrder.isPending}
-            />
+            {isTableRungUp ? (
+              rungUpBanner
+            ) : (
+              <TicketPanel
+                lines={lines}
+                notes={orderNotes}
+                tableId={tableId}
+                onNotesChange={setOrderNotes}
+                onQtyChange={handleQtyChange}
+                onRemove={handleRemove}
+                onFire={() => {
+                  if (!tableId || lines.length === 0) return;
+                  handleFire();
+                  setTicketOpen(false);
+                }}
+                isFiring={createOrder.isPending || addItems.isPending}
+                firedItems={firedItems}
+                fireLabel={existingOpenOrder ? 'Add to order' : 'Fire order'}
+                showNotes={!existingOpenOrder}
+              />
+            )}
           </div>
         </SheetContent>
       </Sheet>
