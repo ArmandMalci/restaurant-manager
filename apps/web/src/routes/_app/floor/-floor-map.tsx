@@ -20,11 +20,12 @@ const STATUS_TONE: Record<TableStatus, Tone> = {
   reserved: 'warning',
 };
 
-// Tailwind classes for each status background
-const STATUS_BG: Record<TableStatus, string> = {
-  available: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800',
-  occupied: 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800',
-  reserved: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800',
+// Tailwind classes for each status background — derived from semantic tokens
+// (success/info/warning); dark handled per-theme via data-theme, not `.dark`.
+export const STATUS_BG: Record<TableStatus, string> = {
+  available: 'bg-success/10 border-success/30',
+  occupied: 'bg-info/10 border-info/30',
+  reserved: 'bg-warning/10 border-warning/30',
 };
 
 // ── Tile sizing by seats ──────────────────────────────────────────────
