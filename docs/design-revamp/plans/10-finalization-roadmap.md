@@ -22,23 +22,24 @@ findings list — doesn't fall through. Tiers 0–4 are the pilot; Tier 5 is opt
 
 ---
 
-## Tier 0 — Decisions (no code; unblocks the criticals) — **NEEDS SIGN-OFF**
+## Tier 0 — Decisions (no code; unblocks the criticals) — **ACCEPTED 2026-07-10**
 
-These are the deferred product/domain calls the direction doc never resolved. Recommended call given for each.
+These are the deferred product/domain calls the direction doc never resolved. All accepted as recommended.
+Implementations land in Tier 2 (spine).
 
-- [ ] **D1 · Settlement model + terminal order status** *(recommended)* — Make settlement single-model. Add a terminal
+- [x] **D1 · Settlement model + terminal order status** *(accepted)* — Make settlement single-model. Add a terminal
   `paid` (or `closed`) value to the `OrderStatus` enum (Prisma migration). `pay()` is authoritative: it settles the full
   remaining balance and transitions the order to `paid`, which **removes it from the checkout queue**. `SplitPanel`
   either reconciles into that single settlement or is the only path (hide "Mark as Paid" when splitting). Fixes review
   🔴 "two contradictory settlement UIs" + 🟠 "paid orders never leave the queue." **Route through `restaurant-domain-judge` before implementing (money + state machine).**
-- [ ] **D2 · Order ↔ table behavior** *(recommended)* — One open order per table. Opening Order on an occupied table
+- [x] **D2 · Order ↔ table behavior** *(accepted)* — One open order per table. Opening Order on an occupied table
   **loads that table's open order** into the builder (header: "Table 6 · open order"), not a blank "New order." Fixes 🔴
   "builder always starts blank."
 - [x] **D3 · KDS bump ownership** — **DECIDED in interview: the cook taps "ready" on the KDS.** Implementation lands in Tier 2.
-- [ ] **D4 · Reservation lifecycle + Shift-scheduling scope** *(recommended)* — Add a real reservation `status`
+- [x] **D4 · Reservation lifecycle + Shift-scheduling scope** *(accepted)* — Add a real reservation `status`
   (`booked | seated | no_show | cancelled`) replacing the clock-math heuristic, plus seat/no-show actions on Door.
   **Cut in-app shift scheduling from the pilot** (a paper venue does not need it to run a shift) — this closes review 🔴
-  "Shifts tab unbuilt" by *scoping it out*, not building it. Confirm or overrule.
+  "Shifts tab unbuilt" by *scoping it out*, not building it.
 
 ---
 
