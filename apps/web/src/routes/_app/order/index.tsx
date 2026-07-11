@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -252,11 +252,12 @@ interface KanbanColumnProps {
   orders: OrderDto[];
   tableMap: Map<string, number>;
   menuNameMap: Map<string, string>;
+  columnRef?: (el: HTMLDivElement | null) => void;
 }
 
-function KanbanColumn({ status, orders, tableMap, menuNameMap }: KanbanColumnProps) {
+function KanbanColumn({ status, orders, tableMap, menuNameMap, columnRef }: KanbanColumnProps) {
   return (
-    <div className="flex flex-col min-w-[280px] w-[280px] flex-shrink-0 snap-start">
+    <div ref={columnRef} className="flex flex-col min-w-[280px] w-[280px] flex-shrink-0 snap-start">
       {/* Column header */}
       <div className="bg-muted/60 rounded-t-lg px-3 py-2 flex items-center justify-between border border-border border-b-0">
         <span className="text-sm font-semibold">{STATUS_LABELS[status]}</span>
@@ -306,7 +307,17 @@ function OrdersSkeleton() {
 
 function OrdersPage() {
   const { tableId: initialTableId } = Route.useSearch();
+
+  return <OrdersPageContent initialTableId={initialTableId} />;
+}
+
+interface OrdersPageContentProps {
+  initialTableId?: string;
+}
+
+export function OrdersPageContent({ initialTableId }: OrdersPageContentProps) {
   const [showCreate, setShowCreate] = useState(false);
+  const columnRefs = useRef<Partial<Record<OrderStatus, HTMLDivElement | null>>>({});
 
   // Auto-open the builder when navigated here with a tableId (mount-once by design —
   // re-running on every initialTableId change would reopen the builder on unrelated re-renders).
@@ -329,6 +340,14 @@ function OrdersPage() {
   ) as unknown as Record<OrderStatus, OrderDto[]>;
 
   const totalOrders = orders.length;
+
+  function scrollToColumn(status: OrderStatus) {
+    columnRefs.current[status]?.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'start',
+      block: 'nearest',
+    });
+  }
 
   return (
     <>
@@ -353,6 +372,21 @@ function OrdersPage() {
           }
         />
 
+        {/* Column-jump pills — narrow viewports only; the board scrolls fine with a mouse/trackpad
+            on desktop, but touch users benefit from a direct jump instead of a long horizontal swipe. */}
+        <div className="flex gap-1.5 overflow-x-auto md:hidden">
+          {ORDER_STATUSES.map((status) => (
+            <button
+              key={status}
+              type="button"
+              onClick={() => scrollToColumn(status)}
+              className="shrink-0 rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80"
+            >
+              {STATUS_LABELS[status]}
+            </button>
+          ))}
+        </div>
+
         {/* Kanban board — scroll-snap rail */}
         <div className="overflow-x-auto flex-1 -mx-1 px-1">
           {isLoading ? (
@@ -366,6 +400,9 @@ function OrdersPage() {
                   orders={columnOrders[status]}
                   tableMap={tableMap}
                   menuNameMap={menuNameMap}
+                  columnRef={(el) => {
+                    columnRefs.current[status] = el;
+                  }}
                 />
               ))}
             </div>

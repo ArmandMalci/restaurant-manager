@@ -5,16 +5,25 @@ import type { ReactNode } from 'react';
 import type { OrderDto } from '@/api/restaurantManagerAPI.schemas';
 
 const mutateRemove = vi.fn();
+const getAllOrders = vi.fn(() => ({ data: [] as OrderDto[], isLoading: false }));
 
 vi.mock('@/api/orders/orders', () => ({
-  useOrderControllerGetAll: vi.fn(),
+  useOrderControllerGetAll: (...args: unknown[]) => getAllOrders(...(args as [])),
   useOrderControllerUpdateStatus: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
   useOrderControllerUpdateItemStatus: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
   useOrderControllerRemove: vi.fn(() => ({ mutate: mutateRemove, isPending: false })),
   invalidateOrderControllerGetAll: vi.fn(),
 }));
 
-import { OrderCard } from './index';
+vi.mock('@/api/tables/tables', () => ({
+  useTableControllerGetAll: vi.fn(() => ({ data: [], isLoading: false })),
+}));
+
+vi.mock('@/api/menu/menu', () => ({
+  useMenuControllerGetItems: vi.fn(() => ({ data: [], isLoading: false })),
+}));
+
+import { OrderCard, OrdersPageContent } from './index';
 
 function wrapper({ children }: { children: ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -67,5 +76,43 @@ describe('OrderCard delete confirmation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(mutateRemove).not.toHaveBeenCalled();
+  });
+});
+
+describe('order kanban column-jump control', () => {
+  beforeEach(() => {
+    getAllOrders.mockReturnValue({
+      data: [
+        { ...order, id: 'o1', status: 'draft' },
+        { ...order, id: 'o2', status: 'ready' },
+      ] as unknown as OrderDto[],
+      isLoading: false,
+    });
+  });
+
+  it('renders a jump pill for each of the 5 kanban statuses', () => {
+    render(<OrdersPageContent />, { wrapper });
+
+    for (const label of ['Draft', 'Sent', 'In Progress', 'Ready', 'Served']) {
+      expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+    }
+  });
+
+  it('scrolls the tapped column into view, not just any column', () => {
+    const scrollIntoView = vi.fn();
+
+    Element.prototype.scrollIntoView = scrollIntoView;
+    render(<OrdersPageContent />, { wrapper });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ready' }));
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith(
+      expect.objectContaining({ behavior: 'smooth', inline: 'start' }),
+    );
+    const scrolledElement = scrollIntoView.mock.instances[0] as HTMLElement;
+
+    expect(scrolledElement.textContent).toContain('Ready');
+    expect(scrolledElement.textContent).not.toContain('Draft');
   });
 });
