@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status';
 import type { Tone } from '@/components/ui/status';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useTableControllerGetAll,
@@ -145,16 +152,16 @@ function TableFormDialog({ initial, onSave, onClose, title }: TableFormDialogPro
             <label htmlFor="table-status" className="text-sm font-medium text-foreground">
               Status
             </label>
-            <select
-              id="table-status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as TableStatus)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="available">Available</option>
-              <option value="occupied">Occupied</option>
-              <option value="reserved">Reserved</option>
-            </select>
+            <Select value={status} onValueChange={(v) => setStatus(v as TableStatus)}>
+              <SelectTrigger id="table-status" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="occupied">Occupied</SelectItem>
+                <SelectItem value="reserved">Reserved</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

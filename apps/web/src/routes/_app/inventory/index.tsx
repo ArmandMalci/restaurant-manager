@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -82,19 +89,20 @@ function InventoryForm({
             className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm font-normal outline-none focus-visible:ring-2"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm font-medium">
+        <label htmlFor="item-unit" className="flex flex-col gap-1 text-sm font-medium">
           Unit *
-          <select
-            value={unit}
-            onChange={(e) => setUnit(e.target.value as InventoryUnit)}
-            className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm font-normal outline-none focus-visible:ring-2"
-          >
-            {UNITS.map((u) => (
-              <option key={u} value={u}>
-                {u.charAt(0).toUpperCase() + u.slice(1)}
-              </option>
-            ))}
-          </select>
+          <Select value={unit} onValueChange={(v) => setUnit(v as InventoryUnit)}>
+            <SelectTrigger id="item-unit" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {UNITS.map((u) => (
+                <SelectItem key={u} value={u}>
+                  {u.charAt(0).toUpperCase() + u.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </label>
       </div>
       <div className="flex flex-wrap gap-3">
@@ -179,19 +187,23 @@ function AdjustDialog({
               className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm font-normal outline-none focus-visible:ring-2"
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label htmlFor="adjust-reason" className="flex flex-col gap-1 text-sm font-medium">
             Reason
-            <select
+            <Select
               value={reason}
-              onChange={(e) => setReason(e.target.value as AdjustInventoryDto['reason'])}
-              className="focus-visible:ring-ring rounded-md border px-2 py-1.5 text-sm font-normal outline-none focus-visible:ring-2"
+              onValueChange={(v) => setReason(v as AdjustInventoryDto['reason'])}
             >
-              {ADJUST_REASONS.map((r) => (
-                <option key={r} value={r}>
-                  {r.charAt(0).toUpperCase() + r.slice(1)}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="adjust-reason" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ADJUST_REASONS.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="outline" size="sm" onClick={onClose}>

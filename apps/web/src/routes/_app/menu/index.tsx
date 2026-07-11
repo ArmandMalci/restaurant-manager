@@ -9,6 +9,13 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   useMenuControllerGetCategories,
   useMenuControllerCreateCategory,
   useMenuControllerUpdateCategory,
@@ -338,15 +345,18 @@ function ModifierGroupSheet({
           <label htmlFor="mg-type" className="text-xs font-medium text-muted-foreground">
             Selection type
           </label>
-          <select
-            id="mg-type"
+          <Select
             value={selectionType}
-            onChange={(e) => setSelectionType(e.target.value as 'single' | 'multi')}
-            className={field}
+            onValueChange={(v) => setSelectionType(v as 'single' | 'multi')}
           >
-            <option value="single">Single choice</option>
-            <option value="multi">Multiple choice</option>
-          </select>
+            <SelectTrigger id="mg-type" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="single">Single choice</SelectItem>
+              <SelectItem value="multi">Multiple choice</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <label className="flex cursor-pointer items-center gap-2 text-sm">
           <input
@@ -550,19 +560,18 @@ function ItemSheet({
           <label htmlFor="item-category" className="text-xs font-medium text-muted-foreground">
             Category
           </label>
-          <select
-            id="item-category"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            required
-            className={field}
-          >
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <Select value={categoryId} onValueChange={(v) => setCategoryId(v as string)} required>
+            <SelectTrigger id="item-category" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1">
           <label htmlFor="item-price" className="text-xs font-medium text-muted-foreground">
@@ -594,18 +603,18 @@ function ItemSheet({
           <label htmlFor="item-station" className="text-xs font-medium text-muted-foreground">
             Station
           </label>
-          <select
-            id="item-station"
-            value={station}
-            onChange={(e) => setStation(e.target.value)}
-            className={field}
-          >
-            <option value="">None</option>
-            <option value="grill">Grill</option>
-            <option value="cold">Cold</option>
-            <option value="bar">Bar</option>
-            <option value="pass">Pass</option>
-          </select>
+          <Select value={station} onValueChange={(v) => setStation((v ?? '') as string)}>
+            <SelectTrigger id="item-station" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">None</SelectItem>
+              <SelectItem value="grill">Grill</SelectItem>
+              <SelectItem value="cold">Cold</SelectItem>
+              <SelectItem value="bar">Bar</SelectItem>
+              <SelectItem value="pass">Pass</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {groups.length > 0 && (
           <div className="space-y-1.5">

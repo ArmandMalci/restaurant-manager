@@ -25,6 +25,13 @@ import {
 } from '@/api/orders/orders';
 import type { ModifierGroupDto, OrderDto } from '@/api/restaurantManagerAPI.schemas';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
   AlertDialog,
@@ -250,19 +257,18 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
             <label className="text-xs font-medium text-muted-foreground" htmlFor="builder-table">
               Table
             </label>
-            <select
-              id="builder-table"
-              value={tableId}
-              onChange={(e) => setTableId(e.target.value)}
-              className="focus-visible:ring-ring w-full max-w-xs rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <option value="">Select table…</option>
-              {tables.map((t) => (
-                <option key={t.id} value={t.id}>
-                  Table {t.number}
-                </option>
-              ))}
-            </select>
+            <Select value={tableId || null} onValueChange={(v) => setTableId((v ?? '') as string)}>
+              <SelectTrigger id="builder-table" className="w-full max-w-xs">
+                <SelectValue placeholder="Select table…" />
+              </SelectTrigger>
+              <SelectContent>
+                {tables.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    Table {t.number}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Category filter pills */}

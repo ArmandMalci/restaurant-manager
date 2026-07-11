@@ -23,6 +23,13 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PageHeader } from '@/components/ui/page-header';
 import { ListRow } from '@/components/ui/list-row';
 import { StatusBadge } from '@/components/ui/status';
@@ -162,20 +169,22 @@ function ReservationForm({
           <label htmlFor="res-table" className="text-sm font-medium">
             Table
           </label>
-          <select
-            id="res-table"
-            value={tableId}
-            onChange={(e) => setTableId(e.target.value)}
+          <Select
+            value={tableId || null}
+            onValueChange={(v) => setTableId((v ?? '') as string)}
             required
-            className={input}
           >
-            <option value="">Select table…</option>
-            {tables.map((t) => (
-              <option key={t.id} value={t.id}>
-                Table {t.number} ({t.seats} seats)
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="res-table" className="w-full">
+              <SelectValue placeholder="Select table…" />
+            </SelectTrigger>
+            <SelectContent>
+              {tables.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  Table {t.number} ({t.seats} seats)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className={field}>
