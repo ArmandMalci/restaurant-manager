@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { ChefHat, Check } from 'lucide-react';
 import { useKdsControllerGetTickets, invalidateKdsControllerGetTickets } from '@/api/kds/kds';
 import { useOrderControllerUpdateItemStatus } from '@/api/orders/orders';
+import type { UpdateOrderItemStatusDtoStatus } from '@/api/restaurantManagerAPI.schemas';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,12 +37,14 @@ const STATIONS: { value: Station; label: string }[] = [
 
 function calcAgeMin(firedAt: string | null): number | null {
   if (!firedAt) return null;
+
   return Math.round((Date.now() - new Date(firedAt).getTime()) / 60_000);
 }
 
 function ageLabel(ageMin: number | null): string {
   if (ageMin === null) return 'just now';
   if (ageMin <= 0) return 'just now';
+
   return `${ageMin}m`;
 }
 
@@ -48,6 +52,7 @@ function ageTone(ageMin: number | null): Tone {
   if (ageMin === null) return 'neutral';
   if (ageMin > AGE_DESTRUCTIVE_MIN) return 'destructive';
   if (ageMin > AGE_WARNING_MIN) return 'warning';
+
   return 'success';
 }
 
@@ -55,6 +60,7 @@ function ageBorderClass(ageMin: number | null): string {
   if (ageMin === null) return 'border-border';
   if (ageMin > AGE_DESTRUCTIVE_MIN) return 'border-destructive/60';
   if (ageMin > AGE_WARNING_MIN) return 'border-warning/60';
+
   return 'border-border';
 }
 
@@ -64,6 +70,7 @@ function effectiveStation(station: string | null): KitchenStation {
   if (station === 'grill' || station === 'cold' || station === 'bar' || station === 'pass') {
     return station;
   }
+
   return 'pass';
 }
 
@@ -125,19 +132,14 @@ function TicketCard({ ticket, activeStation, onBump, bumpingKeys }: TicketCardPr
 
           if (isReady) {
             return (
-              <div
-                key={item.id}
-                className="flex items-start gap-2 opacity-40"
-              >
+              <div key={item.id} className="flex items-start gap-2 opacity-40">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
                   <p className="text-base font-medium line-through text-muted-foreground">
                     {item.quantity}× {item.name}
                   </p>
                   {item.modifiers.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {item.modifiers.join(', ')}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{item.modifiers.join(', ')}</p>
                   )}
                 </div>
               </div>
@@ -146,19 +148,13 @@ function TicketCard({ ticket, activeStation, onBump, bumpingKeys }: TicketCardPr
 
           if (dimmed) {
             return (
-              <div
-                key={item.id}
-                className="flex items-start gap-2 opacity-50"
-                aria-hidden="true"
-              >
+              <div key={item.id} className="flex items-start gap-2 opacity-50" aria-hidden="true">
                 <div className="min-w-0">
                   <p className="text-base font-medium">
                     {item.quantity}× {item.name}
                   </p>
                   {item.modifiers.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {item.modifiers.join(', ')}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{item.modifiers.join(', ')}</p>
                   )}
                 </div>
               </div>
@@ -180,9 +176,7 @@ function TicketCard({ ticket, activeStation, onBump, bumpingKeys }: TicketCardPr
                   {item.quantity}× {item.name}
                 </p>
                 {item.modifiers.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {item.modifiers.join(', ')}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{item.modifiers.join(', ')}</p>
                 )}
               </div>
               <span className="mt-0.5 shrink-0 rounded border border-border px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
@@ -217,14 +211,33 @@ function KdsPage() {
 
   function handleBump(orderId: string, itemId: string) {
     const key = `${orderId}:${itemId}`;
+    // Capture the item's status before it's overwritten so an Undo can restore it.
+    const priorStatus = (tickets ?? [])
+      .find((t) => t.orderId === orderId)
+      ?.items.find((it) => it.id === itemId)?.status as UpdateOrderItemStatusDtoStatus | undefined;
+
     setBumpingKeys((prev) => new Set(prev).add(key));
     updateItemStatus.mutate(
       { id: orderId, itemId, data: { status: 'ready' } },
       {
+        onSuccess: () => {
+          toast('Item marked ready', {
+            action: priorStatus
+              ? {
+                  label: 'Undo',
+                  onClick: () => {
+                    updateItemStatus.mutate({ id: orderId, itemId, data: { status: priorStatus } });
+                  },
+                }
+              : undefined,
+          });
+        },
         onSettled: () => {
           setBumpingKeys((prev) => {
             const next = new Set(prev);
+
             next.delete(key);
+
             return next;
           });
         },
@@ -246,7 +259,7 @@ function KdsPage() {
       <PageHeader title="Kitchen Display" subtitle="Active tickets" />
 
       {/* Station filter */}
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Station filter">
+      <fieldset className="m-0 flex flex-wrap gap-1.5 border-0 p-0" aria-label="Station filter">
         {STATIONS.map((s) => (
           <button
             key={s.value}
@@ -262,17 +275,13 @@ function KdsPage() {
             {s.label}
           </button>
         ))}
-      </div>
+      </fieldset>
 
       {/* Board */}
       {isLoading ? (
         <TicketSkeletons />
       ) : visibleTickets.length === 0 ? (
-        <EmptyState
-          icon={ChefHat}
-          title="Kitchen's clear"
-          description="No active tickets."
-        />
+        <EmptyState icon={ChefHat} title="Kitchen's clear" description="No active tickets." />
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {visibleTickets.map((ticket) => (
