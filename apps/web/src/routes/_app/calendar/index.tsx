@@ -51,16 +51,27 @@ function weekBounds(date: Date): { from: string; to: string } {
   };
 }
 
-function CalendarPage() {
+export function CalendarPage() {
   const [tab, setTab] = useState<Tab>('reservations');
   const [currentDate, setCurrentDate] = useState(new Date());
   const { from, to } = weekBounds(currentDate);
   const isMobile = useIsMobile();
-  const [view, setView] = useState<View>(Views.WEEK);
 
-  useEffect(() => {
-    setView(isMobile ? Views.AGENDA : Views.WEEK);
-  }, [isMobile]);
+  // Reservations default to Month (staff want the month overview). Shifts keeps its pre-existing
+  // per-viewport default — unchanged, out of scope per D4.
+  const defaultView = tab === 'reservations' ? Views.MONTH : isMobile ? Views.AGENDA : Views.WEEK;
+  const [view, setView] = useState<View>(defaultView);
+  // Reset `view` synchronously (during render, not via useEffect) whenever the tab or viewport
+  // changes the set of *available* views — otherwise React can commit one frame with `view` set to
+  // a value (e.g. Month) that isn't in the new `views` array (e.g. Shifts' Week/Day), which crashes
+  // react-big-calendar's internal render.
+  const [syncedFor, setSyncedFor] = useState(`${tab}:${isMobile}`);
+  const viewKey = `${tab}:${isMobile}`;
+
+  if (syncedFor !== viewKey) {
+    setSyncedFor(viewKey);
+    setView(defaultView);
+  }
 
   // Reservations only support a single `date` filter server-side (no from/to range),
   // so the visible-week count is computed client-side from the full list instead.
@@ -116,6 +127,11 @@ function CalendarPage() {
   );
   // Shifts are already server-filtered to [from, to], so their length is week-scoped for free.
   const eventCount = tab === 'reservations' ? reservationsThisWeek : shiftEvents.length;
+
+  const reservationViews = isMobile
+    ? [Views.MONTH, Views.DAY, Views.AGENDA]
+    : [Views.MONTH, Views.WEEK, Views.DAY];
+  const shiftViews = isMobile ? [Views.DAY, Views.AGENDA] : [Views.WEEK, Views.DAY];
 
   return (
     <div className="flex h-full flex-col p-6">
@@ -175,7 +191,7 @@ function CalendarPage() {
           events={activeEvents}
           view={view}
           onView={setView}
-          views={isMobile ? [Views.DAY, Views.AGENDA] : [Views.WEEK, Views.DAY]}
+          views={tab === 'reservations' ? reservationViews : shiftViews}
           date={currentDate}
           onNavigate={setCurrentDate}
           scrollToTime={new Date(0, 0, 0, 10, 0, 0)}
