@@ -31,7 +31,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: '/service', label: 'Service', icon: Activity },
       { to: '/floor', label: 'Floor', icon: LayoutGrid },
       { to: '/order', label: 'Order', icon: ClipboardList },
-      { to: '/door', label: 'Door', icon: DoorOpen },
+      { to: '/reservations', label: 'Reservations', icon: DoorOpen },
       { to: '/checkout', label: 'Checkout', icon: Receipt },
     ],
   },

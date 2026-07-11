@@ -11,7 +11,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/service': 'Service',
   '/floor': 'Floor',
   '/order': 'Order',
-  '/door': 'Door',
+  '/reservations': 'Reservations',
   '/checkout': 'Checkout',
   '/menu': 'Menu',
   '/inventory': 'Inventory',

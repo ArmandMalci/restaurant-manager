@@ -97,7 +97,7 @@ function ServicePage() {
         void navigate({ to: '/floor' });
         break;
       case 'reservation-due':
-        void navigate({ to: '/door' });
+        void navigate({ to: '/reservations' });
         break;
       case 'low-stock':
         void navigate({ to: '/inventory' });

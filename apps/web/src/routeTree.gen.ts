@@ -26,7 +26,6 @@ import { Route as AppMenuIndexRouteImport } from './routes/_app/menu/index'
 import { Route as AppKdsIndexRouteImport } from './routes/_app/kds/index'
 import { Route as AppInventoryIndexRouteImport } from './routes/_app/inventory/index'
 import { Route as AppFloorIndexRouteImport } from './routes/_app/floor/index'
-import { Route as AppDoorIndexRouteImport } from './routes/_app/door/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/_app/dashboard/index'
 import { Route as AppCheckoutIndexRouteImport } from './routes/_app/checkout/index'
 import { Route as AppCalendarIndexRouteImport } from './routes/_app/calendar/index'
@@ -115,11 +114,6 @@ const AppFloorIndexRoute = AppFloorIndexRouteImport.update({
   path: '/floor/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppDoorIndexRoute = AppDoorIndexRouteImport.update({
-  id: '/door/',
-  path: '/door/',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
@@ -148,7 +142,6 @@ export interface FileRoutesByFullPath {
   '/calendar/': typeof AppCalendarIndexRoute
   '/checkout/': typeof AppCheckoutIndexRoute
   '/dashboard/': typeof AppDashboardIndexRoute
-  '/door/': typeof AppDoorIndexRoute
   '/floor/': typeof AppFloorIndexRoute
   '/inventory/': typeof AppInventoryIndexRoute
   '/kds/': typeof AppKdsIndexRoute
@@ -170,7 +163,6 @@ export interface FileRoutesByTo {
   '/calendar': typeof AppCalendarIndexRoute
   '/checkout': typeof AppCheckoutIndexRoute
   '/dashboard': typeof AppDashboardIndexRoute
-  '/door': typeof AppDoorIndexRoute
   '/floor': typeof AppFloorIndexRoute
   '/inventory': typeof AppInventoryIndexRoute
   '/kds': typeof AppKdsIndexRoute
@@ -195,7 +187,6 @@ export interface FileRoutesById {
   '/_app/calendar/': typeof AppCalendarIndexRoute
   '/_app/checkout/': typeof AppCheckoutIndexRoute
   '/_app/dashboard/': typeof AppDashboardIndexRoute
-  '/_app/door/': typeof AppDoorIndexRoute
   '/_app/floor/': typeof AppFloorIndexRoute
   '/_app/inventory/': typeof AppInventoryIndexRoute
   '/_app/kds/': typeof AppKdsIndexRoute
@@ -219,7 +210,6 @@ export interface FileRouteTypes {
     | '/calendar/'
     | '/checkout/'
     | '/dashboard/'
-    | '/door/'
     | '/floor/'
     | '/inventory/'
     | '/kds/'
@@ -241,7 +231,6 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/checkout'
     | '/dashboard'
-    | '/door'
     | '/floor'
     | '/inventory'
     | '/kds'
@@ -265,7 +254,6 @@ export interface FileRouteTypes {
     | '/_app/calendar/'
     | '/_app/checkout/'
     | '/_app/dashboard/'
-    | '/_app/door/'
     | '/_app/floor/'
     | '/_app/inventory/'
     | '/_app/kds/'
@@ -408,13 +396,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFloorIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/door/': {
-      id: '/_app/door/'
-      path: '/door'
-      fullPath: '/door/'
-      preLoaderRoute: typeof AppDoorIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/dashboard/': {
       id: '/_app/dashboard/'
       path: '/dashboard'
@@ -451,7 +432,6 @@ interface AppRouteChildren {
   AppCalendarIndexRoute: typeof AppCalendarIndexRoute
   AppCheckoutIndexRoute: typeof AppCheckoutIndexRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
-  AppDoorIndexRoute: typeof AppDoorIndexRoute
   AppFloorIndexRoute: typeof AppFloorIndexRoute
   AppInventoryIndexRoute: typeof AppInventoryIndexRoute
   AppKdsIndexRoute: typeof AppKdsIndexRoute
@@ -472,7 +452,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppCalendarIndexRoute: AppCalendarIndexRoute,
   AppCheckoutIndexRoute: AppCheckoutIndexRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
-  AppDoorIndexRoute: AppDoorIndexRoute,
   AppFloorIndexRoute: AppFloorIndexRoute,
   AppInventoryIndexRoute: AppInventoryIndexRoute,
   AppKdsIndexRoute: AppKdsIndexRoute,
