@@ -92,7 +92,7 @@ describe('AuthController', () => {
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/Path=\/auth\/refresh/);
-    expect(cookie).toMatch(/Max-Age=604800/);
+    expect(cookie).toMatch(/Max-Age=1296000/);
   });
 
   it('POST /auth/refresh returns 200 with new accessToken and rotates cookie', async () => {
@@ -165,6 +165,6 @@ describe('AuthController', () => {
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/Path=\/auth\/refresh/);
-    expect(cookie).toMatch(/Max-Age=604800/);
+    expect(cookie).toMatch(/Max-Age=1296000/);
   });
 });
