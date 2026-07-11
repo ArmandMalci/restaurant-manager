@@ -1,7 +1,8 @@
 # ADR-002: Multi-Tenancy Foundation
 
 **Date:** 2026-07-11
-**Status:** Proposed — pending Armand's sign-off
+**Status:** Accepted — implementation authorized 2026-07-11 (Tier 0 `prisma migrate reset` confirmed run; Armand
+authorized continuing without further per-step approval this session)
 **Deciders:** Armand Malci (sign-off pending) + `restaurant-architect` (proposal) + `restaurant-domain-judge` (skeptical pass)
 
 ## Context
