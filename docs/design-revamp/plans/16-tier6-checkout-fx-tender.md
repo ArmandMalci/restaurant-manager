@@ -49,16 +49,16 @@ pattern in `evenShares()`/`byItemShares()` to follow for the FX math).
 Task 3's tender math needs — a base currency and a rate table — not a full multi-currency menu/pricing overhaul
 (out of scope, see Self-review notes).
 
-- [ ] **Step 1:** Add `baseCurrency`/`exchangeRates` to `RestaurantSettings` in `prisma/schema.prisma`.
-- [ ] **Step 2:** Confirm the Tier 0 `prisma migrate reset` has run this session (or run it now, confirming with
+- [x] **Step 1:** Add `baseCurrency`/`exchangeRates` to `RestaurantSettings` in `prisma/schema.prisma`.
+- [x] **Step 2:** Confirm the Tier 0 `prisma migrate reset` has run this session (or run it now, confirming with
   Armand first), then `pnpm prisma migrate dev --name add_restaurant_currency_config`, then `pnpm prisma generate`.
-- [ ] **Step 3:** Update the shared Zod schema, API DTOs/Swagger decorators, regenerate the Orval client.
-- [ ] **Step 4:** Add the Currency section to the Settings screen.
-- [ ] **Step 5:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
+- [x] **Step 3:** Update the shared Zod schema, API DTOs/Swagger decorators, regenerate the Orval client.
+- [x] **Step 4:** Add the Currency section to the Settings screen.
+- [x] **Step 5:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
   tests.
-- [ ] **Step 6:** Verify in-browser: a manager can set a base currency and add/edit exchange rates in Settings, and
+- [x] **Step 6:** Verify in-browser: a manager can set a base currency and add/edit exchange rates in Settings, and
   they persist.
-- [ ] **Step 7:** Commit: `feat(api,web): restaurant base currency + exchange rate config`.
+- [x] **Step 7:** Commit: `feat(api,web): restaurant base currency + exchange rate config`. *(Commit `b080ce7`.)*
 
 ---
 
@@ -84,13 +84,13 @@ Task 3's tender math needs — a base currency and a rate table — not a full m
 "pure, side-effect-free, cheap to unit test" property (its own doc comment) rather than burying rounding-sensitive
 money math inside a component.
 
-- [ ] **Step 1:** Implement `convertToBase` and `computeChange` in `-split-math.ts`.
-- [ ] **Step 2:** Write the test cases above in `-split-math.spec.ts`, including Armand's own worked example as a
+- [x] **Step 1:** Implement `convertToBase` and `computeChange` in `-split-math.ts`.
+- [x] **Step 2:** Write the test cases above in `-split-math.spec.ts`, including Armand's own worked example as a
   named test case.
-- [ ] **Step 3:** `pnpm --filter @restaurant/web test -- split-math` — must pass, including the worked example
+- [x] **Step 3:** `pnpm --filter @restaurant/web test -- split-math` — must pass, including the worked example
   producing exactly 8.40 change.
-- [ ] **Step 4:** `pnpm --filter @restaurant/web typecheck`.
-- [ ] **Step 5:** Commit: `feat(web): FX tender math (convertToBase, computeChange)`.
+- [x] **Step 4:** `pnpm --filter @restaurant/web typecheck`.
+- [x] **Step 5:** Commit: `feat(web): FX tender math (convertToBase, computeChange)`. *(Commit `2b88052`.)*
 
 ---
 
@@ -118,18 +118,19 @@ settlement model needs (`amount`, `method`); this task only adds a client-side c
 call, matching the actual ask ("a helping feature where it lets the user enter the amount of cash... and
 automatically calculates the change").
 
-- [ ] **Step 1:** Add the tender sub-form to `SplitRow` (shown only for `method === 'cash'`), defaulting to one row
+- [x] **Step 1:** Add the tender sub-form to `SplitRow` (shown only for `method === 'cash'`), defaulting to one row
   in the base currency for the exact amount owed.
-- [ ] **Step 2:** Add "+ add currency" to append additional `{ currencyCode, amount }` rows, each currency picked
+- [x] **Step 2:** Add "+ add currency" to append additional `{ currencyCode, amount }` rows, each currency picked
   from a shadcn `Select` populated from the configured `exchangeRates` keys plus the base currency.
   Wire live change-due display via Task 2's `computeChange`.
-- [ ] **Step 3:** Thread `baseCurrency`/`exchangeRates` from Settings into `SplitPanel` → `SplitRow`.
-- [ ] **Step 4:** Add the tendered breakdown + change due to the receipt block for cash payments that used it.
-- [ ] **Step 5:** `pnpm --filter @restaurant/web typecheck` + affected tests.
-- [ ] **Step 6:** Verify in-browser: recording a cash payment with a single currency at the exact amount needs no
+- [x] **Step 3:** Thread `baseCurrency`/`exchangeRates` from Settings into `SplitPanel` → `SplitRow`.
+- [x] **Step 4:** Add the tendered breakdown + change due to the receipt block for cash payments that used it.
+- [x] **Step 5:** `pnpm --filter @restaurant/web typecheck` + affected tests.
+- [x] **Step 6:** Verify in-browser: recording a cash payment with a single currency at the exact amount needs no
   extra input (unchanged UX for the common case); adding a second currency row computes and displays the correct
   change using the worked example from Task 2; the receipt shows the tender breakdown when one was used.
-- [ ] **Step 7:** Commit: `feat(web): multi-currency cash tender UI in checkout`.
+  *(Confirmed live: 20 EUR + 20 GBP @ 1.17 toward a $42.90 split → "Change due $0.50," matching the ratio exactly.)*
+- [x] **Step 7:** Commit: `feat(web): multi-currency cash tender UI in checkout`. *(Commit `8bf63d3`.)*
 
 ---
 
