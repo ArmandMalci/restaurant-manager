@@ -1,12 +1,29 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import dayjs from 'dayjs';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useReportsControllerGetSummary } from '@/api/reports/reports';
+import {
+  useReportsControllerGetDaily,
+  useReportsControllerGetSummary,
+} from '@/api/reports/reports';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/ui/page-header';
 import { MetricCell } from '@/components/ui/metric-cell';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+
+const MAX_RANGE_DAYS = 92;
 
 export const Route = createFileRoute('/_app/reports/')({
   component: ReportsPage,
@@ -44,16 +61,22 @@ function MetricCellSkeleton() {
   );
 }
 
-function ReportsPage() {
+export function ReportsPage() {
   const { data, isLoading, refetch, isFetching } = useReportsControllerGetSummary();
+
+  const [from, setFrom] = useState(() => dayjs().subtract(6, 'day').format('YYYY-MM-DD'));
+  const [to, setTo] = useState(() => dayjs().format('YYYY-MM-DD'));
+  const {
+    data: daily,
+    isLoading: dailyLoading,
+    isError: dailyIsError,
+  } = useReportsControllerGetDaily({ from, to }, { query: { enabled: Boolean(from && to) } });
 
   const totalOrders = data ? Object.values(data.ordersByStatus).reduce((a, b) => a + b, 0) : 0;
   const totalTables = data ? Object.values(data.tablesByStatus).reduce((a, b) => a + b, 0) : 0;
   const occupiedTables = data?.tablesByStatus.occupied ?? 0;
   const occupiedPct = totalTables > 0 ? Math.round((occupiedTables / totalTables) * 100) : 0;
 
-  // ponytail: date-range filter removed — GET /api/reports/summary takes no params.
-  // Re-add once the backend accepts a from/to (or range) query param.
   const headerAction = (
     <Button
       type="button"
@@ -208,6 +231,80 @@ function ReportsPage() {
                 </div>
               ))}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Daily breakdown — orders, revenue, reservations per day over a date range */}
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 pb-3">
+          <CardTitle className="text-sm font-medium">Daily Breakdown</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="reports-daily-from" className="text-muted-foreground text-sm">
+                From
+              </Label>
+              <Input
+                id="reports-daily-from"
+                type="date"
+                value={from}
+                max={to}
+                onChange={(e) => setFrom(e.target.value)}
+                className="w-auto"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="reports-daily-to" className="text-muted-foreground text-sm">
+                To
+              </Label>
+              <Input
+                id="reports-daily-to"
+                type="date"
+                value={to}
+                min={from}
+                max={dayjs(from)
+                  .add(MAX_RANGE_DAYS - 1, 'day')
+                  .format('YYYY-MM-DD')}
+                onChange={(e) => setTo(e.target.value)}
+                className="w-auto"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {dailyLoading ? (
+            <div className="space-y-2">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-8 w-full rounded" />
+              ))}
+            </div>
+          ) : dailyIsError ? (
+            <p className="text-destructive text-sm">
+              Could not load the daily report for this range.
+            </p>
+          ) : !daily || daily.length === 0 ? (
+            <p className="text-muted-foreground text-sm">No data for this range.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Orders</TableHead>
+                  <TableHead>Revenue</TableHead>
+                  <TableHead>Reservations</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {daily.map((row) => (
+                  <TableRow key={row.date}>
+                    <TableCell>{dayjs(row.date).format('ddd, MMM D')}</TableCell>
+                    <TableCell>{row.orderCount}</TableCell>
+                    <TableCell>${row.revenue.toFixed(2)}</TableCell>
+                    <TableCell>{row.reservationCount}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
