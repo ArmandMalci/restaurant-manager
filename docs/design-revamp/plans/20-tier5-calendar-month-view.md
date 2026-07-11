@@ -21,11 +21,13 @@ way Plan 17 Task 3 does, since it's a new modal usage, not a migration of an exi
 - Modify: `apps/web/src/routes/_app/calendar/index.tsx` — default `view` prop for `react-big-calendar` becomes
   `Views.MONTH` when the active tab is Reservations; Shifts tab's existing default is untouched.
 
-- [ ] **Step 1:** Change the default view for the Reservations tab to Month; confirm the existing Week/Day/Agenda
+- [x] **Step 1:** Change the default view for the Reservations tab to Month; confirm the existing Week/Day/Agenda
   toggle still works (Month becomes the default, not the only option).
-- [ ] **Step 2:** `pnpm --filter @restaurant/web typecheck` + a test confirming Month is the initial view for
-  Reservations.
-- [ ] **Step 3:** Commit: `feat(web): default Reservations calendar to Month view`.
+- [x] **Step 2:** `pnpm --filter @restaurant/web typecheck` + a test confirming Month is the initial view for
+  Reservations. *(Also caught and fixed a real crash: switching tabs could desync `view` state from the active
+  tab's `views` array, throwing inside react-big-calendar. Reproduced via a temporary revert to confirm the new
+  regression test actually catches it, then fixed with React's render-time state-adjustment pattern.)*
+- [x] **Step 3:** Commit: `feat(web): default Reservations calendar to Month view`. *(Commit `8bc534a`.)*
 
 ---
 
@@ -36,14 +38,14 @@ way Plan 17 Task 3 does, since it's a new modal usage, not a migration of an exi
   that day's reservations, using the existing `ListRow` pattern from `reservations/index.tsx` (import/reuse, don't
   reimplement the row layout).
 
-- [ ] **Step 1:** Wire the day-cell click handler to open the modal with that day's reservations (already-fetched
+- [x] **Step 1:** Wire the day-cell click handler to open the modal with that day's reservations (already-fetched
   data, filtered client-side by date — no new endpoint needed).
-- [ ] **Step 2:** Render the day's reservations using `ListRow`.
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming clicking a day opens the modal with
+- [x] **Step 2:** Render the day's reservations using `ListRow`.
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming clicking a day opens the modal with
   the correct reservations.
-- [ ] **Step 4:** Verify in-browser: Month view renders, clicking a day with reservations shows them in the modal,
+- [x] **Step 4:** Verify in-browser: Month view renders, clicking a day with reservations shows them in the modal,
   clicking an empty day shows an empty state (reuse `EmptyState`, already used elsewhere in this app).
-- [ ] **Step 5:** Commit: `feat(web): day-detail modal for calendar Month view`.
+- [x] **Step 5:** Commit: `feat(web): day-detail modal for calendar Month view`. *(Commit `3776d90`.)*
 
 ---
 
