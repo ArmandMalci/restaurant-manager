@@ -3412,11 +3412,22 @@
             "type": "string",
             "nullable": true
           },
+          "baseCurrency": {
+            "type": "string",
+            "description": "ISO currency code all bill totals are stated in"
+          },
+          "exchangeRates": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Map of ISO currency code -> rate to baseCurrency (baseCurrency itself is 1, not stored)"
+          },
           "updatedAt": {
             "type": "string"
           }
         },
-        "required": ["id", "name", "updatedAt"]
+        "required": ["id", "name", "baseCurrency", "exchangeRates", "updatedAt"]
       },
       "UpdateSettingsDto": {
         "type": "object",
@@ -3459,6 +3470,22 @@
             "x-nestjs_zod-empty-type": true,
             "type": "string",
             "nullable": true
+          },
+          "baseCurrency": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10,
+            "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "exchangeRates": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": true
+            },
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-self-required": false
           }
         }
       },

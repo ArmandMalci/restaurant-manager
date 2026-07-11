@@ -678,6 +678,11 @@ export interface DailyReportRowDto {
   reservationCount: number;
 }
 
+/**
+ * Map of ISO currency code -> rate to baseCurrency (baseCurrency itself is 1, not stored)
+ */
+export type RestaurantSettingsDtoExchangeRates = { [key: string]: number };
+
 export interface RestaurantSettingsDto {
   id: string;
   name: string;
@@ -691,8 +696,14 @@ export interface RestaurantSettingsDto {
   address?: string | null;
   /** @nullable */
   openingHours?: string | null;
+  /** ISO currency code all bill totals are stated in */
+  baseCurrency: string;
+  /** Map of ISO currency code -> rate to baseCurrency (baseCurrency itself is 1, not stored) */
+  exchangeRates: RestaurantSettingsDtoExchangeRates;
   updatedAt: string;
 }
+
+export type UpdateSettingsDtoExchangeRates = { [key: string]: number };
 
 export interface UpdateSettingsDto {
   /**
@@ -719,6 +730,12 @@ export interface UpdateSettingsDto {
   address?: string | null;
   /** @nullable */
   openingHours?: string | null;
+  /**
+   * @minLength 1
+   * @maxLength 10
+   */
+  baseCurrency?: string;
+  exchangeRates?: UpdateSettingsDtoExchangeRates;
 }
 
 export interface CreateBillDto {

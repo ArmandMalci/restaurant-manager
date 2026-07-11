@@ -292,14 +292,16 @@ enum OrderItemStatus {
 }
 
 model RestaurantSettings {
-  id           String   @id @default("default")
-  name         String   @default("My Restaurant")
-  description  String?
-  phone        String?
-  email        String?
-  address      String?
-  openingHours String?
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default("default")
+  name          String   @default("My Restaurant")
+  description   String?
+  phone         String?
+  email         String?
+  address       String?
+  openingHours  String?
+  baseCurrency  String   @default("EUR")
+  exchangeRates Json     @default("{}")
+  updatedAt     DateTime @updatedAt
 
   @@map("restaurant_settings")
 }

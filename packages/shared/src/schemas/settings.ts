@@ -8,6 +8,8 @@ export const RestaurantSettingsSchema = z.object({
   email: z.string().nullable(),
   address: z.string().max(200).nullable(),
   openingHours: z.string().nullable(),
+  baseCurrency: z.string().min(1).max(10),
+  exchangeRates: z.record(z.string(), z.number().positive()),
   updatedAt: z.coerce.date(),
 });
 export type RestaurantSettings = z.infer<typeof RestaurantSettingsSchema>;

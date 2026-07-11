@@ -193,6 +193,15 @@ export class RestaurantSettingsDto {
   @ApiProperty({ type: String, nullable: true, required: false }) public openingHours!:
     | string
     | null;
+  @ApiProperty({ description: 'ISO currency code all bill totals are stated in' })
+  public baseCurrency!: string;
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: { type: 'number' },
+    description:
+      'Map of ISO currency code -> rate to baseCurrency (baseCurrency itself is 1, not stored)',
+  })
+  public exchangeRates!: Record<string, number>;
   @ApiProperty() public updatedAt!: string;
 }
 

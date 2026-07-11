@@ -23,6 +23,7 @@ const { AppModule } = require('../dist/app.module');
  * nestjs-zod v5 + Zod v4 generates OpenAPI 3.1 syntax for:
  *   - nullable: anyOf [{...}, {type:'null'}] instead of {nullable:true}
  *   - exclusiveMinimum: number instead of boolean + minimum
+ *   - propertyNames on z.record() key schemas (3.1-only JSON Schema keyword)
  * Orval's spec validator crashes on these. Walk the spec and downgrade to 3.0.
  */
 function toOpenApi30(value: unknown): unknown {
@@ -44,6 +45,12 @@ function toOpenApi30(value: unknown): unknown {
   if (typeof obj.exclusiveMinimum === 'number') {
     const { exclusiveMinimum, ...rest } = obj;
     return toOpenApi30({ ...rest, minimum: exclusiveMinimum, exclusiveMinimum: true });
+  }
+
+  // propertyNames (z.record key schema) unsupported in OpenAPI 3.0 — not needed by Orval
+  if ('propertyNames' in obj) {
+    const { propertyNames: _propertyNames, ...rest } = obj;
+    return toOpenApi30(rest);
   }
 
   return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, toOpenApi30(v)]));

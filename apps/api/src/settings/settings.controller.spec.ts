@@ -13,6 +13,8 @@ const mockSettings = {
   email: 'info@restaurant.com',
   address: '123 Main St',
   openingHours: 'Mon-Sun 9am-10pm',
+  baseCurrency: 'EUR',
+  exchangeRates: { GBP: 1.17, USD: 1.08 },
   updatedAt: new Date().toISOString(),
 };
 

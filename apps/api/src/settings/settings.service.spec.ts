@@ -10,6 +10,8 @@ const mockRow = {
   email: null,
   address: null,
   openingHours: null,
+  baseCurrency: 'EUR',
+  exchangeRates: {},
   updatedAt: new Date(),
 };
 

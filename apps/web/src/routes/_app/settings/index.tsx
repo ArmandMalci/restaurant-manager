@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, Download } from 'lucide-react';
+import { Bell, BellOff, Download, Plus, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useSettingsControllerGet,
@@ -16,10 +16,39 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export const Route = createFileRoute('/_app/settings/')({
   component: SettingsPage,
 });
+
+// ponytail: fixed shortlist, not a full ISO 4217 table — add codes here as venues need them.
+const CURRENCY_CODES = [
+  'EUR',
+  'USD',
+  'GBP',
+  'CHF',
+  'SEK',
+  'NOK',
+  'DKK',
+  'PLN',
+  'CZK',
+  'HUF',
+  'CAD',
+  'AUD',
+  'JPY',
+] as const;
+
+interface RateRow {
+  code: string;
+  rate: string;
+}
 
 function SettingsPage() {
   const qc = useQueryClient();
@@ -77,6 +106,10 @@ function SettingsPage() {
   const [openingHours, setOpeningHours] = useState('');
   const [saved, setSaved] = useState(false);
 
+  const [baseCurrency, setBaseCurrency] = useState('EUR');
+  const [rateRows, setRateRows] = useState<RateRow[]>([]);
+  const [currencySaved, setCurrencySaved] = useState(false);
+
   useEffect(() => {
     if (data) {
       setName(data.name ?? '');
@@ -85,8 +118,51 @@ function SettingsPage() {
       setEmail(data.email ?? '');
       setAddress(data.address ?? '');
       setOpeningHours(data.openingHours ?? '');
+      setBaseCurrency(data.baseCurrency ?? 'EUR');
+      setRateRows(
+        Object.entries(data.exchangeRates ?? {}).map(([code, rate]) => ({
+          code,
+          rate: String(rate),
+        })),
+      );
     }
   }, [data]);
+
+  function addCurrencyRow() {
+    const used = new Set([baseCurrency, ...rateRows.map((r) => r.code)]);
+    const nextCode = CURRENCY_CODES.find((c) => !used.has(c)) ?? '';
+
+    setRateRows((prev) => [...prev, { code: nextCode, rate: '1' }]);
+  }
+
+  function removeCurrencyRow(index: number) {
+    setRateRows((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function updateCurrencyRow(index: number, patch: Partial<RateRow>) {
+    setRateRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  }
+
+  function handleCurrencySave() {
+    const exchangeRates = Object.fromEntries(
+      rateRows
+        .filter(
+          (r) =>
+            r.code && r.code !== baseCurrency && r.rate !== '' && !Number.isNaN(Number(r.rate)),
+        )
+        .map((r) => [r.code, Number(r.rate)]),
+    );
+
+    update.mutate(
+      { data: { baseCurrency, exchangeRates } },
+      {
+        onSuccess: () => {
+          setCurrencySaved(true);
+          setTimeout(() => setCurrencySaved(false), 2000);
+        },
+      },
+    );
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -206,7 +282,98 @@ function SettingsPage() {
 
       <Separator />
 
-      {/* Section 2: Appearance */}
+      {/* Section 2: Currency */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Currency</CardTitle>
+          <CardDescription>
+            Base currency and exchange rates used for multi-currency cash tender at checkout.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="max-w-xs space-y-1.5">
+            <Label htmlFor="settings-base-currency">Base Currency</Label>
+            <Select value={baseCurrency} onValueChange={(v) => v && setBaseCurrency(v as string)}>
+              <SelectTrigger id="settings-base-currency">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_CODES.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {code}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Exchange rates (to {baseCurrency})</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addCurrencyRow}>
+                <Plus className="h-4 w-4" />
+                Add currency
+              </Button>
+            </div>
+
+            {rateRows.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                No additional currencies configured — cashiers can only tender in {baseCurrency}.
+              </p>
+            )}
+
+            {rateRows.map((row, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: rows have no stable identity beyond position
+              <div key={i} className="flex items-center gap-2">
+                <Select
+                  value={row.code}
+                  onValueChange={(v) => v && updateCurrencyRow(i, { code: v as string })}
+                >
+                  <SelectTrigger className="w-28" size="sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCY_CODES.filter((c) => c !== baseCurrency).map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="number"
+                  step="0.0001"
+                  min="0"
+                  value={row.rate}
+                  onChange={(e) => updateCurrencyRow(i, { rate: e.target.value })}
+                  placeholder="1.17"
+                  className="max-w-32"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label="Remove currency"
+                  onClick={() => removeCurrencyRow(i)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 border-t border-border pt-4">
+            <Button type="button" disabled={update.isPending} onClick={handleCurrencySave}>
+              {update.isPending ? 'Saving…' : 'Save currency settings'}
+            </Button>
+            {currencySaved && <span className="text-sm font-medium text-success">Saved!</span>}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Section 3: Appearance */}
       <Card>
         <CardHeader>
           <CardTitle>Appearance</CardTitle>
@@ -225,7 +392,7 @@ function SettingsPage() {
 
       <Separator />
 
-      {/* Section 3: Notifications */}
+      {/* Section 4: Notifications */}
       <Card>
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
