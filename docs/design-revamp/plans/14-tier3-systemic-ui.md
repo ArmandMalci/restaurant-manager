@@ -214,24 +214,28 @@ one shared primitive instead of hand-rolling URL-sync in each content-modal call
 reimplementations of the same "read param → open, close → clear param" logic — and reusing it (without the URL wiring)
 for the two nav panels keeps all five visually consistent even if only three are actually URL-driven.
 
-- [ ] **Step 1:** Build `url-modal.tsx` on top of `dialog.tsx`; full-screen below `sm:` via Tailwind breakpoint
+- [x] **Step 1:** Build `url-modal.tsx` on top of `dialog.tsx`; full-screen below `sm:` via Tailwind breakpoint
   classes, centered card at `sm:` and up (per `docs/PRODUCT.md`'s "modal, not drawer" + "full screen like a new page
   on mobile" requirement); support both the URL-driven and locally-controlled modes described above.
-- [ ] **Step 2:** Migrate `-table-action-sheet.tsx` first (highest-value: also lets the status-chip work land in the
+- [x] **Step 2:** Migrate `-table-action-sheet.tsx` first (highest-value: also lets the status-chip work land in the
   same diff) — swap `Sheet` for the new modal in URL-driven mode (param `tableId`), and replace the 3-button status
   picker with color-coded tap-to-cycle chips + tooltip.
-- [ ] **Step 3:** Migrate the reservations form (was `door/index.tsx`, now under Task 2's renamed file) onto the new
-  modal in URL-driven mode, param `reservation`.
-- [ ] **Step 4:** Migrate the order builder's mobile ticket sheet onto the new modal in URL-driven mode, param
+- [x] **Step 3:** Migrate the reservations form (was `door/index.tsx`, now under Task 2's renamed file) onto the new
+  modal in URL-driven mode, param `reservation`. *(Also fixed a real bug surfaced during verification: the form only
+  seeded state from `initial` at mount, so refreshing on `?reservation=<id>` while the query was still loading
+  opened an empty form that never picked up the record. Fixed by keying the form on the resolved record id.)*
+- [x] **Step 4:** Migrate the order builder's mobile ticket sheet onto the new modal in URL-driven mode, param
   `ticket`.
-- [ ] **Step 5:** Migrate both topbar panels onto the new modal for visual consistency; decide in-browser whether
+- [x] **Step 5:** Migrate both topbar panels onto the new modal for visual consistency; decide in-browser whether
   they should also take a search param or stay locally controlled (see the flagged decision above), and note the
-  choice made in the commit message.
-- [ ] **Step 6:** Verify in-browser at mobile width (390px) and desktop: the three content modals open full-screen
+  choice made in the commit message. *(Decided: leave both on `Sheet`, not `UrlModal`, entirely — a slide-in panel
+  from the screen edge is a better fit for nav/notification chrome than a centered/full-screen modal takeover; the
+  plan explicitly allowed this outcome.)*
+- [x] **Step 6:** Verify in-browser at mobile width (390px) and desktop: the three content modals open full-screen
   on mobile / centered on desktop, survive a page refresh with their param present, back button closes them, and the
   status chips in the table-action-sheet are color-coded + cycle on tap with a visible tooltip.
-- [ ] **Step 7:** `pnpm --filter @restaurant/web typecheck` + affected tests + commit:
-  `feat(web): url-driven responsive modal, migrate 5 sheets, color-coded status chips`.
+- [x] **Step 7:** `pnpm --filter @restaurant/web typecheck` + affected tests + commit:
+  `feat(web): url-driven responsive modal, migrate 5 sheets, color-coded status chips`. *(Commit `5aee671`.)*
 
 ---
 
