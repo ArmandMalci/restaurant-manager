@@ -21,6 +21,16 @@ import { ListRow } from '@/components/ui/list-row';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { OrderBuilder } from './-builder';
 
 export const Route = createFileRoute('/_app/order/')({
@@ -81,11 +91,12 @@ interface OrderCardProps {
   menuNameMap: Map<string, string>;
 }
 
-function OrderCard({ order, tableNumber, menuNameMap }: OrderCardProps) {
+export function OrderCard({ order, tableNumber, menuNameMap }: OrderCardProps) {
   const qc = useQueryClient();
   const updateStatus = useOrderControllerUpdateStatus();
   const updateItemStatus = useOrderControllerUpdateItemStatus();
   const deleteOrder = useOrderControllerRemove();
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const currentIndex = ORDER_STATUSES.indexOf(order.status as OrderStatus);
   const nextStatus =
@@ -99,8 +110,7 @@ function OrderCard({ order, tableNumber, menuNameMap }: OrderCardProps) {
     );
   };
 
-  const handleDelete = () => {
-    if (!window.confirm('Delete order?')) return;
+  const handleDeleteConfirm = () => {
     deleteOrder.mutate({ id: order.id }, { onSuccess: () => invalidateOrderControllerGetAll(qc) });
   };
 
@@ -108,110 +118,130 @@ function OrderCard({ order, tableNumber, menuNameMap }: OrderCardProps) {
     tableNumber !== undefined ? `Table ${tableNumber}` : `Table ${order.tableId.slice(0, 6)}`;
 
   return (
-    <Card size="sm" className="mb-2">
-      {/* Card header row */}
-      <CardContent className="pb-0">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold leading-tight">{tableLabel}</p>
-            <p className="text-muted-foreground text-xs mt-0.5">
-              {timeAgo(new Date(order.createdAt))}
-              {order.notes && <span className="ml-1.5 italic">{order.notes}</span>}
-            </p>
+    <>
+      <Card size="sm" className="mb-2">
+        {/* Card header row */}
+        <CardContent className="pb-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-tight">{tableLabel}</p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                {timeAgo(new Date(order.createdAt))}
+                {order.notes && <span className="ml-1.5 italic">{order.notes}</span>}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              className="text-muted-foreground hover:text-destructive hover:bg-muted rounded p-1 transition-colors -mt-0.5 shrink-0"
+              aria-label="Delete order"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="text-muted-foreground hover:text-destructive hover:bg-muted rounded p-1 transition-colors -mt-0.5 shrink-0"
-            aria-label="Delete order"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </CardContent>
+        </CardContent>
 
-      {/* Line items via ListRow */}
-      {order.items.length > 0 && (
-        <div className="border-t border-border mx-0">
-          {order.items.map((item) => {
-            const itemStatus = item.status as OrderItemStatus;
-            const itemIndex = ITEM_STATUSES.indexOf(itemStatus);
-            const nextItemStatus =
-              itemIndex < ITEM_STATUSES.length - 1 ? ITEM_STATUSES[itemIndex + 1] : null;
-            const itemName =
-              menuNameMap.get(item.menuItemId) ?? `Item ${item.menuItemId.slice(0, 6)}`;
+        {/* Line items via ListRow */}
+        {order.items.length > 0 && (
+          <div className="border-t border-border mx-0">
+            {order.items.map((item) => {
+              const itemStatus = item.status as OrderItemStatus;
+              const itemIndex = ITEM_STATUSES.indexOf(itemStatus);
+              const nextItemStatus =
+                itemIndex < ITEM_STATUSES.length - 1 ? ITEM_STATUSES[itemIndex + 1] : null;
+              const itemName =
+                menuNameMap.get(item.menuItemId) ?? `Item ${item.menuItemId.slice(0, 6)}`;
 
-            return (
-              <ListRow
-                key={item.id}
-                leading={
-                  <span className="text-muted-foreground text-xs font-mono w-4 text-center shrink-0">
-                    ×{item.quantity}
-                  </span>
-                }
-                title={
-                  <span className="block whitespace-normal break-words text-xs leading-snug">
-                    {itemName}
-                  </span>
-                }
-                action={
-                  nextItemStatus ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateItemStatus.mutate(
-                          {
-                            id: order.id,
-                            itemId: item.id,
-                            data: { status: nextItemStatus },
-                          },
-                          { onSuccess: () => invalidateOrderControllerGetAll(qc) },
-                        )
-                      }
-                      className="flex items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={`Advance to ${ITEM_STATUS_LABELS[nextItemStatus]}`}
-                    >
+              return (
+                <ListRow
+                  key={item.id}
+                  leading={
+                    <span className="text-muted-foreground text-xs font-mono w-4 text-center shrink-0">
+                      ×{item.quantity}
+                    </span>
+                  }
+                  title={
+                    <span className="block whitespace-normal break-words text-xs leading-snug">
+                      {itemName}
+                    </span>
+                  }
+                  action={
+                    nextItemStatus ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateItemStatus.mutate(
+                            {
+                              id: order.id,
+                              itemId: item.id,
+                              data: { status: nextItemStatus },
+                            },
+                            { onSuccess: () => invalidateOrderControllerGetAll(qc) },
+                          )
+                        }
+                        className="flex items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={`Advance to ${ITEM_STATUS_LABELS[nextItemStatus]}`}
+                      >
+                        <StatusBadge
+                          tone={ITEM_STATUS_TONE[itemStatus]}
+                          label={ITEM_STATUS_LABELS[itemStatus]}
+                        />
+                        <ArrowRight className="h-3 w-3 shrink-0" />
+                      </button>
+                    ) : (
                       <StatusBadge
                         tone={ITEM_STATUS_TONE[itemStatus]}
                         label={ITEM_STATUS_LABELS[itemStatus]}
                       />
-                      <ArrowRight className="h-3 w-3 shrink-0" />
-                    </button>
-                  ) : (
-                    <StatusBadge
-                      tone={ITEM_STATUS_TONE[itemStatus]}
-                      label={ITEM_STATUS_LABELS[itemStatus]}
-                    />
-                  )
-                }
-                className="px-3 py-2"
-              />
-            );
-          })}
-        </div>
-      )}
-
-      {/* Footer: advance order */}
-      <CardFooter className="py-1.5 px-3 justify-between">
-        <span className="text-muted-foreground text-xs">
-          {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-        </span>
-        {nextStatus ? (
-          <button
-            type="button"
-            onClick={handleAdvance}
-            disabled={updateStatus.isPending}
-            className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
-            aria-label={`Move to ${STATUS_LABELS[nextStatus]}`}
-          >
-            {STATUS_LABELS[nextStatus]}
-            <ArrowRight className="h-3 w-3" />
-          </button>
-        ) : (
-          <StatusBadge tone="neutral" label="Served" />
+                    )
+                  }
+                  className="px-3 py-2"
+                />
+              );
+            })}
+          </div>
         )}
-      </CardFooter>
-    </Card>
+
+        {/* Footer: advance order */}
+        <CardFooter className="py-1.5 px-3 justify-between">
+          <span className="text-muted-foreground text-xs">
+            {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+          </span>
+          {nextStatus ? (
+            <button
+              type="button"
+              onClick={handleAdvance}
+              disabled={updateStatus.isPending}
+              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+              aria-label={`Move to ${STATUS_LABELS[nextStatus]}`}
+            >
+              {STATUS_LABELS[nextStatus]}
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          ) : (
+            <StatusBadge tone="neutral" label="Served" />
+          )}
+        </CardFooter>
+      </Card>
+
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tableLabel} — {order.items.length} item{order.items.length !== 1 ? 's' : ''}. This
+              can&rsquo;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDeleteConfirm}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -278,12 +308,13 @@ function OrdersPage() {
   const { tableId: initialTableId } = Route.useSearch();
   const [showCreate, setShowCreate] = useState(false);
 
-  // Auto-open the builder when navigated here with a tableId
+  // Auto-open the builder when navigated here with a tableId (mount-once by design —
+  // re-running on every initialTableId change would reopen the builder on unrelated re-renders).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally mount-once, see above
   useEffect(() => {
     if (initialTableId) {
       setShowCreate(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: orders = [], isLoading } = useOrderControllerGetAll();
