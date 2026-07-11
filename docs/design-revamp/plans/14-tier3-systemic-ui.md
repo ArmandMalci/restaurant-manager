@@ -159,16 +159,18 @@ says otherwise — check both before deciding which direction to normalize.
 set used elsewhere in the app (confirm existing usage pattern via `grep -rn "SelectTrigger" apps/web/src` for one to
 copy from, if one exists — otherwise this file's own primitive API is the reference).
 
-- [ ] **Step 1:** Migrate `door/index.tsx:165` (table picker).
-- [ ] **Step 2:** Migrate `floor/index.tsx:147` (table status form field) — note this is the **edit-form** status
+- [x] **Step 1:** Migrate `reservations/index.tsx:165` (table picker).
+- [x] **Step 2:** Migrate `floor/index.tsx:147` (table status form field) — note this is the **edit-form** status
   select, distinct from the tap-to-cycle `StatusBadge` interaction elsewhere on the same screen; don't conflate the two.
-- [ ] **Step 3:** Migrate all three `menu/index.tsx` selects (341, 553, 597).
-- [ ] **Step 4:** Migrate `order/-builder.tsx:253` (table picker).
-- [ ] **Step 5:** Migrate both `inventory/index.tsx` selects (87, 184).
-- [ ] **Step 6:** Verify each migrated field in-browser: options populate correctly, keyboard navigation works,
+- [x] **Step 3:** Migrate all three `menu/index.tsx` selects (341, 553, 597).
+- [x] **Step 4:** Migrate `order/-builder.tsx:253` (table picker).
+- [x] **Step 5:** Migrate both `inventory/index.tsx` selects (87, 184). *(Also fixed a real a11y gap: neither had an
+  explicit `id`/`htmlFor` pairing since native `<select>` is implicitly labelable but the `SelectTrigger` wrapper
+  isn't — added explicit `id="item-unit"`/`id="adjust-reason"`.)*
+- [x] **Step 6:** Verify each migrated field in-browser: options populate correctly, keyboard navigation works,
   touch target ≥44px on emulated tablet (inherits the Tier 1 coarse-pointer rule via `data-slot="select-trigger"`).
-- [ ] **Step 7:** `pnpm --filter @restaurant/web typecheck` + affected tests + commit:
-  `fix(web): replace native selects with shadcn Select (8 sites)`.
+- [x] **Step 7:** `pnpm --filter @restaurant/web typecheck` + affected tests + commit:
+  `fix(web): replace native selects with shadcn Select (8 sites)`. *(Commit `661e51c`.)*
 
 ---
 
