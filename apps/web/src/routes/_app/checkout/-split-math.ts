@@ -6,6 +6,7 @@ import type { OrderItemDto } from '@/api/restaurantManagerAPI.schemas';
 
 export function lineItemTotal(item: OrderItemDto): number {
   const modifierTotal = item.modifiers.reduce((sum, m) => sum + Number(m.priceDelta), 0);
+
   return (Number(item.unitPrice) + modifierTotal) * item.quantity;
 }
 
@@ -18,6 +19,7 @@ export function evenShares(total: number, count: number): number[] {
 
   for (let i = 0; i < count; i++) {
     const cents = i === count - 1 ? remaining : shareCents;
+
     shares.push(cents / 100);
     remaining -= cents;
   }
@@ -35,10 +37,47 @@ export function byItemShares(
 
   for (const item of items) {
     const idx = assignments[item.id] ?? 0;
+
     if (idx >= 0 && idx < count) {
       shares[idx] = Math.round((shares[idx] + lineItemTotal(item)) * 100) / 100;
     }
   }
 
   return shares;
+}
+
+/**
+ * Converts a tendered `amount` in `currencyCode` to the bill's base currency using
+ * `rates` (ISO code -> rate-to-base). The base currency's own rate is implicitly 1 and
+ * is never stored in `rates` (see RestaurantSettings.exchangeRates), so a missing entry
+ * falls back to 1. Not rounded — rounding happens once, in computeChange.
+ */
+export function convertToBase(
+  amount: number,
+  currencyCode: string,
+  rates: Record<string, number>,
+): number {
+  return amount * (rates[currencyCode] ?? 1);
+}
+
+/**
+ * Sums cash `tenders` (each in its own currency) converted to `baseCurrency`, then
+ * subtracts `billTotal`. Positive result is change due; negative means still owed.
+ * A tender already in `baseCurrency` is never looked up in `rates`, even if the map
+ * happens to contain a stray entry for it. Rounded once at the end (cents).
+ */
+export function computeChange(
+  billTotal: number,
+  tenders: Array<{ amount: number; currencyCode: string }>,
+  baseCurrency: string,
+  rates: Record<string, number>,
+): number {
+  const totalInBase = tenders.reduce((sum, t) => {
+    const converted =
+      t.currencyCode === baseCurrency ? t.amount : convertToBase(t.amount, t.currencyCode, rates);
+
+    return sum + converted;
+  }, 0);
+
+  return Math.round((totalInBase - billTotal) * 100) / 100;
 }

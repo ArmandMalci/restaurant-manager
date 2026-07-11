@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { evenShares, byItemShares, lineItemTotal } from './-split-math';
+import {
+  evenShares,
+  byItemShares,
+  lineItemTotal,
+  convertToBase,
+  computeChange,
+} from './-split-math';
 import type { OrderItemDto } from '@/api/restaurantManagerAPI.schemas';
 
 function item(overrides: Partial<OrderItemDto> = {}): OrderItemDto {
@@ -18,13 +24,16 @@ function item(overrides: Partial<OrderItemDto> = {}): OrderItemDto {
 describe('evenShares', () => {
   it('splits evenly with no remainder', () => {
     const shares = evenShares(20, 2);
+
     expect(shares).toEqual([10, 10]);
   });
 
   it('sums exactly to total when it does not divide evenly (last share absorbs remainder)', () => {
     const shares = evenShares(10, 3);
+
     expect(shares).toEqual([3.33, 3.33, 3.34]);
     const sum = shares.reduce((a, b) => a + b, 0);
+
     expect(Math.round(sum * 100) / 100).toBe(10);
   });
 
@@ -49,6 +58,7 @@ describe('lineItemTotal', () => {
         { id: 'm2', orderItemId: 'item-1', modifierOptionId: 'o2', name: 'Bacon', priceDelta: 2 },
       ],
     });
+
     // (8 + 1.5 + 2) * 2 = 23
     expect(lineItemTotal(line)).toBe(23);
   });
@@ -78,6 +88,49 @@ describe('byItemShares', () => {
 
   it('defaults unassigned items to split 0', () => {
     const items: OrderItemDto[] = [item({ id: 'a', unitPrice: 4, quantity: 1 })];
+
     expect(byItemShares(items, {}, 2)).toEqual([4, 0]);
+  });
+});
+
+describe('convertToBase', () => {
+  it('multiplies by the configured rate', () => {
+    expect(convertToBase(20, 'GBP', { GBP: 1.17 })).toBeCloseTo(23.4);
+  });
+
+  it('falls back to rate 1 when the currency has no entry (e.g. the base currency)', () => {
+    expect(convertToBase(20, 'EUR', { GBP: 1.17 })).toBe(20);
+  });
+});
+
+describe('computeChange', () => {
+  it("Armand's worked example: 20 EUR + 20 GBP @ 1 GBP = 1.17 EUR toward a 35 EUR bill -> 8.40 EUR change", () => {
+    const change = computeChange(
+      35,
+      [
+        { amount: 20, currencyCode: 'EUR' },
+        { amount: 20, currencyCode: 'GBP' },
+      ],
+      'EUR',
+      { GBP: 1.17 },
+    );
+
+    expect(change).toBe(8.4);
+  });
+
+  it('single-currency exact tender in the base currency yields zero change (sanity check)', () => {
+    expect(computeChange(35, [{ amount: 35, currencyCode: 'EUR' }], 'EUR', { GBP: 1.17 })).toBe(0);
+  });
+
+  it('a tender in the base currency is never looked up in rates, even with a stray entry for it', () => {
+    const change = computeChange(20, [{ amount: 20, currencyCode: 'EUR' }], 'EUR', { EUR: 999 });
+
+    expect(change).toBe(0);
+  });
+
+  it('under-tendered: negative result means still owed, not change due', () => {
+    const change = computeChange(35, [{ amount: 20, currencyCode: 'EUR' }], 'EUR', {});
+
+    expect(change).toBe(-15);
   });
 });
