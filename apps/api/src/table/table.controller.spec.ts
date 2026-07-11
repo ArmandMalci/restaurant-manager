@@ -1,4 +1,4 @@
-import { ExecutionContext, NotFoundException } from '@nestjs/common';
+import { ConflictException, ExecutionContext, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { TableController } from './table.controller';
@@ -134,6 +134,13 @@ describe('TableController', () => {
       const res = await app.inject({ method: 'DELETE', url: '/tables/missing' });
 
       expect(res.statusCode).toBe(404);
+    });
+
+    it('returns 409 when table is occupied or reserved', async () => {
+      mockTableService.remove.mockRejectedValue(new ConflictException());
+      const res = await app.inject({ method: 'DELETE', url: '/tables/tbl-1' });
+
+      expect(res.statusCode).toBe(409);
     });
   });
 

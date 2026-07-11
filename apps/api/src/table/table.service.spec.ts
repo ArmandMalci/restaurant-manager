@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { TableService } from './table.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -22,6 +22,12 @@ const prismaMock = {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+  },
+  order: {
+    count: jest.fn(),
+  },
+  reservation: {
+    count: jest.fn(),
   },
   $transaction: jest.fn(),
 };
@@ -63,7 +69,14 @@ describe('TableService', () => {
   describe('create', () => {
     it('creates and returns table', async () => {
       prismaMock.table.create.mockResolvedValue(mockTable);
-      const result = await service.create({ number: 1, seats: 4, status: 'available', posX: null, posY: null, shape: 'square' });
+      const result = await service.create({
+        number: 1,
+        seats: 4,
+        status: 'available',
+        posX: null,
+        posY: null,
+        shape: 'square',
+      });
 
       expect(result).toEqual(mockTable);
     });
@@ -85,16 +98,43 @@ describe('TableService', () => {
   });
 
   describe('remove', () => {
-    it('deletes table when it exists', async () => {
+    it('deletes an available table with no related rows', async () => {
       prismaMock.table.findUnique.mockResolvedValue(mockTable);
+      prismaMock.order.count.mockResolvedValue(0);
+      prismaMock.reservation.count.mockResolvedValue(0);
       prismaMock.table.delete.mockResolvedValue(mockTable);
+
       await service.remove('tbl-1');
+
       expect(prismaMock.table.delete).toHaveBeenCalledWith({ where: { id: 'tbl-1' } });
     });
 
     it('throws NotFoundException when table missing', async () => {
       prismaMock.table.findUnique.mockResolvedValue(null);
       await expect(service.remove('x')).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws ConflictException when table is occupied', async () => {
+      prismaMock.table.findUnique.mockResolvedValue({ ...mockTable, status: 'occupied' });
+
+      await expect(service.remove('tbl-1')).rejects.toThrow(ConflictException);
+      expect(prismaMock.table.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws ConflictException when table is reserved', async () => {
+      prismaMock.table.findUnique.mockResolvedValue({ ...mockTable, status: 'reserved' });
+
+      await expect(service.remove('tbl-1')).rejects.toThrow(ConflictException);
+      expect(prismaMock.table.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws ConflictException when an available table has related order/reservation history', async () => {
+      prismaMock.table.findUnique.mockResolvedValue(mockTable);
+      prismaMock.order.count.mockResolvedValue(1);
+      prismaMock.reservation.count.mockResolvedValue(0);
+
+      await expect(service.remove('tbl-1')).rejects.toThrow(ConflictException);
+      expect(prismaMock.table.delete).not.toHaveBeenCalled();
     });
   });
 
@@ -161,8 +201,14 @@ describe('TableService', () => {
         { id: 't2', posX: 30, posY: 40, shape: 'square' },
       ]);
 
-      expect(prismaMock.table.update).toHaveBeenCalledWith({ where: { id: 't1' }, data: { posX: 10, posY: 20, shape: 'round' } });
-      expect(prismaMock.table.update).toHaveBeenCalledWith({ where: { id: 't2' }, data: { posX: 30, posY: 40, shape: 'square' } });
+      expect(prismaMock.table.update).toHaveBeenCalledWith({
+        where: { id: 't1' },
+        data: { posX: 10, posY: 20, shape: 'round' },
+      });
+      expect(prismaMock.table.update).toHaveBeenCalledWith({
+        where: { id: 't2' },
+        data: { posX: 30, posY: 40, shape: 'square' },
+      });
       expect(prismaMock.$transaction).toHaveBeenCalled();
     });
   });

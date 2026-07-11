@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateTableDto, UpdateTableDto, SetTableStatusDto } from '@restaurant/shared';
 
@@ -29,7 +29,24 @@ export class TableService {
   }
 
   public async remove(id: string) {
-    await this.findOne(id);
+    const table = await this.findOne(id);
+
+    if (table.status !== 'available') {
+      throw new ConflictException('Cannot delete an occupied or reserved table');
+    }
+
+    // Order.tableId / Reservation.tableId have no onDelete clause (Postgres defaults
+    // to Restrict), so any history row would otherwise surface as a raw FK 500.
+    const [orderCount, reservationCount] = await Promise.all([
+      this.prisma.order.count({ where: { tableId: id } }),
+      this.prisma.reservation.count({ where: { tableId: id } }),
+    ]);
+
+    if (orderCount > 0 || reservationCount > 0) {
+      throw new ConflictException(
+        'Cannot delete a table with existing order or reservation history',
+      );
+    }
 
     return this.prisma.table.delete({ where: { id } });
   }
