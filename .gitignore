@@ -43,7 +43,6 @@ coverage/
 .swarm/
 ruvector*
 .worktrees/
-docs/superpowers/
 .playwright-mcp/
 
 # design iteration artifacts
