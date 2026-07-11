@@ -20,14 +20,17 @@ this plan.
   with the same `AlertDialog` pattern already used in `-builder.tsx:412-413` (open/close state + `AlertDialogAction`
   triggering the actual delete).
 
-- [ ] **Step 1:** Add `AlertDialog` state (open/target-order) to `index.tsx`, matching `-builder.tsx`'s existing
+- [x] **Step 1:** Add `AlertDialog` state (open/target-order) to `index.tsx`, matching `-builder.tsx`'s existing
   discard-confirm pattern.
-- [ ] **Step 2:** Replace the `window.confirm` call and wire the delete action through the dialog's
+- [x] **Step 2:** Replace the `window.confirm` call and wire the delete action through the dialog's
   `AlertDialogAction`.
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming no `window.confirm` call remains and
-  the dialog renders/fires correctly.
-- [ ] **Step 4:** Verify in-browser: deleting an order shows the themed dialog, not a native browser confirm.
-- [ ] **Step 5:** Commit: `fix(web): replace window.confirm with AlertDialog on order delete`.
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming no `window.confirm` call remains and
+  the dialog renders/fires correctly. *(Also root-caused a pre-existing pre-commit blocker: a dead
+  `eslint-disable-next-line react-hooks/exhaustive-deps` comment for a plugin not even registered in this repo's
+  ESLint config — Biome's own `useExhaustiveDependencies` rule still failed. Replaced with the repo's actual
+  `biome-ignore` convention.)*
+- [x] **Step 4:** Verify in-browser: deleting an order shows the themed dialog, not a native browser confirm.
+- [x] **Step 5:** Commit: `fix(web): replace window.confirm with AlertDialog on order delete`. *(Commit `036ca20`.)*
 
 ---
 
@@ -39,13 +42,13 @@ this plan.
   (`scrollIntoView` or the board's existing scroll-snap mechanism, whichever this file already uses for its own
   snap behavior).
 
-- [ ] **Step 1:** Add the column-jump strip, visible only below the desktop breakpoint (the horizontal scroll-snap
+- [x] **Step 1:** Add the column-jump strip, visible only below the desktop breakpoint (the horizontal scroll-snap
   board is already fine on wider viewports).
-- [ ] **Step 2:** Wire each pill to scroll the board to its column.
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming the jump control scrolls to the
+- [x] **Step 2:** Wire each pill to scroll the board to its column.
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming the jump control scrolls to the
   correct column.
-- [ ] **Step 4:** Verify in-browser at 390px width: tapping a pill jumps directly to that column.
-- [ ] **Step 5:** Commit: `feat(web): column-jump control on narrow /order viewports`.
+- [x] **Step 4:** Verify in-browser at 390px width: tapping a pill jumps directly to that column.
+- [x] **Step 5:** Commit: `feat(web): column-jump control on narrow /order viewports`. *(Commit `473c8a5`.)*
 
 ---
 
