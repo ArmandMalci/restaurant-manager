@@ -26,12 +26,15 @@ gaps (low-contrast status tiles, sub-44px header controls).
 - Modify: `packages/shared/src/schemas/` (or wherever `ReportSummaryDto`-adjacent types live) — add a
   `DailyReportRow`/`DailyReportSchema` type for the new endpoint's response shape, and Swagger decorators.
 
-- [ ] **Step 1:** Add `getDaily(from, to)` to `reports.service.ts` with range validation.
-- [ ] **Step 2:** Add the `GET /reports/daily` endpoint with Swagger decorators.
-- [ ] **Step 3:** Add the shared schema/type, regenerate the Orval client.
-- [ ] **Step 4:** Tests: out-of-range span rejected with 400; revenue sums only `paid` bills within each day's
+- [x] **Step 1:** Add `getDaily(from, to)` to `reports.service.ts` with range validation.
+- [x] **Step 2:** Add the `GET /reports/daily` endpoint with Swagger decorators.
+- [x] **Step 3:** Add the shared schema/type, regenerate the Orval client. *(Used a plain `DailyReportRowDto` class
+  in `swagger-dtos.ts`, matching this file's existing precedent for `ReportSummaryDto` — not a `packages/shared` Zod
+  schema, since nestjs-zod v5 + Zod v4 emits OpenAPI 3.1 syntax Orval rejects.)*
+- [x] **Step 4:** Tests: out-of-range span rejected with 400; revenue sums only `paid` bills within each day's
   boundary (not all bills, not unpaid ones).
-- [ ] **Step 5:** `pnpm --filter @restaurant/api typecheck` + commit: `feat(api): add GET /reports/daily endpoint`.
+- [x] **Step 5:** `pnpm --filter @restaurant/api typecheck` + commit: `feat(api): add GET /reports/daily endpoint`.
+  *(Commit `4cf3731`.)*
 
 ---
 
@@ -45,13 +48,15 @@ gaps (low-contrast status tiles, sub-44px header controls).
   new `/reports/daily` endpoint; render results as a table (date, orders, revenue, reservations) — not a chart by
   default (see design doc rationale).
 
-- [ ] **Step 1:** Add the date-range picker.
-- [ ] **Step 2:** Add the daily-breakdown table, wired to the new endpoint.
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming the picker calls the endpoint with
+- [x] **Step 1:** Add the date-range picker. *(Used a native `<input type="date">` pair via the shared
+  `Input`/`Label` primitives — no calendar/date-picker component exists anywhere in this app yet, and this is the
+  simplest correct fit for two plain date values; inherits shared touch-target/theming for free.)*
+- [x] **Step 2:** Add the daily-breakdown table, wired to the new endpoint.
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test confirming the picker calls the endpoint with
   the selected range and renders one row per day.
-- [ ] **Step 4:** Verify in-browser: selecting a range shows the correct per-day rows including a real revenue
-  figure (the app's first).
-- [ ] **Step 5:** Commit: `feat(web): day-by-day report view with date-range picker`.
+- [x] **Step 4:** Verify in-browser: selecting a range shows the correct per-day rows including a real revenue
+  figure (the app's first). *(Confirmed against live data: real non-zero revenue on 2 of 7 days.)*
+- [x] **Step 5:** Commit: `feat(web): day-by-day report view with date-range picker`. *(Commit `09976c5`.)*
 
 ---
 
@@ -63,12 +68,15 @@ gaps (low-contrast status tiles, sub-44px header controls).
   plan is grounded in fresh research, not assumed from the changelog) and the sub-44px header touch targets (Plan
   10, Tier 3 deferred note — this one was explicitly left unfixed).
 
-- [ ] **Step 1:** Check current contrast on the 2 flagged status tiles; fix only if still an issue.
-- [ ] **Step 2:** Bump the header controls to the standard 44px coarse-pointer minimum (should inherit the Tier 1
+- [x] **Step 1:** Check current contrast on the 2 flagged status tiles; fix only if still an issue. *(Already fixed
+  in `8a83c7c` — verified, not re-broken. No change needed.)*
+- [x] **Step 2:** Bump the header controls to the standard 44px coarse-pointer minimum (should inherit the Tier 1
   `@media (pointer: coarse)` rule automatically if they use the shared `Button`/`data-slot` primitives — investigate
-  why they don't today before adding one-off sizing).
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + verify in-browser on an emulated tablet.
-- [ ] **Step 4:** Commit: `fix(web): reports status-tile contrast + header touch targets`.
+  why they don't today before adding one-off sizing). *(They already do — the coarse-pointer rule (`f4b0e85`) landed
+  before the "deferred" note (`8a83c7c`) was written; Plan 10's note was stale. No change needed.)*
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + verify in-browser on an emulated tablet.
+- [x] **Step 4:** Commit: `fix(web): reports status-tile contrast + header touch targets`. *(No commit — both gaps
+  were already resolved by prior work; verified rather than fixed, per this repo's no-empty-commit convention.)*
 
 ---
 
