@@ -46,6 +46,12 @@ export function byItemShares(
   return shares;
 }
 
+/** One cash tender row: an amount tendered in a given ISO currency code. */
+export interface CashTender {
+  currencyCode: string;
+  amount: number;
+}
+
 /**
  * Converts a tendered `amount` in `currencyCode` to the bill's base currency using
  * `rates` (ISO code -> rate-to-base). The base currency's own rate is implicitly 1 and
@@ -68,7 +74,7 @@ export function convertToBase(
  */
 export function computeChange(
   billTotal: number,
-  tenders: Array<{ amount: number; currencyCode: string }>,
+  tenders: CashTender[],
   baseCurrency: string,
   rates: Record<string, number>,
 ): number {

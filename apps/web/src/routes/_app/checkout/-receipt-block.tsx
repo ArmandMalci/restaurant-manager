@@ -2,7 +2,7 @@
  * ReceiptBlock — printable receipt for a settled bill.
  * Dash-prefixed: not a route.
  */
-import { lineItemTotal } from './-split-math';
+import { lineItemTotal, type CashTender } from './-split-math';
 import { useSettingsControllerGet } from '@/api/settings/settings';
 import type { BillDto, OrderDto, CreatePaymentDtoMethod } from '@/api/restaurantManagerAPI.schemas';
 
@@ -15,15 +15,35 @@ const METHOD_LABEL: Record<string, string> = {
   other: 'Other',
 };
 
+/** A cash payment's tender breakdown, recorded client-side only (see SplitPanel). */
+export interface RecordedCashTender {
+  amount: number;
+  tenders: CashTender[];
+  change: number;
+}
+
 export interface ReceiptBlockProps {
   bill: BillDto;
   order: OrderDto;
   tableNumber: number | string | undefined;
+  /** Cashier-facing tender breakdowns for cash payments recorded this session — not persisted. */
+  cashTenders?: RecordedCashTender[];
 }
 
-export function ReceiptBlock({ bill, order, tableNumber }: ReceiptBlockProps) {
+export function ReceiptBlock({ bill, order, tableNumber, cashTenders = [] }: ReceiptBlockProps) {
   const { data: settings } = useSettingsControllerGet();
   const contactLine = [settings?.address, settings?.phone].filter(Boolean).join(' · ');
+  // Best-effort match of persisted Payment rows back to this session's client-only tender
+  // log, by amount — consumed in order so identical amounts don't double-match.
+  const unmatchedTenders = [...cashTenders];
+
+  function matchTender(paymentAmount: number): RecordedCashTender | undefined {
+    const idx = unmatchedTenders.findIndex((t) => Math.abs(t.amount - paymentAmount) < 0.005);
+
+    if (idx === -1) return undefined;
+
+    return unmatchedTenders.splice(idx, 1)[0];
+  }
 
   return (
     <div
@@ -76,12 +96,33 @@ export function ReceiptBlock({ bill, order, tableNumber }: ReceiptBlockProps) {
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Payments
         </p>
-        {bill.payments.map((p) => (
-          <div key={p.id} className="flex justify-between font-mono text-xs">
-            <span>{METHOD_LABEL[p.method as CreatePaymentDtoMethod] ?? p.method}</span>
-            <span>${Number(p.amount).toFixed(2)}</span>
-          </div>
-        ))}
+        {bill.payments.map((p) => {
+          const tender = p.method === 'cash' ? matchTender(Number(p.amount)) : undefined;
+
+          return (
+            <div key={p.id} className="space-y-0.5">
+              <div className="flex justify-between font-mono text-xs">
+                <span>{METHOD_LABEL[p.method as CreatePaymentDtoMethod] ?? p.method}</span>
+                <span>${Number(p.amount).toFixed(2)}</span>
+              </div>
+              {tender && (
+                <div className="space-y-0.5 pl-3 font-mono text-[0.7rem] text-muted-foreground">
+                  {tender.tenders.map((t, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: tender rows have no stable identity
+                    <div key={i} className="flex justify-between">
+                      <span>Tendered {t.currencyCode}</span>
+                      <span>{t.amount.toFixed(2)}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between">
+                    <span>{tender.change < 0 ? 'Still owed' : 'Change'}</span>
+                    <span>${Math.abs(tender.change).toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
       {bill.paidAt && (
         <p className="border-t border-border pt-2 text-center text-xs text-muted-foreground">

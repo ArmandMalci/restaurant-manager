@@ -12,12 +12,13 @@ import {
   invalidateBillingControllerFindOne,
 } from '@/api/billing/billing';
 import { invalidateOrderControllerGetAll } from '@/api/orders/orders';
+import { useSettingsControllerGet } from '@/api/settings/settings';
 import type { BillDto, OrderDto, CreatePaymentDtoMethod } from '@/api/restaurantManagerAPI.schemas';
 import { CreatePaymentDtoMethod as Method } from '@/api/restaurantManagerAPI.schemas';
 import { evenShares, byItemShares } from './-split-math';
 import { SplitRow } from './-split-row';
 import { SplitControls, type SplitMode } from './-split-controls';
-import { ReceiptBlock } from './-receipt-block';
+import { ReceiptBlock, type RecordedCashTender } from './-receipt-block';
 
 export interface SplitPanelProps {
   bill: BillDto;
@@ -31,6 +32,13 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
   const [shareCount, setShareCount] = useState(2);
   const [assignments, setAssignments] = useState<Record<string, number>>({});
   const [methods, setMethods] = useState<Record<number, CreatePaymentDtoMethod>>({});
+  // Cashier-facing only — never sent to the API. See Plan 16 Task 3: the settlement
+  // model records only the bill-currency amount owed, not the tendered breakdown.
+  const [cashTenderLog, setCashTenderLog] = useState<RecordedCashTender[]>([]);
+
+  const { data: settings } = useSettingsControllerGet();
+  const baseCurrency = settings?.baseCurrency ?? 'EUR';
+  const exchangeRates = settings?.exchangeRates ?? {};
 
   const recordPayment = useBillingControllerRecordPayment({
     mutation: {
@@ -57,12 +65,15 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
 
   function changeShareCount(next: number) {
     const clamped = Math.max(1, Math.min(next, 20));
+
     setShareCount(clamped);
     setAssignments((prev) => {
       const fixed: Record<string, number> = {};
+
       for (const [itemId, idx] of Object.entries(prev)) {
         fixed[itemId] = idx >= clamped ? clamped - 1 : idx;
       }
+
       return fixed;
     });
   }
@@ -108,8 +119,8 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
 
             <div className="space-y-2">
               {shares.map((amount, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: split index is the bucket's stable identity
                 <SplitRow
+                  // biome-ignore lint/suspicious/noArrayIndexKey: split index is the bucket's stable identity
                   key={i}
                   index={i}
                   amount={amount}
@@ -117,12 +128,22 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
                   method={methodFor(i)}
                   onMethodChange={(m) => setMethods((prev) => ({ ...prev, [i]: m }))}
                   isRecording={recordPayment.isPending}
-                  onRecord={() =>
+                  baseCurrency={baseCurrency}
+                  exchangeRates={exchangeRates}
+                  onRecord={(cash) => {
+                    if (cash) {
+                      setCashTenderLog((prev) => [
+                        ...prev,
+                        { amount, tenders: cash.tenders, change: cash.change },
+                      ]);
+                    }
+                    // Only the owed amount + method are persisted — the tendered
+                    // breakdown/change above is cashier-facing only (see state comment).
                     recordPayment.mutate({
                       id: bill.id,
                       data: { amount, method: methodFor(i) },
-                    })
-                  }
+                    });
+                  }}
                 />
               ))}
             </div>
@@ -142,7 +163,12 @@ export function SplitPanel({ bill, order, tableNumber }: SplitPanelProps) {
               <Printer className="h-4 w-4" />
               Print receipt
             </Button>
-            <ReceiptBlock bill={bill} order={order} tableNumber={tableNumber} />
+            <ReceiptBlock
+              bill={bill}
+              order={order}
+              tableNumber={tableNumber}
+              cashTenders={cashTenderLog}
+            />
           </div>
         )}
       </CardContent>
