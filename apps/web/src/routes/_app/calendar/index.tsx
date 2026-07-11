@@ -1,12 +1,22 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo, useEffect } from 'react';
-import { Calendar, dayjsLocalizer, Views, type View } from 'react-big-calendar';
+import { Calendar, dayjsLocalizer, Views, type View, type SlotInfo } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { CalendarDays, Users } from 'lucide-react';
 import { useReservationControllerGetAll } from '@/api/reservations/reservations';
 import { useShiftControllerGetAll } from '@/api/shifts/shifts';
 import { useStaffControllerGetAll } from '@/api/staff/staff';
 import { PageHeader } from '@/components/ui/page-header';
+import { ListRow } from '@/components/ui/list-row';
+import { EmptyState } from '@/components/ui/empty-state';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 // ponytail: single-use, kept local — promote to hooks/ if a second consumer shows up.
 function useIsMobile(breakpointPx = 640): boolean {
@@ -56,9 +66,10 @@ export function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { from, to } = weekBounds(currentDate);
   const isMobile = useIsMobile();
+  const [modalDate, setModalDate] = useState<Date | null>(null);
 
-  // Reservations default to Month (staff want the month overview). Shifts keeps its pre-existing
-  // per-viewport default — unchanged, out of scope per D4.
+  // Reservations default to Month (staff want the month overview; day detail lives in the modal
+  // below). Shifts keeps its pre-existing per-viewport default — unchanged, out of scope per D4.
   const defaultView = tab === 'reservations' ? Views.MONTH : isMobile ? Views.AGENDA : Views.WEEK;
   const [view, setView] = useState<View>(defaultView);
   // Reset `view` synchronously (during render, not via useEffect) whenever the tab or viewport
@@ -128,6 +139,16 @@ export function CalendarPage() {
   // Shifts are already server-filtered to [from, to], so their length is week-scoped for free.
   const eventCount = tab === 'reservations' ? reservationsThisWeek : shiftEvents.length;
 
+  // Month cells are too small for inline detail — clicking a day opens this modal instead,
+  // filtered client-side from the already-fetched reservation list (no new endpoint).
+  const dayReservations = useMemo(() => {
+    if (!modalDate) return [];
+
+    return reservations
+      .filter((r) => dayjs(r.date).isSame(modalDate, 'day'))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [modalDate, reservations]);
+
   const reservationViews = isMobile
     ? [Views.MONTH, Views.DAY, Views.AGENDA]
     : [Views.MONTH, Views.WEEK, Views.DAY];
@@ -196,6 +217,16 @@ export function CalendarPage() {
           onNavigate={setCurrentDate}
           scrollToTime={new Date(0, 0, 0, 10, 0, 0)}
           style={{ height: '100%' }}
+          selectable={tab === 'reservations'}
+          onSelectSlot={
+            tab === 'reservations'
+              ? (slotInfo: SlotInfo) => setModalDate(slotInfo.start)
+              : undefined
+          }
+          onDrillDown={tab === 'reservations' ? (date: Date) => setModalDate(date) : undefined}
+          onShowMore={
+            tab === 'reservations' ? (_events, date: Date) => setModalDate(date) : undefined
+          }
           eventPropGetter={() => ({
             className:
               tab === 'reservations'
@@ -204,6 +235,40 @@ export function CalendarPage() {
           })}
         />
       </div>
+
+      <Dialog open={modalDate !== null} onOpenChange={(open) => !open && setModalDate(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{modalDate ? dayjs(modalDate).format('dddd, MMMM D') : ''}</DialogTitle>
+            <DialogDescription>
+              {dayReservations.length} reservation{dayReservations.length !== 1 ? 's' : ''}
+            </DialogDescription>
+          </DialogHeader>
+          {dayReservations.length === 0 ? (
+            <EmptyState
+              icon={CalendarDays}
+              title="No reservations"
+              description="Nothing booked for this day."
+            />
+          ) : (
+            <div className="max-h-96 overflow-y-auto rounded-lg border border-border bg-card">
+              {dayReservations.map((r) => (
+                <ListRow
+                  key={r.id}
+                  title={r.guestName}
+                  subtitle={dayjs(r.date).format('h:mm A')}
+                  meta={
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {r.partySize}
+                    </span>
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
