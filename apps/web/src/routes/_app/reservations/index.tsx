@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Plus, Pencil, Trash2, Users, CalendarDays } from 'lucide-react';
+import { useState } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -15,14 +15,8 @@ import type { ReservationDto } from '@/api/restaurantManagerAPI.schemas';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
+import { UrlModal } from '@/components/ui/url-modal';
+import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -38,6 +32,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export const Route = createFileRoute('/_app/reservations/')({
   component: ReservationsPage,
+  validateSearch: (search: Record<string, unknown>): { reservation?: string } => ({
+    reservation: typeof search.reservation === 'string' ? search.reservation : undefined,
+  }),
 });
 
 // ── Utilities ─────────────────────────────────────────────────────────
@@ -371,8 +368,8 @@ type FilterTab = 'today' | 'week' | 'all';
 
 function ReservationsPage() {
   const [tab, setTab] = useState<FilterTab>('today');
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [editingReservation, setEditingReservation] = useState<ReservationDto | null>(null);
+  const navigate = useNavigate();
+  const { reservation: reservationParam } = Route.useSearch();
 
   const qc = useQueryClient();
   const dateParam = tab === 'today' ? todayStr() : undefined;
@@ -383,6 +380,12 @@ function ReservationsPage() {
   const createRes = useReservationControllerCreate();
   const updateRes = useReservationControllerUpdate();
   const deleteRes = useReservationControllerRemove();
+
+  // `reservation=new` opens the form empty; `reservation=<id>` opens it pre-filled.
+  const editingReservation =
+    reservationParam && reservationParam !== 'new'
+      ? (allReservations.find((r) => r.id === reservationParam) ?? null)
+      : null;
 
   const displayed: ReservationDto[] =
     tab !== 'week'
@@ -397,9 +400,23 @@ function ReservationsPage() {
           return d >= now && d <= end;
         });
 
+  function closeForm() {
+    navigate({
+      to: '.',
+      search: (prev) => {
+        const { reservation: _reservation, ...rest } = prev as { reservation?: string };
+
+        return rest;
+      },
+    });
+  }
+
+  function openNew() {
+    navigate({ to: '.', search: (prev) => ({ ...prev, reservation: 'new' }) });
+  }
+
   function openEdit(r: ReservationDto) {
-    setEditingReservation(r);
-    setSheetOpen(true);
+    navigate({ to: '.', search: (prev) => ({ ...prev, reservation: r.id }) });
   }
 
   function handleDelete(r: ReservationDto) {
@@ -411,7 +428,7 @@ function ReservationsPage() {
     const opts = {
       onSuccess: () => {
         invalidateReservationControllerGetAll(qc);
-        setSheetOpen(false);
+        closeForm();
       },
     };
 
@@ -424,42 +441,36 @@ function ReservationsPage() {
 
   return (
     <div className="p-6">
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <PageHeader
-          title="Reservations"
-          subtitle={`${displayed.length} reservation${displayed.length !== 1 ? 's' : ''}`}
-          action={
-            <SheetTrigger
-              render={
-                <Button
-                  onClick={() => {
-                    setEditingReservation(null);
-                  }}
-                  className="gap-1.5"
-                />
-              }
-            >
-              <Plus className="h-4 w-4" />
-              Add reservation
-            </SheetTrigger>
-          }
+      <PageHeader
+        title="Reservations"
+        subtitle={`${displayed.length} reservation${displayed.length !== 1 ? 's' : ''}`}
+        action={
+          <Button onClick={openNew} className="gap-1.5">
+            <Plus className="h-4 w-4" />
+            Add reservation
+          </Button>
+        }
+      />
+
+      <UrlModal paramKey="reservation" className="sm:max-w-lg">
+        <DialogHeader className="p-4 pb-0">
+          <DialogTitle>{editingReservation ? 'Edit reservation' : 'New reservation'}</DialogTitle>
+          <DialogDescription>
+            {editingReservation
+              ? `Editing reservation for ${editingReservation.guestName}`
+              : 'Fill in the details to create a new reservation.'}
+          </DialogDescription>
+        </DialogHeader>
+        <ReservationForm
+          // Remount once the record resolves after a hard refresh (query starts empty, so
+          // `editingReservation` is briefly null even though `reservation=<id>` is in the URL) —
+          // otherwise the form's useState-seeded fields never pick up the loaded data.
+          key={reservationParam === 'new' ? 'new' : (editingReservation?.id ?? 'loading')}
+          initial={editingReservation ?? undefined}
+          onSave={handleSave}
+          onCancel={closeForm}
         />
-        <SheetContent side="right">
-          <SheetHeader>
-            <SheetTitle>{editingReservation ? 'Edit reservation' : 'New reservation'}</SheetTitle>
-            <SheetDescription>
-              {editingReservation
-                ? `Editing reservation for ${editingReservation.guestName}`
-                : 'Fill in the details to create a new reservation.'}
-            </SheetDescription>
-          </SheetHeader>
-          <ReservationForm
-            initial={editingReservation ?? undefined}
-            onSave={handleSave}
-            onCancel={() => setSheetOpen(false)}
-          />
-        </SheetContent>
-      </Sheet>
+      </UrlModal>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as FilterTab)}>
         <TabsList>

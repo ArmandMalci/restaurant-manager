@@ -9,6 +9,7 @@
  */
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { ShoppingCart, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -32,7 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { UrlModal } from '@/components/ui/url-modal';
+import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,6 +71,7 @@ interface OrderBuilderProps {
 
 export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderProps) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const createOrder = useOrderControllerCreate();
   const addItems = useOrderControllerAddItems();
 
@@ -82,8 +85,18 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
   const [lines, setLines] = useState<LineItem[]>([]);
   const [orderNotes, setOrderNotes] = useState('');
   const [pendingItem, setPendingItem] = useState<PendingItem | null>(null);
-  const [ticketOpen, setTicketOpen] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+
+  function closeTicket() {
+    navigate({
+      to: '.',
+      search: (prev) => {
+        const { ticket: _ticket, ...rest } = prev as { ticket?: string };
+
+        return rest;
+      },
+    });
+  }
 
   // The table's current order: an unbilled order means "append to it"; an
   // unpaid-but-billed order means "already rung up, settle before adding
@@ -369,7 +382,7 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setTicketOpen(true)}
+          onClick={() => navigate({ to: '.', search: (prev) => ({ ...prev, ticket: 'open' }) })}
           className="flex items-center gap-2"
         >
           <ShoppingCart className="h-4 w-4" />
@@ -382,37 +395,35 @@ export function OrderBuilder({ onClose, initialTableId, orders }: OrderBuilderPr
         </Button>
       </div>
 
-      {/* Mobile: ticket as bottom Sheet */}
-      <Sheet open={ticketOpen} onOpenChange={setTicketOpen}>
-        <SheetContent side="bottom" className="h-[80vh] p-0">
-          <SheetHeader className="px-4 pt-4 pb-0">
-            <SheetTitle>Ticket</SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4 min-h-0">
-            {isTableRungUp ? (
-              rungUpBanner
-            ) : (
-              <TicketPanel
-                lines={lines}
-                notes={orderNotes}
-                tableId={tableId}
-                onNotesChange={setOrderNotes}
-                onQtyChange={handleQtyChange}
-                onRemove={handleRemove}
-                onFire={() => {
-                  if (!tableId || lines.length === 0) return;
-                  handleFire();
-                  setTicketOpen(false);
-                }}
-                isFiring={createOrder.isPending || addItems.isPending}
-                firedItems={firedItems}
-                fireLabel={existingOpenOrder ? 'Add to order' : 'Fire order'}
-                showNotes={!existingOpenOrder}
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* Mobile: ticket modal (URL-driven via `?ticket=open`) */}
+      <UrlModal paramKey="ticket" paramValue="open">
+        <DialogHeader className="px-4 pt-4 pb-0">
+          <DialogTitle>Ticket</DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4 min-h-0">
+          {isTableRungUp ? (
+            rungUpBanner
+          ) : (
+            <TicketPanel
+              lines={lines}
+              notes={orderNotes}
+              tableId={tableId}
+              onNotesChange={setOrderNotes}
+              onQtyChange={handleQtyChange}
+              onRemove={handleRemove}
+              onFire={() => {
+                if (!tableId || lines.length === 0) return;
+                handleFire();
+                closeTicket();
+              }}
+              isFiring={createOrder.isPending || addItems.isPending}
+              firedItems={firedItems}
+              fireLabel={existingOpenOrder ? 'Add to order' : 'Fire order'}
+              showNotes={!existingOpenOrder}
+            />
+          )}
+        </div>
+      </UrlModal>
 
       {/* Discard confirmation — only prompted when there are unfired lines */}
       <AlertDialog open={confirmDiscard} onOpenChange={setConfirmDiscard}>

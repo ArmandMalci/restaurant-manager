@@ -35,8 +35,9 @@ import { OrderBuilder } from './-builder';
 
 export const Route = createFileRoute('/_app/order/')({
   component: OrdersPage,
-  validateSearch: (search: Record<string, unknown>): { tableId?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { tableId?: string; ticket?: string } => ({
     tableId: typeof search.tableId === 'string' ? search.tableId : undefined,
+    ticket: typeof search.ticket === 'string' ? search.ticket : undefined,
   }),
 });
 

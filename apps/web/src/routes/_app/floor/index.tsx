@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
 import { Plus, Pencil, Trash2, Users, X, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -6,7 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status';
-import type { Tone } from '@/components/ui/status';
 import {
   Select,
   SelectContent,
@@ -26,34 +25,17 @@ import {
 } from '@/api/tables/tables';
 import type { TableStatus } from '@restaurant/shared';
 import type { TableDto, TableDtoShape } from '@/api/restaurantManagerAPI.schemas';
-import { FloorMap } from './-floor-map';
+import { FloorMap, STATUS_LABELS, STATUS_TONE, NEXT_STATUS } from './-floor-map';
 import type { PositionOverride } from './-floor-map';
 import { TableActionSheet } from './-table-action-sheet';
 import { DeleteDialog } from './-delete-dialog';
 
 export const Route = createFileRoute('/_app/floor/')({
   component: TablesPage,
+  validateSearch: (search: Record<string, unknown>): { tableId?: string } => ({
+    tableId: typeof search.tableId === 'string' ? search.tableId : undefined,
+  }),
 });
-
-// ── Constants ────────────────────────────────────────────────────────────
-
-const STATUS_LABELS: Record<TableStatus, string> = {
-  available: 'Available',
-  occupied: 'Occupied',
-  reserved: 'Reserved',
-};
-
-const STATUS_TONE: Record<TableStatus, Tone> = {
-  available: 'success',
-  occupied: 'info',
-  reserved: 'warning',
-};
-
-const NEXT_STATUS: Record<TableStatus, TableStatus> = {
-  available: 'occupied',
-  occupied: 'reserved',
-  reserved: 'available',
-};
 
 // ── Dialog primitives ────────────────────────────────────────────────────
 
@@ -282,6 +264,7 @@ type ViewMode = 'map' | 'grid';
 function TablesPage() {
   const [modal, setModal] = useState<ModalState>({ type: 'none' });
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: tables = [], isLoading } = useTableControllerGetAll();
   const createTable = useTableControllerCreate();
@@ -300,16 +283,14 @@ function TablesPage() {
   const [positions, setPositions] = useState<Record<string, PositionOverride>>({});
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  // Action sheet
-  const [selectedTable, setSelectedTable] = useState<TableDto | null>(null);
-
   const available = tables.filter((t) => t.status === 'available').length;
   const occupied = tables.filter((t) => t.status === 'occupied').length;
   const reserved = tables.filter((t) => t.status === 'reserved').length;
 
+  // Action sheet is URL-driven (`?tableId=`) — TableActionSheet reads it itself.
   function handleTableClick(table: TableDto) {
     if (!editMode) {
-      setSelectedTable(table);
+      navigate({ to: '.', search: (prev) => ({ ...prev, tableId: table.id }) });
     }
   }
 
@@ -527,7 +508,7 @@ function TablesPage() {
       </div>
 
       {/* Action sheet */}
-      <TableActionSheet table={selectedTable} onClose={() => setSelectedTable(null)} />
+      <TableActionSheet tables={tables} />
 
       {/* Dialogs */}
       {modal.type === 'create' && (

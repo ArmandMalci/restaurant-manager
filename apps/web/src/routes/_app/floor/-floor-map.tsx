@@ -16,9 +16,18 @@ import type { TableDto, TableDtoShape } from '@/api/restaurantManagerAPI.schemas
 import { useTableControllerRemove, invalidateTableControllerGetAll } from '@/api/tables/tables';
 import { DeleteDialog } from './-delete-dialog';
 
-// ── Status tone map ───────────────────────────────────────────────────
+// ── Status maps ───────────────────────────────────────────────────────
+// Single source of truth for table-status presentation — reused by floor/index.tsx
+// (grid view) and -table-action-sheet.tsx (per-table modal) instead of each
+// redeclaring its own copy.
 
-const STATUS_TONE: Record<TableStatus, Tone> = {
+export const STATUS_LABELS: Record<TableStatus, string> = {
+  available: 'Available',
+  occupied: 'Occupied',
+  reserved: 'Reserved',
+};
+
+export const STATUS_TONE: Record<TableStatus, Tone> = {
   available: 'success',
   occupied: 'info',
   reserved: 'warning',
@@ -30,6 +39,12 @@ export const STATUS_BG: Record<TableStatus, string> = {
   available: 'bg-success/10 border-success/30',
   occupied: 'bg-info/10 border-info/30',
   reserved: 'bg-warning/10 border-warning/30',
+};
+
+export const NEXT_STATUS: Record<TableStatus, TableStatus> = {
+  available: 'occupied',
+  occupied: 'reserved',
+  reserved: 'available',
 };
 
 // ── Tile sizing by seats ──────────────────────────────────────────────
