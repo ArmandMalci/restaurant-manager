@@ -669,6 +669,15 @@ export interface ReportSummaryDto {
   topItems: TopItemDto[];
 }
 
+export interface DailyReportRowDto {
+  /** Day this row covers, YYYY-MM-DD */
+  date: string;
+  orderCount: number;
+  /** Sum of paid Bill.total for bills paid on this day */
+  revenue: number;
+  reservationCount: number;
+}
+
 export interface RestaurantSettingsDto {
   id: string;
   name: string;
@@ -936,6 +945,17 @@ export type ReservationControllerGetAllParams = {
 
 export type StaffControllerGetAllParams = {
   role?: string;
+};
+
+export type ReportsControllerGetDailyParams = {
+  /**
+   * Start date (YYYY-MM-DD), inclusive
+   */
+  from: string;
+  /**
+   * End date (YYYY-MM-DD), inclusive, max 92 days after `from`
+   */
+  to: string;
 };
 
 export type ShiftControllerGetAllParams = {

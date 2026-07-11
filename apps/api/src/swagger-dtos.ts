@@ -273,3 +273,11 @@ export class ReportSummaryDto {
 
   @ApiProperty({ type: [TopItemDto] }) public topItems!: TopItemDto[];
 }
+
+export class DailyReportRowDto {
+  @ApiProperty({ description: 'Day this row covers, YYYY-MM-DD' }) public date!: string;
+  @ApiProperty() public orderCount!: number;
+  @ApiProperty({ description: 'Sum of paid Bill.total for bills paid on this day' })
+  public revenue!: number;
+  @ApiProperty() public reservationCount!: number;
+}

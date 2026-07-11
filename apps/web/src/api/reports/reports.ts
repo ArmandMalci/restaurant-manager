@@ -18,7 +18,11 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { ReportSummaryDto } from '../restaurantManagerAPI.schemas';
+import type {
+  DailyReportRowDto,
+  ReportSummaryDto,
+  ReportsControllerGetDailyParams,
+} from '../restaurantManagerAPI.schemas';
 
 import { customInstance } from '../../lib/api-client';
 
@@ -143,6 +147,149 @@ export const invalidateReportsControllerGetSummary = async (
 ): Promise<QueryClient> => {
   await queryClient.invalidateQueries(
     { queryKey: getReportsControllerGetSummaryQueryKey() },
+    options,
+  );
+
+  return queryClient;
+};
+
+/**
+ * @summary Get per-day order count, revenue, and reservation count for a date range
+ */
+export const reportsControllerGetDaily = (
+  params: ReportsControllerGetDailyParams,
+  signal?: AbortSignal,
+) => {
+  return customInstance<DailyReportRowDto[]>({
+    url: `/api/reports/daily`,
+    method: 'GET',
+    params,
+    signal,
+  });
+};
+
+export const getReportsControllerGetDailyQueryKey = (params?: ReportsControllerGetDailyParams) => {
+  return [`/api/reports/daily`, ...(params ? [params] : [])] as const;
+};
+
+export const getReportsControllerGetDailyQueryOptions = <
+  TData = Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+  TError = unknown,
+>(
+  params: ReportsControllerGetDailyParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetDaily>>, TError, TData>
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getReportsControllerGetDailyQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof reportsControllerGetDaily>>> = ({
+    signal,
+  }) => reportsControllerGetDaily(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ReportsControllerGetDailyQueryResult = NonNullable<
+  Awaited<ReturnType<typeof reportsControllerGetDaily>>
+>;
+export type ReportsControllerGetDailyQueryError = unknown;
+
+export function useReportsControllerGetDaily<
+  TData = Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+  TError = unknown,
+>(
+  params: ReportsControllerGetDailyParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetDaily>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+          TError,
+          Awaited<ReturnType<typeof reportsControllerGetDaily>>
+        >,
+        'initialData'
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReportsControllerGetDaily<
+  TData = Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+  TError = unknown,
+>(
+  params: ReportsControllerGetDailyParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetDaily>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+          TError,
+          Awaited<ReturnType<typeof reportsControllerGetDaily>>
+        >,
+        'initialData'
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReportsControllerGetDaily<
+  TData = Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+  TError = unknown,
+>(
+  params: ReportsControllerGetDailyParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetDaily>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get per-day order count, revenue, and reservation count for a date range
+ */
+
+export function useReportsControllerGetDaily<
+  TData = Awaited<ReturnType<typeof reportsControllerGetDaily>>,
+  TError = unknown,
+>(
+  params: ReportsControllerGetDailyParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetDaily>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getReportsControllerGetDailyQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get per-day order count, revenue, and reservation count for a date range
+ */
+export const invalidateReportsControllerGetDaily = async (
+  queryClient: QueryClient,
+  params: ReportsControllerGetDailyParams,
+  options?: InvalidateOptions,
+): Promise<QueryClient> => {
+  await queryClient.invalidateQueries(
+    { queryKey: getReportsControllerGetDailyQueryKey(params) },
     options,
   );
 

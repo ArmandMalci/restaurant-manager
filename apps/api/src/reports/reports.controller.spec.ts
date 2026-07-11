@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
@@ -13,6 +14,7 @@ const mockSummary = {
 
 const mockReportsService = {
   getSummary: jest.fn(),
+  getDaily: jest.fn(),
 };
 
 const allowAll = { canActivate: () => true };
@@ -60,6 +62,32 @@ describe('ReportsController', () => {
 
       expect(res.statusCode).toBe(200);
       expect(JSON.parse(res.body).orders.total).toBe(0);
+    });
+  });
+
+  describe('GET /reports/daily', () => {
+    it('returns 200 with a per-day breakdown, passing from/to through', async () => {
+      const mockDaily = [{ date: '2026-07-01', orderCount: 3, revenue: 100, reservationCount: 1 }];
+
+      mockReportsService.getDaily.mockResolvedValue(mockDaily);
+      const res = await app.inject({
+        method: 'GET',
+        url: '/reports/daily?from=2026-07-01&to=2026-07-01',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual(mockDaily);
+      expect(mockReportsService.getDaily).toHaveBeenCalledWith('2026-07-01', '2026-07-01');
+    });
+
+    it('returns 400 when the service rejects an out-of-range span', async () => {
+      mockReportsService.getDaily.mockRejectedValue(new BadRequestException('Range too large'));
+      const res = await app.inject({
+        method: 'GET',
+        url: '/reports/daily?from=2026-01-01&to=2026-12-31',
+      });
+
+      expect(res.statusCode).toBe(400);
     });
   });
 });

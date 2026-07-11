@@ -1577,6 +1577,53 @@
         "tags": ["reports"]
       }
     },
+    "/api/reports/daily": {
+      "get": {
+        "operationId": "ReportsController_getDaily",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD), inclusive",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD), inclusive, max 92 days after `from`",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DailyReportRowDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get per-day order count, revenue, and reservation count for a date range",
+        "tags": ["reports"]
+      }
+    },
     "/api/settings": {
       "get": {
         "operationId": "SettingsController_get",
@@ -3315,6 +3362,26 @@
           }
         },
         "required": ["ordersByStatus", "tablesByStatus", "reservationsToday", "topItems"]
+      },
+      "DailyReportRowDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Day this row covers, YYYY-MM-DD"
+          },
+          "orderCount": {
+            "type": "number"
+          },
+          "revenue": {
+            "type": "number",
+            "description": "Sum of paid Bill.total for bills paid on this day"
+          },
+          "reservationCount": {
+            "type": "number"
+          }
+        },
+        "required": ["date", "orderCount", "revenue", "reservationCount"]
       },
       "RestaurantSettingsDto": {
         "type": "object",

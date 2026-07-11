@@ -1,13 +1,15 @@
 import { Test } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 const prismaMock = {
-  order: { groupBy: jest.fn() },
+  order: { groupBy: jest.fn(), count: jest.fn() },
   table: { groupBy: jest.fn() },
   reservation: { count: jest.fn() },
   orderItem: { groupBy: jest.fn() },
   menuItem: { findMany: jest.fn() },
+  bill: { aggregate: jest.fn() },
 };
 
 describe('ReportsService', () => {
@@ -77,6 +79,50 @@ describe('ReportsService', () => {
       const result = await service.getSummary();
 
       expect(result.topItems[0].name).toBe('Unknown');
+    });
+  });
+
+  describe('getDaily', () => {
+    it('rejects a span longer than 92 days with a 400', async () => {
+      await expect(service.getDaily('2026-01-01', '2026-12-31')).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(prismaMock.order.count).not.toHaveBeenCalled();
+    });
+
+    it('rejects an invalid date', async () => {
+      await expect(service.getDaily('not-a-date', '2026-07-02')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('rejects from after to', async () => {
+      await expect(service.getDaily('2026-07-05', '2026-07-01')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('returns one row per day, summing only paid bills within each day boundary', async () => {
+      prismaMock.order.count.mockResolvedValueOnce(3).mockResolvedValueOnce(5);
+      prismaMock.bill.aggregate
+        .mockResolvedValueOnce({ _sum: { total: 100 } })
+        .mockResolvedValueOnce({ _sum: { total: null } });
+      prismaMock.reservation.count.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+
+      const result = await service.getDaily('2026-07-01', '2026-07-02');
+
+      expect(result).toEqual([
+        { date: '2026-07-01', orderCount: 3, revenue: 100, reservationCount: 1 },
+        { date: '2026-07-02', orderCount: 5, revenue: 0, reservationCount: 0 },
+      ]);
+
+      const day1Where = prismaMock.bill.aggregate.mock.calls[0][0].where;
+
+      expect(day1Where.paid).toBe(true);
+      expect(day1Where.paidAt).toEqual({
+        gte: new Date('2026-07-01T00:00:00.000Z'),
+        lt: new Date('2026-07-02T00:00:00.000Z'),
+      });
     });
   });
 });
