@@ -23,7 +23,7 @@
     "packages/**/*.ts": [
       "biome check --write --no-errors-on-unmatched"
     ],
-    "**/*.{json,md}": [
+    "**/*.json": [
       "biome format --write"
     ]
   },

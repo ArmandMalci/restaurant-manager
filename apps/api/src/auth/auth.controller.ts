@@ -40,7 +40,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/auth/refresh',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 15 * 24 * 60 * 60,
     });
 
     return { accessToken, user };
@@ -65,7 +65,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/auth/refresh',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 15 * 24 * 60 * 60,
     });
 
     return { accessToken };

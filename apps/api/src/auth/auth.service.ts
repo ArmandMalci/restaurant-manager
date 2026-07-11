@@ -62,7 +62,7 @@ export class AuthService {
 
   private async createRefreshToken(staffId: string) {
     const token = randomUUID();
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
 
     await this.prisma.refreshToken.create({ data: { token, staffId, expiresAt } });
 
