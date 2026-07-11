@@ -21,15 +21,16 @@ per-station columns as a secondary improvement.
 capture that first. Per the design doc, this is a toast-with-action (`sonner` supports this natively via
 `toast(message, { action: { label, onClick } })`), not a blocking confirm — bump stays a single tap.
 
-- [ ] **Step 1:** In `handleBump`, capture the item's current status before mutating (from the ticket data already
+- [x] **Step 1:** In `handleBump`, capture the item's current status before mutating (from the ticket data already
   in scope — don't add a new fetch).
-- [ ] **Step 2:** On successful bump, show `toast('Item marked ready', { action: { label: 'Undo', onClick: () =>
+- [x] **Step 2:** On successful bump, show `toast('Item marked ready', { action: { label: 'Undo', onClick: () =>
   ... } })` where the undo action re-fires `useOrderControllerUpdateItemStatus` with the captured prior status.
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test: bump an item, confirm the toast+action render,
-  confirm clicking Undo restores the prior status via the mutation.
-- [ ] **Step 4:** Verify in-browser: bump an item, see the undo toast, click Undo, confirm the item returns to its
-  prior column/state.
-- [ ] **Step 5:** Commit: `fix(web): add missing undo window on KDS item bump`.
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + a test: bump an item, confirm the toast+action render,
+  confirm clicking Undo restores the prior status via the mutation. *(Also fixed a pre-existing a11y lint failure
+  blocking the commit: a `role="group"` div → real `<fieldset>`.)*
+- [x] **Step 4:** Verify in-browser: bump an item, see the undo toast, click Undo, confirm the item returns to its
+  prior column/state. *(Confirmed via network trace: PATCH status:'ready' then status:'pending'.)*
+- [x] **Step 5:** Commit: `fix(web): add missing undo window on KDS item bump`. *(Commit `59a10ac`.)*
 
 ---
 
@@ -40,14 +41,15 @@ capture that first. Per the design doc, this is a toast-with-action (`sonner` su
   parallel columns per station instead of one flat filtered grid; a specific station selection keeps today's
   single-list behavior (already correct for that case).
 
-- [ ] **Step 1:** Group `visibleTickets`' items by station when in the "all" view; render as columns (reuse
+- [x] **Step 1:** Group `visibleTickets`' items by station when in the "all" view; render as columns (reuse
   whatever column/grid layout primitive `/order`'s kanban already uses if it's a good fit, otherwise a simple flex
-  layout consistent with this file's existing card-grid classes).
-- [ ] **Step 2:** `pnpm --filter @restaurant/web typecheck` + a test confirming station columns render independently
+  layout consistent with this file's existing card-grid classes). *(Added `ticketsForStation`, `KITCHEN_STATIONS`,
+  and a `StationColumn` sub-component reusing the existing `TicketCard`.)*
+- [x] **Step 2:** `pnpm --filter @restaurant/web typecheck` + a test confirming station columns render independently
   in "all" view.
-- [ ] **Step 3:** Verify in-browser: with tickets across multiple stations, "all" view shows them in separate
+- [x] **Step 3:** Verify in-browser: with tickets across multiple stations, "all" view shows them in separate
   columns rather than one interleaved grid.
-- [ ] **Step 4:** Commit: `feat(web): per-station columns on KDS "all" view`.
+- [x] **Step 4:** Commit: `feat(web): per-station columns on KDS "all" view`. *(Commit `2f6b1c1`.)*
 
 ---
 
