@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
-import { Plus, Pencil, Trash2, Users, X, LayoutGrid, Map } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, X, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ import type { TableDto, TableDtoShape } from '@/api/restaurantManagerAPI.schemas
 import { FloorMap } from './-floor-map';
 import type { PositionOverride } from './-floor-map';
 import { TableActionSheet } from './-table-action-sheet';
+import { DeleteDialog } from './-delete-dialog';
 
 export const Route = createFileRoute('/_app/floor/')({
   component: TablesPage,
@@ -177,54 +178,6 @@ function TableFormDialog({ initial, onSave, onClose, title }: TableFormDialogPro
   );
 }
 
-// ── Delete confirmation dialog ────────────────────────────────────────────
-
-interface DeleteDialogProps {
-  tableNumber: number;
-  onConfirm: () => void;
-  onClose: () => void;
-}
-
-function DeleteDialog({ tableNumber, onConfirm, onClose }: DeleteDialogProps) {
-  return (
-    <>
-      <DialogOverlay onClose={onClose} />
-      <DialogPanel>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Delete Table {tableNumber}?</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <p className="text-sm text-muted-foreground mb-6">
-          This action cannot be undone. Table {tableNumber} will be permanently removed.
-        </p>
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
-          >
-            Delete
-          </button>
-        </div>
-      </DialogPanel>
-    </>
-  );
-}
-
 // ── Table card (grid view) ────────────────────────────────────────────────
 
 interface TableCardProps {
@@ -239,63 +192,73 @@ function TableCard({ table, onEdit, onDelete, onCycleStatus, onTableClick }: Tab
   const statusKey = table.status as TableStatus;
 
   return (
-    <div
-      className="group relative flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm hover:border-accent/40 hover:shadow-md transition-all duration-200 cursor-pointer"
-      onClick={() => onTableClick(table)}
-      role="button"
-      aria-label={`Table ${table.number}`}
-    >
-      {/* Hover actions */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          aria-label="Edit table"
-        >
-          <Pencil />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          aria-label="Delete table"
-          className="hover:text-destructive"
-        >
-          <Trash2 />
-        </Button>
-      </div>
+    <>
+      {/* biome-ignore lint/a11y/useSemanticElements: nests its own buttons, can't be a real <button>; tabIndex + onKeyDown provide keyboard access */}
+      <div
+        className="group relative flex flex-col overflow-hidden rounded-lg bg-card border border-border shadow-sm hover:border-accent/40 hover:shadow-md transition-all duration-200 cursor-pointer"
+        onClick={() => onTableClick(table)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onTableClick(table);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`Table ${table.number}`}
+      >
+        {/* Hover actions */}
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            aria-label="Edit table"
+          >
+            <Pencil />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            aria-label="Delete table"
+            className="hover:text-destructive"
+          >
+            <Trash2 />
+          </Button>
+        </div>
 
-      {/* Card body */}
-      <div className="flex flex-1 flex-col items-center justify-center px-4 py-5 text-center">
-        <p className="text-lg font-semibold text-foreground">T{table.number}</p>
-        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-          <Users className="h-3 w-3" />
-          {table.seats} seats
-        </p>
-      </div>
+        {/* Card body */}
+        <div className="flex flex-1 flex-col items-center justify-center px-4 py-5 text-center">
+          <p className="text-lg font-semibold text-foreground">T{table.number}</p>
+          <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+            <Users className="h-3 w-3" />
+            {table.seats} seats
+          </p>
+        </div>
 
-      {/* Status — single StatusBadge, clickable to cycle */}
-      <div className="border-t border-border px-3 py-2 flex justify-center">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onCycleStatus();
-          }}
-          title={`Switch to ${STATUS_LABELS[NEXT_STATUS[statusKey]]}`}
-          className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <StatusBadge tone={STATUS_TONE[statusKey]} label={STATUS_LABELS[statusKey]} />
-        </button>
+        {/* Status — single StatusBadge, clickable to cycle */}
+        <div className="border-t border-border px-3 py-2 flex justify-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCycleStatus();
+            }}
+            title={`Switch to ${STATUS_LABELS[NEXT_STATUS[statusKey]]}`}
+            className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <StatusBadge tone={STATUS_TONE[statusKey]} label={STATUS_LABELS[statusKey]} />
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -413,15 +376,15 @@ function TablesPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="space-y-6 p-6">
+        <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <Skeleton className="h-7 w-24" />
             <Skeleton className="h-4 w-20" />
           </div>
           <Skeleton className="h-8 w-28 rounded-lg" />
         </div>
-        <div className="mb-4 flex gap-2">
+        <div className="flex gap-2">
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} className="h-6 w-24 rounded-md" />
           ))}
@@ -437,122 +400,124 @@ function TablesPage() {
 
   return (
     <div className="p-6">
-      <PageHeader
-        title="Floor"
-        subtitle={`${tables.length} table${tables.length !== 1 ? 's' : ''}`}
-        className="flex-col items-stretch sm:flex-row sm:items-start"
-        action={
-          editMode ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                Cancel
-              </button>
-              <Button onClick={handleSaveLayout} disabled={saveLayout.isPending}>
-                {saveLayout.isPending ? 'Saving…' : 'Save layout'}
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-wrap items-center gap-2">
-              {/* View toggle — secondary/muted selected state; bg-accent is reserved
-                  for the single primary CTA (Add table) per the one-accent-CTA rule. */}
-              <div className="flex rounded-md border border-border overflow-hidden">
+      <div className="space-y-6">
+        <PageHeader
+          title="Floor"
+          subtitle={`${tables.length} table${tables.length !== 1 ? 's' : ''}`}
+          className="flex-col items-stretch sm:flex-row sm:items-start"
+          action={
+            editMode ? (
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setViewMode('map')}
-                  className={
-                    effectiveView === 'map'
-                      ? 'px-2.5 py-1.5 bg-muted text-foreground transition-colors'
-                      : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
-                  }
-                  aria-label="Map view"
-                  title="Map view"
-                >
-                  <Map className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('grid')}
-                  className={
-                    effectiveView === 'grid'
-                      ? 'px-2.5 py-1.5 bg-muted text-foreground transition-colors'
-                      : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
-                  }
-                  aria-label="Grid view"
-                  title="Grid view"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </button>
-              </div>
-
-              {effectiveView === 'map' && (
-                <button
-                  type="button"
-                  onClick={handleEnterEditMode}
+                  onClick={handleCancelEdit}
                   className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
                 >
-                  Edit layout
+                  Cancel
                 </button>
-              )}
+                <Button onClick={handleSaveLayout} disabled={saveLayout.isPending}>
+                  {saveLayout.isPending ? 'Saving…' : 'Save layout'}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                {/* View toggle — secondary/muted selected state; bg-accent is reserved
+                    for the single primary CTA (Add table) per the one-accent-CTA rule. */}
+                <div className="flex rounded-md border border-border overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('map')}
+                    className={
+                      effectiveView === 'map'
+                        ? 'px-2.5 py-1.5 bg-muted text-foreground transition-colors'
+                        : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
+                    }
+                    aria-label="Map view"
+                    title="Map view"
+                  >
+                    <MapIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('grid')}
+                    className={
+                      effectiveView === 'grid'
+                        ? 'px-2.5 py-1.5 bg-muted text-foreground transition-colors'
+                        : 'px-2.5 py-1.5 text-muted-foreground hover:bg-muted transition-colors'
+                    }
+                    aria-label="Grid view"
+                    title="Grid view"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </div>
 
-              <Button onClick={() => setModal({ type: 'create' })}>
-                <Plus />
-                Add table
-              </Button>
-            </div>
-          )
-        }
-      />
+                {effectiveView === 'map' && (
+                  <button
+                    type="button"
+                    onClick={handleEnterEditMode}
+                    className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                  >
+                    Edit layout
+                  </button>
+                )}
 
-      {/* Summary counts */}
-      {tables.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          <StatusBadge tone="success" label={`Available ${available}`} />
-          <StatusBadge tone="info" label={`Occupied ${occupied}`} />
-          <StatusBadge tone="warning" label={`Reserved ${reserved}`} />
-        </div>
-      )}
-
-      {/* Content */}
-      {tables.length === 0 ? (
-        <EmptyState
-          icon={LayoutGrid}
-          title="No tables yet"
-          description="Add your first table to start tracking status and capacity."
+                <Button onClick={() => setModal({ type: 'create' })}>
+                  <Plus />
+                  Add table
+                </Button>
+              </div>
+            )
+          }
         />
-      ) : effectiveView === 'map' ? (
-        <FloorMap
-          tables={tables}
-          onTableClick={handleTableClick}
-          editMode={editMode}
-          positions={positions}
-          onDrop={handleDrop}
-          onDragStart={setDraggingId}
-          draggingId={draggingId}
-          onShapeToggle={handleShapeToggle}
-        />
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {tables.map((table) => (
-            <TableCard
-              key={table.id}
-              table={table}
-              onEdit={() => setModal({ type: 'edit', table })}
-              onDelete={() => setModal({ type: 'delete', table })}
-              onTableClick={handleTableClick}
-              onCycleStatus={() =>
-                setStatus.mutate(
-                  { id: table.id, data: { status: NEXT_STATUS[table.status as TableStatus] } },
-                  { onSuccess: () => invalidateTableControllerGetAll(qc) },
-                )
-              }
-            />
-          ))}
-        </div>
-      )}
+
+        {/* Summary counts */}
+        {tables.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <StatusBadge tone="success" label={`Available ${available}`} />
+            <StatusBadge tone="info" label={`Occupied ${occupied}`} />
+            <StatusBadge tone="warning" label={`Reserved ${reserved}`} />
+          </div>
+        )}
+
+        {/* Content */}
+        {tables.length === 0 ? (
+          <EmptyState
+            icon={LayoutGrid}
+            title="No tables yet"
+            description="Add your first table to start tracking status and capacity."
+          />
+        ) : effectiveView === 'map' ? (
+          <FloorMap
+            tables={tables}
+            onTableClick={handleTableClick}
+            editMode={editMode}
+            positions={positions}
+            onDrop={handleDrop}
+            onDragStart={setDraggingId}
+            draggingId={draggingId}
+            onShapeToggle={handleShapeToggle}
+          />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {tables.map((table) => (
+              <TableCard
+                key={table.id}
+                table={table}
+                onEdit={() => setModal({ type: 'edit', table })}
+                onDelete={() => setModal({ type: 'delete', table })}
+                onTableClick={handleTableClick}
+                onCycleStatus={() =>
+                  setStatus.mutate(
+                    { id: table.id, data: { status: NEXT_STATUS[table.status as TableStatus] } },
+                    { onSuccess: () => invalidateTableControllerGetAll(qc) },
+                  )
+                }
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Action sheet */}
       <TableActionSheet table={selectedTable} onClose={() => setSelectedTable(null)} />

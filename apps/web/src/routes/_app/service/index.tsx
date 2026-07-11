@@ -123,7 +123,7 @@ function ServicePage() {
   }
 
   return (
-    <div className="space-y-6 p-1">
+    <div className="space-y-6 p-6">
       <PageHeader title="Service" subtitle={liveDateLabel()} />
 
       {/* Pulse strip */}
