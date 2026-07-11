@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useReservationControllerGetAll,
+  useReservationControllerGetOne,
   useReservationControllerCreate,
   useReservationControllerUpdate,
   useReservationControllerRemove,
@@ -382,10 +383,13 @@ function ReservationsPage() {
   const deleteRes = useReservationControllerRemove();
 
   // `reservation=new` opens the form empty; `reservation=<id>` opens it pre-filled.
-  const editingReservation =
-    reservationParam && reservationParam !== 'new'
-      ? (allReservations.find((r) => r.id === reservationParam) ?? null)
-      : null;
+  // Fetched by id directly (not looked up in `allReservations`) because that list is
+  // date-filtered by `tab` — a reservation outside today's filter would never be found
+  // there, leaving `editingReservation` permanently null and `handleSave` silently
+  // creating a duplicate instead of updating.
+  const editId = reservationParam && reservationParam !== 'new' ? reservationParam : undefined;
+  const { data: editingReservation, isLoading: isLoadingEditTarget } =
+    useReservationControllerGetOne(editId ?? '', { query: { enabled: Boolean(editId) } });
 
   const displayed: ReservationDto[] =
     tab !== 'week'
@@ -454,22 +458,32 @@ function ReservationsPage() {
 
       <UrlModal paramKey="reservation" className="sm:max-w-lg">
         <DialogHeader className="p-4 pb-0">
-          <DialogTitle>{editingReservation ? 'Edit reservation' : 'New reservation'}</DialogTitle>
+          <DialogTitle>{editId ? 'Edit reservation' : 'New reservation'}</DialogTitle>
           <DialogDescription>
             {editingReservation
               ? `Editing reservation for ${editingReservation.guestName}`
-              : 'Fill in the details to create a new reservation.'}
+              : editId
+                ? 'Loading reservation…'
+                : 'Fill in the details to create a new reservation.'}
           </DialogDescription>
         </DialogHeader>
-        <ReservationForm
-          // Remount once the record resolves after a hard refresh (query starts empty, so
-          // `editingReservation` is briefly null even though `reservation=<id>` is in the URL) —
-          // otherwise the form's useState-seeded fields never pick up the loaded data.
-          key={reservationParam === 'new' ? 'new' : (editingReservation?.id ?? 'loading')}
-          initial={editingReservation ?? undefined}
-          onSave={handleSave}
-          onCancel={closeForm}
-        />
+        {editId && !editingReservation ? (
+          // Editing but the record hasn't resolved yet (fetched by id, independent of the
+          // date-filtered list — see `editId` above) — hold off rendering the form so a save
+          // can't fall through to `createRes` before we know which record to update.
+          <div className="p-4 text-sm text-muted-foreground">
+            {isLoadingEditTarget ? 'Loading reservation…' : 'Reservation not found.'}
+          </div>
+        ) : (
+          <ReservationForm
+            // Remount when switching between records (or from "new" to editing an id) so the
+            // form's useState-seeded fields re-seed from the newly-loaded `initial`.
+            key={editId ?? 'new'}
+            initial={editingReservation ?? undefined}
+            onSave={handleSave}
+            onCancel={closeForm}
+          />
+        )}
       </UrlModal>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as FilterTab)}>
