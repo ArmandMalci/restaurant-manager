@@ -65,21 +65,23 @@ strings, this is a form-control swap only (`<input>` → `<textarea>`).
 rebuild. The stub at `reservations/index.tsx` (currently 8 lines, redirects to `/door`) is deleted because the real
 implementation takes its place.
 
-- [ ] **Step 1:** `git mv apps/web/src/routes/_app/door/index.tsx apps/web/src/routes/_app/reservations/index.tsx`
+- [x] **Step 1:** `git mv apps/web/src/routes/_app/door/index.tsx apps/web/src/routes/_app/reservations/index.tsx`
   (overwriting the stub); update `createFileRoute('/_app/door/')` → `createFileRoute('/_app/reservations/')` inside
   the moved file.
-- [ ] **Step 2:** Update the `PageHeader title` to `"Reservations"`.
-- [ ] **Step 3:** Convert the notes `<input>` to a `<textarea>` (keep existing `value`/`onChange` wiring; add a
+- [x] **Step 2:** Update the `PageHeader title` to `"Reservations"`.
+- [x] **Step 3:** Convert the notes `<input>` to a `<textarea>` (keep existing `value`/`onChange` wiring; add a
   sensible `rows` and let it inherit the shared `data-slot` styling if `input.tsx`'s `data-slot="input"` styling
   doesn't apply to a bare textarea — check `input.tsx` for a reusable class export first before hand-rolling styles).
-- [ ] **Step 4:** Update the three nav/label references (`nav.ts:34`, `topbar.tsx:14`, `service/index.tsx:100`) to
+- [x] **Step 4:** Update the three nav/label references (`nav.ts:34`, `topbar.tsx:14`, `service/index.tsx:100`) to
   `/reservations` / `"Reservations"`.
-- [ ] **Step 5:** `pnpm --filter @restaurant/web dev` once to let TanStack Router regenerate `routeTree.gen.ts`;
+- [x] **Step 5:** `pnpm --filter @restaurant/web dev` once to let TanStack Router regenerate `routeTree.gen.ts`;
   confirm no leftover `/door` references (`grep -rn "'/door'" apps/web/src`).
-- [ ] **Step 6:** Verify in-browser: sidebar/nav shows "Reservations," navigating there renders the full reservation
+- [x] **Step 6:** Verify in-browser: sidebar/nav shows "Reservations," navigating there renders the full reservation
   list/form, notes field is a multi-line textarea, and `/door` no longer resolves (no redirect needed — it simply
-  doesn't exist).
-- [ ] **Step 7:** `pnpm --filter @restaurant/web typecheck` + commit:
+  doesn't exist). *(Login page confirmed rendering; full click-through blocked by a pre-existing environment issue —
+  Docker daemon was down, so the DB-backed `/api/auth/login` 500'd independent of this diff, confirmed via direct API
+  call. Route/component correctness verified via typecheck, lint, and source review instead.)*
+- [x] **Step 7:** `pnpm --filter @restaurant/web typecheck` + commit:
   `fix(web): rename Door to Reservations, notes field to textarea`.
 
 ---
