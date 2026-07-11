@@ -33,6 +33,10 @@ const STATIONS: { value: Station; label: string }[] = [
   { value: 'pass', label: 'Pass' },
 ];
 
+const KITCHEN_STATIONS = STATIONS.filter(
+  (s): s is { value: KitchenStation; label: string } => s.value !== 'all',
+);
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function calcAgeMin(firedAt: string | null): number | null {
@@ -72,6 +76,10 @@ function effectiveStation(station: string | null): KitchenStation {
   }
 
   return 'pass';
+}
+
+function ticketsForStation(tickets: KdsTicket[], station: KitchenStation): KdsTicket[] {
+  return tickets.filter((t) => t.items.some((it) => effectiveStation(it.station) === station));
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -190,6 +198,40 @@ function TicketCard({ ticket, activeStation, onBump, bumpingKeys }: TicketCardPr
   );
 }
 
+interface StationColumnProps {
+  station: KitchenStation;
+  label: string;
+  tickets: KdsTicket[];
+  onBump: (orderId: string, itemId: string) => void;
+  bumpingKeys: Set<string>;
+}
+
+function StationColumn({ station, label, tickets, onBump, bumpingKeys }: StationColumnProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between rounded-md bg-muted px-3 py-1.5">
+        <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+        <span className="text-xs text-muted-foreground">{tickets.length}</span>
+      </div>
+      {tickets.length === 0 ? (
+        <p className="px-1 text-sm text-muted-foreground">No tickets</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {tickets.map((ticket) => (
+            <TicketCard
+              key={ticket.orderId}
+              ticket={ticket}
+              activeStation={station}
+              onBump={onBump}
+              bumpingKeys={bumpingKeys}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function KdsPage() {
@@ -248,11 +290,7 @@ function KdsPage() {
   const allTickets = tickets ?? [];
 
   const visibleTickets =
-    activeStation === 'all'
-      ? allTickets
-      : allTickets.filter((t) =>
-          t.items.some((it) => effectiveStation(it.station) === activeStation),
-        );
+    activeStation === 'all' ? allTickets : ticketsForStation(allTickets, activeStation);
 
   return (
     <div className="space-y-5 p-1">
@@ -282,6 +320,19 @@ function KdsPage() {
         <TicketSkeletons />
       ) : visibleTickets.length === 0 ? (
         <EmptyState icon={ChefHat} title="Kitchen's clear" description="No active tickets." />
+      ) : activeStation === 'all' ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {KITCHEN_STATIONS.map((s) => (
+            <StationColumn
+              key={s.value}
+              station={s.value}
+              label={s.label}
+              tickets={ticketsForStation(allTickets, s.value)}
+              onBump={handleBump}
+              bumpingKeys={bumpingKeys}
+            />
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {visibleTickets.map((ticket) => (

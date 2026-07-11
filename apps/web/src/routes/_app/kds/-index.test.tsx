@@ -101,3 +101,57 @@ describe('KDS bump undo window', () => {
     );
   });
 });
+
+const stationTickets = [
+  {
+    orderId: 'order-10',
+    tableNumber: 1,
+    firedAt: new Date().toISOString(),
+    items: [
+      { id: 'g-1', name: 'Steak', quantity: 1, station: 'grill', status: 'pending', modifiers: [] },
+      { id: 'c-1', name: 'Salad', quantity: 1, station: 'cold', status: 'pending', modifiers: [] },
+    ],
+  },
+  {
+    orderId: 'order-11',
+    tableNumber: 2,
+    firedAt: new Date().toISOString(),
+    items: [
+      { id: 'b-1', name: 'Mojito', quantity: 2, station: 'bar', status: 'pending', modifiers: [] },
+    ],
+  },
+];
+
+describe('KDS per-station columns', () => {
+  beforeEach(() => {
+    customInstance.mockReset();
+    toast.mockReset();
+    customInstance.mockImplementation((config: MockRequestConfig) => {
+      if (config.method === 'GET' && config.url === '/api/kds/tickets') {
+        return Promise.resolve(stationTickets);
+      }
+
+      return Promise.reject(new Error(`unexpected request ${config.method} ${config.url}`));
+    });
+  });
+
+  it('renders tickets grouped into independent station columns in the "all" view', async () => {
+    render(<KdsPage />, { wrapper });
+
+    // The Steak item (grill) renders in both the Grill column (bumpable) and the Cold
+    // column (dimmed, since order-10 also has a Cold item) — expect both occurrences.
+    await screen.findAllByText('1× Steak');
+
+    expect(screen.getByRole('heading', { name: 'Grill' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Cold' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Bar' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pass' })).toBeInTheDocument();
+
+    // order-10 has items on both Grill and Cold, so its card renders independently in both columns.
+    expect(screen.getAllByText('Table 1')).toHaveLength(2);
+    // order-11 only has a Bar item.
+    expect(screen.getAllByText('Table 2')).toHaveLength(1);
+    // No ticket has a Pass item.
+    expect(screen.getByText('No tickets')).toBeInTheDocument();
+  });
+});
