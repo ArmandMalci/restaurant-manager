@@ -100,17 +100,18 @@ against occupied/reserved status. `Order.tableId` and `Reservation.tableId` both
 FK-constraint error — a 500, not a friendly message. Map view has zero delete/edit affordance today (only grid view
 does), so "no matter what layout he's watching" is currently false.
 
-- [ ] **Step 1:** In `table.service.ts`'s `remove()`, check the table's `status` (or query for related
+- [x] **Step 1:** In `table.service.ts`'s `remove()`, check the table's `status` (or query for related
   orders/reservations) before deleting; throw a `ConflictException` with a clear message
   (`"Cannot delete an occupied or reserved table"` or similar) instead of letting the FK error surface raw.
-- [ ] **Step 2:** Confirm/add a test in `table.controller.spec.ts` or `table.service.spec.ts` asserting delete on an
+  *(Commit `a072a80` — also guards the available-with-history case, beyond just occupied/reserved.)*
+- [x] **Step 2:** Confirm/add a test in `table.controller.spec.ts` or `table.service.spec.ts` asserting delete on an
   occupied table is rejected with a 409, and delete on an available table (no related rows) succeeds.
-- [ ] **Step 3:** In `-floor-map.tsx`'s `Tile`, add the same delete-icon affordance the grid view already has
+- [x] **Step 3:** In `-floor-map.tsx`'s `Tile`, add the same delete-icon affordance the grid view already has
   (reuse `DeleteDialog` from `floor/index.tsx` rather than duplicating it — extract it to a shared file if it isn't
-  already importable across both views).
-- [ ] **Step 4:** Verify in-browser: attempt delete on an occupied table in both map and grid view → friendly error
+  already importable across both views). *(Commit `1cb0373` + `6668801` — extracted to `-delete-dialog.tsx`.)*
+- [x] **Step 4:** Verify in-browser: attempt delete on an occupied table in both map and grid view → friendly error
   toast, not a crash; delete an available table in map view → tile disappears.
-- [ ] **Step 5:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
+- [x] **Step 5:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
   tests, then commit: `fix(web,api): guard table deletion, expose delete from floor map view`.
 
 ---
@@ -127,20 +128,24 @@ no `space-y-*`, so its sections space themselves ad hoc via scattered `mb-4`/`mb
 its denser spatial-map content); align Service to it rather than the reverse, unless a live comparison in-browser
 says otherwise — check both before deciding which direction to normalize.
 
-- [ ] **Step 1:** Compare both screens side-by-side in-browser at desktop and mobile widths; decide which outer
+- [x] **Step 1:** Compare both screens side-by-side in-browser at desktop and mobile widths; decide which outer
   padding value + spacing mechanism (`space-y-*` vs per-element margins) reads better across both, and apply it to
   both wrappers (likely: adopt `p-6` uniformly and replace Floor's ad hoc `mb-4`/`mb-6` with a single `space-y-6`,
-  since a consistent rhythm was already the direction taken on Service).
-- [ ] **Step 2:** Verify no visual regression on either screen (padding still frames content correctly on mobile —
+  since a consistent rhythm was already the direction taken on Service). *(Chose `p-6` uniformly, confirmed
+  in-browser at desktop + 390px.)*
+- [x] **Step 2:** Verify no visual regression on either screen (padding still frames content correctly on mobile —
   don't let a larger `p-6` clip content that fit at `p-1` on narrow viewports).
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + commit: `fix(web): unify Service/Floor content spacing`.
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + commit: `fix(web): unify Service/Floor content spacing`.
+  *(Commit `6668801` — also fixed 2 pre-existing lint errors in `floor/index.tsx` that were blocking the hook:
+  shadowed `Map` import, missing keyboard support on `TableCard`.)*
 
 ---
 
 ### Task 5: Native `<select>` → shadcn `Select` migration
 
 **Files (8 usages across 5 files — `select.tsx` is already installed, no `shadcn add` needed):**
-- `apps/web/src/routes/_app/door/index.tsx:165` — table picker for a reservation
+- `apps/web/src/routes/_app/reservations/index.tsx:165` (was `door/index.tsx` before Task 2's rename) — table picker
+  for a reservation
 - `apps/web/src/routes/_app/floor/index.tsx:147` — table status in the table edit form
 - `apps/web/src/routes/_app/menu/index.tsx:341` — modifier group selection type (single/multi)
 - `apps/web/src/routes/_app/menu/index.tsx:553` — menu item category
