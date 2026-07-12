@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status';
 import type { Tone } from '@/components/ui/status';
 import type { TableStatus } from '@restaurant/shared';
-import type { TableDto, TableDtoShape } from '@/api/restaurantManagerAPI.schemas';
+import type { TableDto, TableDtoShape, ReservationDto } from '@/api/restaurantManagerAPI.schemas';
 import { useTableControllerRemove, invalidateTableControllerGetAll } from '@/api/tables/tables';
 import { DeleteDialog } from './-delete-dialog';
 
@@ -47,6 +47,12 @@ export const NEXT_STATUS: Record<TableStatus, TableStatus> = {
   reserved: 'available',
 };
 
+// Shared with -table-action-sheet.tsx so both surfaces format reservation times the
+// same way (see Plan 15 Task 3).
+export function reservationTimeLabel(dateIso: string): string {
+  return new Date(dateIso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
 // ── Tile sizing by seats ──────────────────────────────────────────────
 
 function tileSizeClass(seats: number): string {
@@ -76,6 +82,9 @@ export interface FloorMapProps {
   onDragStart?: (tableId: string) => void;
   draggingId?: string | null;
   onShapeToggle?: (tableId: string) => void;
+  // Soonest upcoming `booked` reservation per table, keyed by tableId — surfaced on
+  // reserved tiles (see Plan 15 Task 3). Omit for no reservation context.
+  reservationByTable?: Map<string, ReservationDto>;
 }
 
 function clamp(val: number, min: number, max: number) {
@@ -95,6 +104,7 @@ interface TileProps {
   onClick: () => void;
   onShapeToggle?: () => void;
   onDelete?: () => void;
+  reservation?: ReservationDto;
 }
 
 function Tile({
@@ -108,6 +118,7 @@ function Tile({
   onClick,
   onShapeToggle,
   onDelete,
+  reservation,
 }: TileProps) {
   const statusKey = table.status as TableStatus;
   const sizeClass = tileSizeClass(table.seats);
@@ -132,10 +143,16 @@ function Tile({
   const content = (
     <>
       <p className="text-xs font-semibold text-foreground leading-none">T{table.number}</p>
-      <p className="flex items-center gap-0.5 text-[10px] text-muted-foreground mt-0.5 leading-none">
-        <Users className="h-2.5 w-2.5" />
-        {table.seats}
-      </p>
+      {!editMode && reservation ? (
+        <p className="mt-0.5 max-w-full truncate px-1 text-[9px] leading-none text-muted-foreground">
+          {reservation.guestName.split(' ')[0]} · {reservationTimeLabel(reservation.date)}
+        </p>
+      ) : (
+        <p className="flex items-center gap-0.5 text-[10px] text-muted-foreground mt-0.5 leading-none">
+          <Users className="h-2.5 w-2.5" />
+          {table.seats}
+        </p>
+      )}
       {!editMode && (
         <div className="mt-1">
           <StatusBadge tone={STATUS_TONE[statusKey]} label="" />
@@ -211,6 +228,7 @@ export function FloorMap({
   onDragStart,
   draggingId = null,
   onShapeToggle,
+  reservationByTable,
 }: FloorMapProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
@@ -300,6 +318,7 @@ export function FloorMap({
                 onClick={() => onTableClick(table)}
                 onShapeToggle={onShapeToggle ? () => onShapeToggle(table.id) : undefined}
                 onDelete={editMode ? undefined : () => setDeleteTarget(table)}
+                reservation={reservationByTable?.get(table.id)}
               />
             );
           })}

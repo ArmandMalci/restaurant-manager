@@ -18,13 +18,24 @@ import { cn } from '@/lib/utils';
 import { useOrderControllerGetAll } from '@/api/orders/orders';
 import { useTableControllerSetStatus, invalidateTableControllerGetAll } from '@/api/tables/tables';
 import { useMenuControllerGetItems } from '@/api/menu/menu';
+import { useReservationControllerGetAll } from '@/api/reservations/reservations';
 import type { TableStatus } from '@restaurant/shared';
 import type { TableDto, OrderDto } from '@/api/restaurantManagerAPI.schemas';
-import { STATUS_BG, STATUS_LABELS, STATUS_TONE, NEXT_STATUS } from './-floor-map';
+import {
+  STATUS_BG,
+  STATUS_LABELS,
+  STATUS_TONE,
+  NEXT_STATUS,
+  reservationTimeLabel,
+} from './-floor-map';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
 const ACTIVE_ORDER_STATUSES: string[] = ['draft', 'sent', 'in_progress', 'ready'];
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 function computeBillTotal(order: OrderDto): number {
   return order.items.reduce((sum, item) => {
@@ -123,11 +134,21 @@ export function TableActionSheet({ tables }: TableActionSheetProps) {
   const setStatus = useTableControllerSetStatus();
   const { data: orders = [] } = useOrderControllerGetAll();
   const { data: menuItems = [] } = useMenuControllerGetItems();
+  const { data: todaysReservations = [] } = useReservationControllerGetAll({
+    date: todayStr(),
+  });
 
   const menuNameMap = new Map<string, string>(menuItems.map((m) => [m.id, m.name]));
 
   const activeOrder = table
     ? orders.find((o) => o.tableId === table.id && ACTIVE_ORDER_STATUSES.includes(o.status))
+    : undefined;
+
+  // Soonest upcoming `booked` reservation for this table (see Plan 15 Task 3).
+  const reservation = table
+    ? todaysReservations
+        .filter((r) => r.tableId === table.id && r.status === 'booked')
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]
     : undefined;
 
   function handleCycleStatus() {
@@ -160,6 +181,13 @@ export function TableActionSheet({ tables }: TableActionSheetProps) {
             />
             <span className="text-xs text-muted-foreground">{table.seats} seats</span>
           </div>
+        )}
+        {reservation && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Reserved for{' '}
+            <span className="font-medium text-foreground">{reservation.guestName}</span> at{' '}
+            {reservationTimeLabel(reservation.date)} · {reservation.partySize} guests
+          </p>
         )}
       </DialogHeader>
 

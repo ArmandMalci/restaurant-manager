@@ -23,12 +23,23 @@ import {
   useTableControllerSaveLayout,
   invalidateTableControllerGetAll,
 } from '@/api/tables/tables';
+import { useReservationControllerGetAll } from '@/api/reservations/reservations';
 import type { TableStatus } from '@restaurant/shared';
-import type { TableDto, TableDtoShape } from '@/api/restaurantManagerAPI.schemas';
-import { FloorMap, STATUS_LABELS, STATUS_TONE, NEXT_STATUS } from './-floor-map';
+import type { TableDto, TableDtoShape, ReservationDto } from '@/api/restaurantManagerAPI.schemas';
+import {
+  FloorMap,
+  STATUS_LABELS,
+  STATUS_TONE,
+  NEXT_STATUS,
+  reservationTimeLabel,
+} from './-floor-map';
 import type { PositionOverride } from './-floor-map';
 import { TableActionSheet } from './-table-action-sheet';
 import { DeleteDialog } from './-delete-dialog';
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export const Route = createFileRoute('/_app/floor/')({
   component: TablesPage,
@@ -175,9 +186,17 @@ interface TableCardProps {
   onDelete: () => void;
   onCycleStatus: () => void;
   onTableClick: (table: TableDto) => void;
+  reservation?: ReservationDto;
 }
 
-function TableCard({ table, onEdit, onDelete, onCycleStatus, onTableClick }: TableCardProps) {
+function TableCard({
+  table,
+  onEdit,
+  onDelete,
+  onCycleStatus,
+  onTableClick,
+  reservation,
+}: TableCardProps) {
   const statusKey = table.status as TableStatus;
 
   return (
@@ -230,6 +249,12 @@ function TableCard({ table, onEdit, onDelete, onCycleStatus, onTableClick }: Tab
             <Users className="h-3 w-3" />
             {table.seats} seats
           </p>
+          {reservation && (
+            <p className="mt-1 max-w-full truncate px-2 text-xs text-warning">
+              {reservation.guestName} · {reservationTimeLabel(reservation.date)} ·{' '}
+              {reservation.partySize}p
+            </p>
+          )}
         </div>
 
         {/* Status — single StatusBadge, clickable to cycle */}
@@ -272,6 +297,22 @@ function TablesPage() {
   const deleteTable = useTableControllerRemove();
   const setStatus = useTableControllerSetStatus();
   const saveLayout = useTableControllerSaveLayout();
+
+  // Soonest upcoming `booked` reservation per table, for surfacing guest/time context on
+  // reserved tiles — client-side join, no backend change (see Plan 15 Task 3).
+  const { data: todaysReservations = [] } = useReservationControllerGetAll({ date: todayStr() });
+  const reservationByTable = useMemo(() => {
+    const map = new Map<string, ReservationDto>();
+    const upcoming = todaysReservations
+      .filter((r) => r.status === 'booked')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    for (const r of upcoming) {
+      if (!map.has(r.tableId)) map.set(r.tableId, r);
+    }
+
+    return map;
+  }, [todaysReservations]);
 
   // Determine default view: map if any table has posX set
   const hasMapData = useMemo(() => tables.some((t) => t.posX != null), [tables]);
@@ -485,6 +526,7 @@ function TablesPage() {
             onDragStart={setDraggingId}
             draggingId={draggingId}
             onShapeToggle={handleShapeToggle}
+            reservationByTable={reservationByTable}
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -495,6 +537,7 @@ function TablesPage() {
                 onEdit={() => setModal({ type: 'edit', table })}
                 onDelete={() => setModal({ type: 'delete', table })}
                 onTableClick={handleTableClick}
+                reservation={reservationByTable.get(table.id)}
                 onCycleStatus={() =>
                   setStatus.mutate(
                     { id: table.id, data: { status: NEXT_STATUS[table.status as TableStatus] } },
