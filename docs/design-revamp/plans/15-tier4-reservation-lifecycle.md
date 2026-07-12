@@ -60,21 +60,25 @@ computes status purely from `date`/`tableId` proximity to "now" — it doesn't e
 column, so a reservation seated 3 hours ago still shows "confirmed" once outside the ±2hr window, and there's no way
 to ever reach "no_show" at all. A real column removes the guesswork and is what Task 2's seat/no-show buttons write to.
 
-- [ ] **Step 1:** Add `ReservationStatus` enum + `status` field to `prisma/schema.prisma`; reconcile the
-  `tableId` nullable mismatch (see Files above).
-- [ ] **Step 2:** Run the Tier-0 prerequisite migration reset if not already done this session (confirm with Armand
+- [x] **Step 1:** Add `ReservationStatus` enum + `status` field to `prisma/schema.prisma`; reconcile the
+  `tableId` nullable mismatch (see Files above). *(Grepped for any `tableId: null` reservation payload — none found;
+  tightened the Zod schema to non-nullable, matching Prisma.)*
+- [x] **Step 2:** Run the Tier-0 prerequisite migration reset if not already done this session (confirm with Armand
   first), then `pnpm prisma migrate dev --name add_reservation_status` to generate the real migration, then
-  `pnpm prisma generate`.
-- [ ] **Step 3:** Update `ReservationSchema`/`UpdateReservationSchema` in `packages/shared`; update
+  `pnpm prisma generate`. *(Applied cleanly — the `@default(booked)` meant no backfill hand-edit was needed, unlike
+  Plan 17's Section migration.)*
+- [x] **Step 3:** Update `ReservationSchema`/`UpdateReservationSchema` in `packages/shared`; update
   `reservation.service.ts` and the Swagger DTOs/decorators.
-- [ ] **Step 4:** Regenerate the Orval client (`pnpm --filter @restaurant/web gen:api` + biome format on `src/api`).
-- [ ] **Step 5:** Replace `deriveStatus()` in `reservations/index.tsx` with the real `status` field; update
+- [x] **Step 4:** Regenerate the Orval client (`pnpm --filter @restaurant/web gen:api` + biome format on `src/api`).
+  *(Required `gen:spec` first, same gap as Plan 17.)*
+- [x] **Step 5:** Replace `deriveStatus()` in `reservations/index.tsx` with the real `status` field; update
   `STATUS_TONE`/`STATUS_LABELS` for the 4 real enum values.
-- [ ] **Step 6:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
+- [x] **Step 6:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
   tests (reservation service/controller specs). Update `packages/shared`'s reservation schema test if one exists.
-- [ ] **Step 7:** Verify in-browser: creating a reservation defaults to `booked`; status badge no longer flips based
-  on wall-clock proximity alone.
-- [ ] **Step 8:** Commit: `feat(api,web): add persisted Reservation.status lifecycle`.
+- [x] **Step 7:** Verify in-browser: creating a reservation defaults to `booked`; status badge no longer flips based
+  on wall-clock proximity alone. *(Verified via typecheck/tests after the migration landed — DB wasn't live during
+  the agent's own pass, confirmed working end-to-end afterward by the orchestrating session.)*
+- [x] **Step 8:** Commit: `feat(api,web): add persisted Reservation.status lifecycle`. *(Commit `7384acc`.)*
 
 ---
 
@@ -100,16 +104,19 @@ to ever reach "no_show" at all. A real column removes the guesswork and is what 
 the underlying status field real, so Task 2 is purely the actions/UI built on top of it — no further schema changes
 needed here.
 
-- [ ] **Step 1:** Add guarded status-transition support to the reservation update path (reject invalid transitions,
-  e.g. `no_show→booked`, with a clear error).
-- [ ] **Step 2:** Add Seat / No-show buttons to each reservation row in the UI, wired to the transition endpoint.
-- [ ] **Step 3:** Add a walk-in quick-create flow.
-- [ ] **Step 4:** Add client-side guest lookup/search over the existing fetched list.
-- [ ] **Step 5:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
+- [x] **Step 1:** Add guarded status-transition support to the reservation update path (reject invalid transitions,
+  e.g. `no_show→booked`, with a clear error). *(`ALLOWED_TRANSITIONS` map: booked→seated/no_show/cancelled;
+  seated/no_show→cancelled only; cancelled terminal; same-status is a no-op. Stamps `seatedAt` on →seated.)*
+- [x] **Step 2:** Add Seat / No-show buttons to each reservation row in the UI, wired to the transition endpoint.
+- [x] **Step 3:** Add a walk-in quick-create flow.
+- [x] **Step 4:** Add client-side guest lookup/search over the existing fetched list.
+- [x] **Step 5:** `pnpm --filter @restaurant/api typecheck` + `pnpm --filter @restaurant/web typecheck` + affected
   tests (add a test for the transition-guard logic — this is exactly the kind of branch-y logic that needs one).
-- [ ] **Step 6:** Verify in-browser: seat/no-show buttons transition status correctly and reject invalid transitions;
+  *(6 new service-spec tests covering every transition edge case.)*
+- [x] **Step 6:** Verify in-browser: seat/no-show buttons transition status correctly and reject invalid transitions;
   walk-in creates a `seated` reservation immediately; guest search filters the list.
-- [ ] **Step 7:** Commit: `feat(web,api): seat/no-show/walk-in actions + guest lookup on reservations`.
+- [x] **Step 7:** Commit: `feat(web,api): seat/no-show/walk-in actions + guest lookup on reservations`. *(Commit
+  `02c8a3d`.)*
 
 ---
 
@@ -130,14 +137,14 @@ needed here.
 map," but explicitly deferred "show reservation context on reserved tables" to this same migration blocker — this
 task closes that last piece.
 
-- [ ] **Step 1:** Fetch today's reservations on the floor route (or join client-side against an already-fetched
+- [x] **Step 1:** Fetch today's reservations on the floor route (or join client-side against an already-fetched
   list) and match by `tableId`.
-- [ ] **Step 2:** Surface guest name + reservation time (+ party size if space allows) on reserved tiles in both map
+- [x] **Step 2:** Surface guest name + reservation time (+ party size if space allows) on reserved tiles in both map
   and grid view, and in the `TableActionSheet` when opened on a reserved table.
-- [ ] **Step 3:** `pnpm --filter @restaurant/web typecheck` + affected tests.
-- [ ] **Step 4:** Verify in-browser: a reserved table shows who it's reserved for and when, in both floor views and
+- [x] **Step 3:** `pnpm --filter @restaurant/web typecheck` + affected tests.
+- [x] **Step 4:** Verify in-browser: a reserved table shows who it's reserved for and when, in both floor views and
   the action sheet.
-- [ ] **Step 5:** Commit: `feat(web): surface reservation context on reserved floor tiles`.
+- [x] **Step 5:** Commit: `feat(web): surface reservation context on reserved floor tiles`. *(Commit `63f0dce`.)*
 
 ---
 
