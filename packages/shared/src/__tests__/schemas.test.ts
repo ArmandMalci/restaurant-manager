@@ -27,6 +27,7 @@ describe('TableSchema', () => {
       number: 1,
       seats: 4,
       status: 'available',
+      sectionId: uuid(),
       createdAt: now,
       updatedAt: now,
     });

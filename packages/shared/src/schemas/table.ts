@@ -6,11 +6,13 @@ export type TableStatus = z.infer<typeof TableStatusSchema>;
 export const TableSchema = z.object({
   id: z.string().uuid(),
   number: z.number().int().positive(),
+  name: z.string().min(1).max(100).nullable().default(null),
   seats: z.number().int().positive(),
   status: TableStatusSchema,
   posX: z.number().min(0).max(100).nullable().default(null),
   posY: z.number().min(0).max(100).nullable().default(null),
   shape: z.enum(['square', 'round']).default('square'),
+  sectionId: z.string().uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });

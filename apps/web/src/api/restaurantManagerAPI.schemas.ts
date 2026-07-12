@@ -227,6 +227,8 @@ export const TableDtoShape = {
 export interface TableDto {
   id: string;
   number: number;
+  /** @nullable */
+  name: string | null;
   seats: number;
   status: string;
   /** @nullable */
@@ -234,6 +236,7 @@ export interface TableDto {
   /** @nullable */
   posY: number | null;
   shape: TableDtoShape;
+  sectionId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -260,6 +263,12 @@ export interface CreateTableDto {
    */
   number: number;
   /**
+   * @minLength 1
+   * @maxLength 100
+   * @nullable
+   */
+  name?: string | null;
+  /**
    * @maximum 9007199254740991
    * @exclusiveMinimum 0
    */
@@ -278,6 +287,8 @@ export interface CreateTableDto {
    */
   posY?: number | null;
   shape?: CreateTableDtoShape;
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  sectionId: string;
 }
 
 export type SaveTableLayoutDtoTablesItemShape =
@@ -330,6 +341,12 @@ export interface UpdateTableDto {
    */
   number?: number;
   /**
+   * @minLength 1
+   * @maxLength 100
+   * @nullable
+   */
+  name?: string | null;
+  /**
    * @maximum 9007199254740991
    * @exclusiveMinimum 0
    */
@@ -348,6 +365,8 @@ export interface UpdateTableDto {
    */
   posY?: number | null;
   shape?: UpdateTableDtoShape;
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
+  sectionId?: string;
 }
 
 export type SetTableStatusDtoStatus =
@@ -361,6 +380,38 @@ export const SetTableStatusDtoStatus = {
 
 export interface SetTableStatusDto {
   status: SetTableStatusDtoStatus;
+}
+
+export interface SectionDto {
+  id: string;
+  name: string;
+  sortOrder: number;
+}
+
+export interface CreateSectionDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  /**
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
+  sortOrder?: number;
+}
+
+export interface UpdateSectionDto {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name?: string;
+  /**
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
+  sortOrder?: number;
 }
 
 export interface OrderItemModifierDto {

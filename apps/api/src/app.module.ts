@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { MenuModule } from './menu/menu.module';
 import { TableModule } from './table/table.module';
+import { SectionModule } from './section/section.module';
 import { OrderModule } from './order/order.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { StaffModule } from './staff/staff.module';
@@ -24,6 +25,7 @@ import { KdsModule } from './kds/kds.module';
     AuthModule,
     MenuModule,
     TableModule,
+    SectionModule,
     OrderModule,
     ReservationModule,
     StaffModule,

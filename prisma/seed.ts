@@ -21,6 +21,7 @@ async function main() {
   await prisma.menuItem.deleteMany();
   await prisma.menuCategory.deleteMany();
   await prisma.table.deleteMany();
+  await prisma.section.deleteMany();
   await prisma.staff.deleteMany();
   console.log("✓ Cleared existing data");
 
@@ -61,6 +62,10 @@ async function main() {
   });
   console.log("✓ Restaurant settings");
 
+  // ── Sections ─────────────────────────────────────────────────────────────
+  const mainRoom = await prisma.section.create({ data: { name: "Main Room", sortOrder: 0 } });
+  console.log("✓ Sections (1)");
+
   // ── Tables ───────────────────────────────────────────────────────────────
   const tables = await Promise.all(
     [
@@ -74,7 +79,7 @@ async function main() {
       { number: 8, seats: 8, status: "available" as const },
       { number: 9, seats: 2, status: "available" as const },
       { number: 10, seats: 10, status: "reserved" as const },
-    ].map((t) => prisma.table.create({ data: t }))
+    ].map((t) => prisma.table.create({ data: { ...t, sectionId: mainRoom.id } }))
   );
   console.log("✓ Tables (10)");
 
@@ -89,30 +94,30 @@ async function main() {
 
   const menuItems = await Promise.all([
     // Starters
-    prisma.menuItem.create({ data: { name: "Bruschetta al Pomodoro", description: "Toasted bread, tomatoes, garlic, basil", price: 9.5, categoryId: starters.id } }),
-    prisma.menuItem.create({ data: { name: "Burrata & Prosciutto", description: "Creamy burrata, cured ham, rocket, olive oil", price: 14, categoryId: starters.id } }),
-    prisma.menuItem.create({ data: { name: "Calamari Fritti", description: "Crispy fried squid, lemon aioli", price: 12, categoryId: starters.id } }),
-    prisma.menuItem.create({ data: { name: "Zuppa del Giorno", description: "Chef's soup of the day", price: 8, categoryId: starters.id } }),
+    prisma.menuItem.create({ data: { name: "Bruschetta al Pomodoro", description: "Toasted bread, tomatoes, garlic, basil", price: 9.5, categoryId: starters.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { name: "Burrata & Prosciutto", description: "Creamy burrata, cured ham, rocket, olive oil", price: 14, categoryId: starters.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { name: "Calamari Fritti", description: "Crispy fried squid, lemon aioli", price: 12, categoryId: starters.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { name: "Zuppa del Giorno", description: "Chef's soup of the day", price: 8, categoryId: starters.id, station: "pass" } }),
     // Pasta & Risotto
-    prisma.menuItem.create({ data: { name: "Spaghetti Carbonara", description: "Egg, guanciale, Pecorino Romano, black pepper", price: 18, categoryId: pasta.id } }),
-    prisma.menuItem.create({ data: { name: "Tagliatelle al Ragù", description: "Hand-rolled pasta, slow-cooked beef ragu", price: 19, categoryId: pasta.id } }),
-    prisma.menuItem.create({ data: { name: "Penne all'Arrabbiata", description: "Spicy tomato sauce, garlic, chilli", price: 15, categoryId: pasta.id } }),
-    prisma.menuItem.create({ data: { name: "Risotto ai Funghi", description: "Wild mushrooms, Parmigiano, truffle oil", price: 22, categoryId: pasta.id } }),
+    prisma.menuItem.create({ data: { name: "Spaghetti Carbonara", description: "Egg, guanciale, Pecorino Romano, black pepper", price: 18, categoryId: pasta.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { name: "Tagliatelle al Ragù", description: "Hand-rolled pasta, slow-cooked beef ragu", price: 19, categoryId: pasta.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { name: "Penne all'Arrabbiata", description: "Spicy tomato sauce, garlic, chilli", price: 15, categoryId: pasta.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { name: "Risotto ai Funghi", description: "Wild mushrooms, Parmigiano, truffle oil", price: 22, categoryId: pasta.id, station: "pass" } }),
     // Mains
-    prisma.menuItem.create({ data: { name: "Branzino al Forno", description: "Oven-roasted sea bass, capers, cherry tomatoes", price: 28, categoryId: mains.id } }),
-    prisma.menuItem.create({ data: { name: "Pollo alla Milanese", description: "Breaded chicken breast, arugula salad, lemon", price: 24, categoryId: mains.id } }),
-    prisma.menuItem.create({ data: { name: "Tagliata di Manzo", description: "Sliced ribeye, rocket, Parmigiano shavings", price: 34, categoryId: mains.id } }),
-    prisma.menuItem.create({ data: { name: "Melanzane alla Parmigiana", description: "Layered aubergine, tomato, mozzarella (v)", price: 18, categoryId: mains.id } }),
+    prisma.menuItem.create({ data: { name: "Branzino al Forno", description: "Oven-roasted sea bass, capers, cherry tomatoes", price: 28, categoryId: mains.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { name: "Pollo alla Milanese", description: "Breaded chicken breast, arugula salad, lemon", price: 24, categoryId: mains.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { name: "Tagliata di Manzo", description: "Sliced ribeye, rocket, Parmigiano shavings", price: 34, categoryId: mains.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { name: "Melanzane alla Parmigiana", description: "Layered aubergine, tomato, mozzarella (v)", price: 18, categoryId: mains.id, station: "grill" } }),
     // Desserts
-    prisma.menuItem.create({ data: { name: "Tiramisù", description: "Classic espresso-soaked ladyfingers, mascarpone", price: 9, categoryId: desserts.id } }),
-    prisma.menuItem.create({ data: { name: "Panna Cotta", description: "Vanilla cream, seasonal berry coulis", price: 8, categoryId: desserts.id } }),
-    prisma.menuItem.create({ data: { name: "Affogato al Caffè", description: "Vanilla gelato, double espresso shot", price: 7, categoryId: desserts.id } }),
+    prisma.menuItem.create({ data: { name: "Tiramisù", description: "Classic espresso-soaked ladyfingers, mascarpone", price: 9, categoryId: desserts.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { name: "Panna Cotta", description: "Vanilla cream, seasonal berry coulis", price: 8, categoryId: desserts.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { name: "Affogato al Caffè", description: "Vanilla gelato, double espresso shot", price: 7, categoryId: desserts.id, station: "cold" } }),
     // Drinks
-    prisma.menuItem.create({ data: { name: "Sparkling Water 750ml", description: "", price: 4, categoryId: drinks.id } }),
-    prisma.menuItem.create({ data: { name: "House Red Wine (glass)", description: "Chianti Classico", price: 9, categoryId: drinks.id } }),
-    prisma.menuItem.create({ data: { name: "House White Wine (glass)", description: "Pinot Grigio", price: 9, categoryId: drinks.id } }),
-    prisma.menuItem.create({ data: { name: "Espresso", description: "", price: 3, categoryId: drinks.id } }),
-    prisma.menuItem.create({ data: { name: "San Pellegrino Limonata", description: "330ml can", price: 4, categoryId: drinks.id } }),
+    prisma.menuItem.create({ data: { name: "Sparkling Water 750ml", description: "", price: 4, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { name: "House Red Wine (glass)", description: "Chianti Classico", price: 9, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { name: "House White Wine (glass)", description: "Pinot Grigio", price: 9, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { name: "Espresso", description: "", price: 3, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { name: "San Pellegrino Limonata", description: "330ml can", price: 4, categoryId: drinks.id, station: "bar" } }),
   ]);
   const [bruschetta, burrata, carbonara, tagliatelle, risotto, branzino, pollo, tagliata, tiramisu, pannaCotta, redWine, water, espresso] =
     [menuItems[0], menuItems[1], menuItems[4], menuItems[5], menuItems[7], menuItems[8], menuItems[9], menuItems[10], menuItems[12], menuItems[13], menuItems[16], menuItems[15], menuItems[18]];

@@ -71,11 +71,13 @@ describe('TableService', () => {
       prismaMock.table.create.mockResolvedValue(mockTable);
       const result = await service.create({
         number: 1,
+        name: null,
         seats: 4,
         status: 'available',
         posX: null,
         posY: null,
         shape: 'square',
+        sectionId: 'sec-1',
       });
 
       expect(result).toEqual(mockTable);

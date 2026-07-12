@@ -36,18 +36,31 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+model Section {
+  id        String @id @default(uuid())
+  name      String
+  sortOrder Int    @default(0)
+
+  tables Table[]
+
+  @@map("sections")
+}
+
 model Table {
   id        String      @id @default(uuid())
   number    Int         @unique
+  name      String?
   seats     Int
   status    TableStatus @default(available)
   seatedAt  DateTime?
   posX      Float?
   posY      Float?
   shape     String      @default("square")
+  sectionId String
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
+  section      Section       @relation(fields: [sectionId], references: [id])
   orders       Order[]
   reservations Reservation[]
 

@@ -7,6 +7,7 @@ export * from './schemas/reservation';
 export * from './schemas/shift';
 export * from './schemas/staff';
 export * from './schemas/table';
+export * from './schemas/section';
 export * from './schemas/notification';
 export * from './schemas/settings';
 export * from './constants/index';

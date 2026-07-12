@@ -826,6 +826,168 @@
         "tags": ["tables"]
       }
     },
+    "/api/sections": {
+      "get": {
+        "operationId": "SectionController_getAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SectionDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all sections",
+        "tags": ["sections"]
+      },
+      "post": {
+        "operationId": "SectionController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a section",
+        "tags": ["sections"]
+      }
+    },
+    "/api/sections/{id}": {
+      "get": {
+        "operationId": "SectionController_getOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a section by id",
+        "tags": ["sections"]
+      },
+      "patch": {
+        "operationId": "SectionController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a section",
+        "tags": ["sections"]
+      },
+      "delete": {
+        "operationId": "SectionController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a section",
+        "tags": ["sections"]
+      }
+    },
     "/api/orders": {
       "get": {
         "operationId": "OrderController_getAll",
@@ -2588,6 +2750,10 @@
           "number": {
             "type": "number"
           },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
           "seats": {
             "type": "number"
           },
@@ -2606,6 +2772,9 @@
             "type": "string",
             "enum": ["square", "round"]
           },
+          "sectionId": {
+            "type": "string"
+          },
           "createdAt": {
             "type": "string"
           },
@@ -2616,11 +2785,13 @@
         "required": [
           "id",
           "number",
+          "name",
           "seats",
           "status",
           "posX",
           "posY",
           "shape",
+          "sectionId",
           "createdAt",
           "updatedAt"
         ]
@@ -2634,6 +2805,15 @@
             "x-nestjs_zod-uses-3-point-1-syntax": true,
             "minimum": 0,
             "exclusiveMinimum": true
+          },
+          "name": {
+            "default": null,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "nullable": true
           },
           "seats": {
             "type": "integer",
@@ -2670,9 +2850,15 @@
             "type": "string",
             "enum": ["square", "round"],
             "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "sectionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
           }
         },
-        "required": ["number", "seats", "status"]
+        "required": ["number", "seats", "status", "sectionId"]
       },
       "SaveTableLayoutDto": {
         "type": "object",
@@ -2718,6 +2904,15 @@
             "minimum": 0,
             "exclusiveMinimum": true
           },
+          "name": {
+            "default": null,
+            "x-nestjs_zod-uses-3-point-1-syntax": true,
+            "x-nestjs_zod-empty-type": true,
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "nullable": true
+          },
           "seats": {
             "type": "integer",
             "maximum": 9007199254740991,
@@ -2753,6 +2948,12 @@
             "type": "string",
             "enum": ["square", "round"],
             "x-nestjs_zod-uses-3-point-1-syntax": true
+          },
+          "sectionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "x-nestjs_zod-uses-3-point-1-syntax": true
           }
         }
       },
@@ -2765,6 +2966,54 @@
           }
         },
         "required": ["status"]
+      },
+      "SectionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": ["id", "name", "sortOrder"]
+      },
+      "CreateSectionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["name"]
+      },
+      "UpdateSectionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "sortOrder": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
       },
       "OrderItemModifierDto": {
         "type": "object",

@@ -52,16 +52,26 @@ export class ModifierGroupDto {
   @ApiProperty({ type: [ModifierOptionDto] }) public options!: ModifierOptionDto[];
 }
 
+// ── Sections ──────────────────────────────────────────────────────────────────
+
+export class SectionDto {
+  @ApiProperty() public id!: string;
+  @ApiProperty() public name!: string;
+  @ApiProperty() public sortOrder!: number;
+}
+
 // ── Tables ────────────────────────────────────────────────────────────────────
 
 export class TableDto {
   @ApiProperty() public id!: string;
   @ApiProperty() public number!: number;
+  @ApiProperty({ type: String, nullable: true }) public name!: string | null;
   @ApiProperty() public seats!: number;
   @ApiProperty() public status!: string;
   @ApiProperty({ type: Number, nullable: true }) public posX!: number | null;
   @ApiProperty({ type: Number, nullable: true }) public posY!: number | null;
   @ApiProperty({ enum: ['square', 'round'] }) public shape!: string;
+  @ApiProperty() public sectionId!: string;
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
 }
