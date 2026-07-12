@@ -1,6 +1,16 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
-import { Plus, Pencil, Trash2, Users, X, LayoutGrid, Map as MapIcon, Settings } from 'lucide-react';
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Users,
+  X,
+  LayoutGrid,
+  Map as MapIcon,
+  MoreVertical,
+  Settings,
+} from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -42,6 +52,7 @@ import {
 } from './-floor-map';
 import type { PositionOverride } from './-floor-map';
 import { TableActionSheet } from './-table-action-sheet';
+import { TableOrderModal } from './-order-modal';
 import { ManageSectionsModal } from './-manage-sections-modal';
 import { DeleteDialog } from './-delete-dialog';
 
@@ -51,8 +62,9 @@ function todayStr() {
 
 export const Route = createFileRoute('/_app/floor/')({
   component: TablesPage,
-  validateSearch: (search: Record<string, unknown>): { tableId?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { tableId?: string; panel?: string } => ({
     tableId: typeof search.tableId === 'string' ? search.tableId : undefined,
+    panel: typeof search.panel === 'string' ? search.panel : undefined,
   }),
 });
 
@@ -222,6 +234,7 @@ interface TableCardProps {
   onDelete: () => void;
   onCycleStatus: () => void;
   onTableClick: (table: TableDto) => void;
+  onOpenActions: (table: TableDto) => void;
   reservation?: ReservationDto;
 }
 
@@ -231,6 +244,7 @@ function TableCard({
   onDelete,
   onCycleStatus,
   onTableClick,
+  onOpenActions,
   reservation,
 }: TableCardProps) {
   const statusKey = table.status as TableStatus;
@@ -251,8 +265,22 @@ function TableCard({
         tabIndex={0}
         aria-label={`Table ${table.number}`}
       >
-        {/* Hover actions */}
+        {/* Hover actions — "⋯" opens the status/reservation/delete action sheet (secondary
+            surface now that the main tap starts/continues an order, see Plan 17 Task 3);
+            Edit/Delete stay as direct quick-management shortcuts, unchanged. */}
         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenActions(table);
+            }}
+            aria-label="Table actions"
+            title="Status, reservation & delete"
+          >
+            <MoreVertical />
+          </Button>
           <Button
             variant="ghost"
             size="icon-xs"
@@ -387,11 +415,19 @@ function TablesPage() {
   const occupied = filteredTables.filter((t) => t.status === 'occupied').length;
   const reserved = filteredTables.filter((t) => t.status === 'reserved').length;
 
-  // Action sheet is URL-driven (`?tableId=`) — TableActionSheet reads it itself.
+  // Primary tap now hands off directly to the order builder (modal, anchored to this table)
+  // instead of the action sheet — ordering is the far more frequent action (see Plan 17
+  // Task 3). `panel` discriminates which URL-modal shows for the shared `tableId` key.
   function handleTableClick(table: TableDto) {
     if (!editMode) {
-      navigate({ to: '.', search: (prev) => ({ ...prev, tableId: table.id }) });
+      navigate({ to: '.', search: (prev) => ({ ...prev, tableId: table.id, panel: 'order' }) });
     }
+  }
+
+  // Secondary "⋯" / long-press affordance — status/reservation/delete, demoted from the
+  // primary tap (see Plan 17 Task 3).
+  function handleOpenActions(table: TableDto) {
+    navigate({ to: '.', search: (prev) => ({ ...prev, tableId: table.id, panel: 'actions' }) });
   }
 
   function handleEnterEditMode() {
@@ -612,6 +648,7 @@ function TablesPage() {
           <FloorMap
             tables={filteredTables}
             onTableClick={handleTableClick}
+            onOpenActions={handleOpenActions}
             editMode={editMode}
             positions={positions}
             onDrop={handleDrop}
@@ -629,6 +666,7 @@ function TablesPage() {
                 onEdit={() => setModal({ type: 'edit', table })}
                 onDelete={() => setModal({ type: 'delete', table })}
                 onTableClick={handleTableClick}
+                onOpenActions={handleOpenActions}
                 reservation={reservationByTable.get(table.id)}
                 onCycleStatus={() =>
                   setStatus.mutate(
@@ -642,8 +680,10 @@ function TablesPage() {
         )}
       </div>
 
-      {/* Action sheet */}
+      {/* Action sheet (secondary — status/reservation/delete) and order builder (primary
+          tap hand-off) — both URL-driven off the shared `tableId` + a `panel` discriminator. */}
       <TableActionSheet tables={tables} />
+      <TableOrderModal />
 
       <ManageSectionsModal
         open={manageSectionsOpen}

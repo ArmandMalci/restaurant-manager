@@ -5,7 +5,7 @@
  * File is dash-prefixed so TanStack Router ignores it as a route.
  */
 import { useRef, useState, type CSSProperties } from 'react';
-import { Trash2, Users } from 'lucide-react';
+import { MoreVertical, Trash2, Users } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -75,6 +75,9 @@ export interface PositionOverride {
 export interface FloorMapProps {
   tables: TableDto[];
   onTableClick: (table: TableDto) => void;
+  // Secondary "⋯" affordance — opens the status/reservation/delete action sheet, demoted
+  // from the primary tap now that ordering is (see Plan 17 Task 3). Omit to hide the icon.
+  onOpenActions?: (table: TableDto) => void;
   // Edit-mode props — omit for read-only
   editMode?: boolean;
   positions?: Record<string, PositionOverride>;
@@ -104,6 +107,7 @@ interface TileProps {
   onClick: () => void;
   onShapeToggle?: () => void;
   onDelete?: () => void;
+  onOpenActions?: () => void;
   reservation?: ReservationDto;
 }
 
@@ -118,6 +122,7 @@ function Tile({
   onClick,
   onShapeToggle,
   onDelete,
+  onOpenActions,
   reservation,
 }: TileProps) {
   const statusKey = table.status as TableStatus;
@@ -198,6 +203,22 @@ function Tile({
       >
         {content}
       </button>
+      {onOpenActions && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenActions();
+          }}
+          aria-label="Table actions"
+          title="Status, reservation & delete"
+          className="absolute -top-2 -left-2 z-20 bg-card opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+        >
+          <MoreVertical />
+        </Button>
+      )}
       {onDelete && (
         <Button
           type="button"
@@ -222,6 +243,7 @@ function Tile({
 export function FloorMap({
   tables,
   onTableClick,
+  onOpenActions,
   editMode = false,
   positions = {},
   onDrop,
@@ -318,6 +340,7 @@ export function FloorMap({
                 onClick={() => onTableClick(table)}
                 onShapeToggle={onShapeToggle ? () => onShapeToggle(table.id) : undefined}
                 onDelete={editMode ? undefined : () => setDeleteTarget(table)}
+                onOpenActions={editMode || !onOpenActions ? undefined : () => onOpenActions(table)}
                 reservation={reservationByTable?.get(table.id)}
               />
             );

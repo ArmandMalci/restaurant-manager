@@ -1,16 +1,18 @@
 /**
- * TableActionSheet — per-table modal opened from map or grid.
- * Shows current order + running bill; tap-to-cycle status chip; "Start/continue order" nav.
+ * TableActionSheet — per-table modal opened from map or grid via the "⋯" icon / long-press
+ * (secondary affordance — the primary tap now opens the order builder directly, see
+ * -order-modal.tsx and Plan 17 Task 3). Shows current order + running bill; tap-to-cycle
+ * status chip; "Start/continue order" hands off to the same order modal.
  *
- * URL-driven via the `tableId` search param on `/floor` (same param the floor screen already
- * hands off to `/order?tableId=` when starting an order) — survives refresh, closes on back.
+ * URL-driven via `tableId` + `panel=actions` on `/floor` (the shared `tableId` key also
+ * drives `-order-modal.tsx`'s `panel=order` sibling) — survives refresh, closes on back.
  *
  * File is dash-prefixed so TanStack Router ignores it as a route.
  */
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { ShoppingBag } from 'lucide-react';
-import { UrlModal } from '@/components/ui/url-modal';
+import { UrlModal, computeNextSearch } from '@/components/ui/url-modal';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { StatusDot } from '@/components/ui/status';
@@ -128,7 +130,8 @@ interface TableActionSheetProps {
 export function TableActionSheet({ tables }: TableActionSheetProps) {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { tableId } = useSearch({ strict: false }) as { tableId?: string };
+  const { tableId, panel } = useSearch({ strict: false }) as { tableId?: string; panel?: string };
+  const isOpen = Boolean(tableId) && panel === 'actions';
   const table = tables.find((t) => t.id === tableId) ?? null;
 
   const setStatus = useTableControllerSetStatus();
@@ -161,15 +164,37 @@ export function TableActionSheet({ tables }: TableActionSheetProps) {
     );
   }
 
+  // Hands off to the same order modal the primary tile tap opens (see -order-modal.tsx) —
+  // stays on /floor instead of navigating away, so the sheet's CTA and the primary tap
+  // converge on one hand-off path (Plan 17 Task 3).
   function handleStartOrder() {
     if (!table) return;
-    navigate({ to: '/order', search: { tableId: table.id } });
+    navigate({ to: '.', search: (prev) => ({ ...prev, tableId: table.id, panel: 'order' }) });
+  }
+
+  function handleClose() {
+    navigate({
+      to: '.',
+      search: (prev) =>
+        computeNextSearch(
+          computeNextSearch(prev as Record<string, unknown>, 'tableId', undefined, false),
+          'panel',
+          undefined,
+          false,
+        ),
+    });
   }
 
   const statusKey = table?.status as TableStatus | undefined;
 
   return (
-    <UrlModal paramKey="tableId" className="sm:max-w-sm">
+    <UrlModal
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleClose();
+      }}
+      className="sm:max-w-sm"
+    >
       <DialogHeader className="px-5 pt-5 pb-3 border-b border-border">
         <DialogTitle>{table ? `Table ${table.number}` : 'Table'}</DialogTitle>
         {table && statusKey && (
