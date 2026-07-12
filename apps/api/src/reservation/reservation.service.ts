@@ -1,6 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import type { CreateReservationDto, UpdateReservationDto } from '@restaurant/shared';
+import type {
+  CreateReservationDto,
+  ReservationStatus,
+  UpdateReservationDto,
+} from '@restaurant/shared';
+
+// Guarded status transitions — a reservation only moves forward (booked → seated/no_show,
+// any non-terminal state → cancelled); once seated/no_show/cancelled it can't revert to
+// booked. Same status is always a no-op (lets a PATCH resend the unchanged field).
+const ALLOWED_TRANSITIONS: Record<ReservationStatus, ReservationStatus[]> = {
+  booked: ['booked', 'seated', 'no_show', 'cancelled'],
+  seated: ['seated', 'cancelled'],
+  no_show: ['no_show', 'cancelled'],
+  cancelled: ['cancelled'],
+};
 
 @Injectable()
 export class ReservationService {
@@ -37,7 +51,7 @@ export class ReservationService {
   }
 
   public async update(id: string, dto: UpdateReservationDto) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
     const data: Record<string, unknown> = {};
 
     if (dto.tableId !== undefined) data.tableId = dto.tableId;
@@ -47,7 +61,18 @@ export class ReservationService {
     if (dto.partySize !== undefined) data.partySize = dto.partySize;
     if (dto.date !== undefined) data.date = new Date(dto.date);
     if (dto.notes !== undefined) data.notes = dto.notes;
-    if (dto.status !== undefined) data.status = dto.status as never;
+
+    if (dto.status !== undefined && dto.status !== existing.status) {
+      const allowed = ALLOWED_TRANSITIONS[existing.status as ReservationStatus];
+
+      if (!allowed.includes(dto.status)) {
+        throw new BadRequestException(
+          `Cannot transition reservation from "${existing.status}" to "${dto.status}"`,
+        );
+      }
+      data.status = dto.status as never;
+      if (dto.status === 'seated') data.seatedAt = new Date();
+    }
 
     return this.prisma.reservation.update({ where: { id }, data });
   }

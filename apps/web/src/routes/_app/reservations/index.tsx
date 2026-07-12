@@ -1,5 +1,15 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Plus, Pencil, Trash2, Users, CalendarDays } from 'lucide-react';
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Users,
+  CalendarDays,
+  UserCheck,
+  UserX,
+  Search,
+  DoorOpen,
+} from 'lucide-react';
 import { useState } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useQueryClient } from '@tanstack/react-query';
@@ -33,8 +43,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export const Route = createFileRoute('/_app/reservations/')({
   component: ReservationsPage,
-  validateSearch: (search: Record<string, unknown>): { reservation?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { reservation?: string; walkin?: string } => ({
     reservation: typeof search.reservation === 'string' ? search.reservation : undefined,
+    walkin: typeof search.walkin === 'string' ? search.walkin : undefined,
   }),
 });
 
@@ -243,6 +254,8 @@ function ReservationList({
   tables,
   onEdit,
   onDelete,
+  onSeat,
+  onNoShow,
   emptyTitle,
   emptyDescription,
 }: {
@@ -250,6 +263,8 @@ function ReservationList({
   tables: Array<{ id: string; number: number }>;
   onEdit: (r: ReservationDto) => void;
   onDelete: (r: ReservationDto) => void;
+  onSeat: (r: ReservationDto) => void;
+  onNoShow: (r: ReservationDto) => void;
   emptyTitle?: string;
   emptyDescription?: string;
 }) {
@@ -322,6 +337,30 @@ function ReservationList({
             }
             action={
               <span className="flex items-center gap-0.5">
+                {status === 'booked' && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onSeat(r)}
+                      aria-label="Seat"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    >
+                      <UserCheck className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onNoShow(r)}
+                      aria-label="No-show"
+                      className="h-8 w-8 text-muted-foreground hover:text-warning"
+                    >
+                      <UserX className="h-3.5 w-3.5" />
+                    </Button>
+                  </>
+                )}
                 <Button
                   type="button"
                   variant="ghost"
@@ -357,8 +396,9 @@ type FilterTab = 'today' | 'week' | 'all';
 
 function ReservationsPage() {
   const [tab, setTab] = useState<FilterTab>('today');
+  const [guestQuery, setGuestQuery] = useState('');
   const navigate = useNavigate();
-  const { reservation: reservationParam } = Route.useSearch();
+  const { reservation: reservationParam, walkin: walkinParam } = Route.useSearch();
 
   const qc = useQueryClient();
   const dateParam = tab === 'today' ? todayStr() : undefined;
@@ -379,7 +419,7 @@ function ReservationsPage() {
   const { data: editingReservation, isLoading: isLoadingEditTarget } =
     useReservationControllerGetOne(editId ?? '', { query: { enabled: Boolean(editId) } });
 
-  const displayed: ReservationDto[] =
+  const byTab: ReservationDto[] =
     tab !== 'week'
       ? allReservations
       : allReservations.filter((r) => {
@@ -391,6 +431,15 @@ function ReservationsPage() {
 
           return d >= now && d <= end;
         });
+
+  // Client-side guest lookup over the already-fetched list — no server-side search
+  // endpoint needed at this data volume (see Plan 15 Task 2).
+  const query = guestQuery.trim().toLowerCase();
+  const displayed: ReservationDto[] = !query
+    ? byTab
+    : byTab.filter((r) =>
+        [r.guestName, r.guestPhone, r.guestEmail].some((v) => v?.toLowerCase().includes(query)),
+      );
 
   function closeForm() {
     navigate({
@@ -411,9 +460,38 @@ function ReservationsPage() {
     navigate({ to: '.', search: (prev) => ({ ...prev, reservation: r.id }) });
   }
 
+  function openWalkIn() {
+    navigate({ to: '.', search: (prev) => ({ ...prev, walkin: 'new' }) });
+  }
+
+  function closeWalkIn() {
+    navigate({
+      to: '.',
+      search: (prev) => {
+        const { walkin: _walkin, ...rest } = prev as { walkin?: string };
+
+        return rest;
+      },
+    });
+  }
+
   function handleDelete(r: ReservationDto) {
     if (!window.confirm(`Delete reservation for ${r.guestName}?`)) return;
     deleteRes.mutate({ id: r.id }, { onSuccess: () => invalidateReservationControllerGetAll(qc) });
+  }
+
+  function handleSeat(r: ReservationDto) {
+    updateRes.mutate(
+      { id: r.id, data: { status: 'seated' } },
+      { onSuccess: () => invalidateReservationControllerGetAll(qc) },
+    );
+  }
+
+  function handleNoShow(r: ReservationDto) {
+    updateRes.mutate(
+      { id: r.id, data: { status: 'no_show' } },
+      { onSuccess: () => invalidateReservationControllerGetAll(qc) },
+    );
   }
 
   function handleSave(data: SaveData) {
@@ -431,16 +509,44 @@ function ReservationsPage() {
     }
   }
 
+  // Walk-in = a reservation created and immediately marked seated (guest who didn't
+  // book ahead). Reuses the create endpoint (defaults to `booked`) then transitions to
+  // `seated` right away — same guarded path Seat/No-show buttons use.
+  function handleWalkInSave(data: SaveData) {
+    createRes.mutate(
+      { data },
+      {
+        onSuccess: (created) => {
+          updateRes.mutate(
+            { id: created.id, data: { status: 'seated' } },
+            {
+              onSuccess: () => {
+                invalidateReservationControllerGetAll(qc);
+                closeWalkIn();
+              },
+            },
+          );
+        },
+      },
+    );
+  }
+
   return (
     <div className="p-6">
       <PageHeader
         title="Reservations"
         subtitle={`${displayed.length} reservation${displayed.length !== 1 ? 's' : ''}`}
         action={
-          <Button onClick={openNew} className="gap-1.5">
-            <Plus className="h-4 w-4" />
-            Add reservation
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={openWalkIn} className="gap-1.5">
+              <DoorOpen className="h-4 w-4" />
+              Walk-in
+            </Button>
+            <Button onClick={openNew} className="gap-1.5">
+              <Plus className="h-4 w-4" />
+              Add reservation
+            </Button>
+          </div>
         }
       />
 
@@ -474,6 +580,35 @@ function ReservationsPage() {
         )}
       </UrlModal>
 
+      <UrlModal paramKey="walkin" className="sm:max-w-lg">
+        <DialogHeader className="p-4 pb-0">
+          <DialogTitle>Walk-in</DialogTitle>
+          <DialogDescription>
+            Seat a guest who didn&apos;t book ahead — they&apos;ll be marked seated immediately.
+          </DialogDescription>
+        </DialogHeader>
+        {walkinParam && (
+          <ReservationForm
+            key="walkin"
+            initial={{ date: new Date().toISOString() }}
+            onSave={handleWalkInSave}
+            onCancel={closeWalkIn}
+          />
+        )}
+      </UrlModal>
+
+      <div className="mt-4 max-w-sm">
+        <div className="relative">
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <input
+            value={guestQuery}
+            onChange={(e) => setGuestQuery(e.target.value)}
+            placeholder="Search guest name, phone, or email…"
+            className="focus-visible:ring-ring w-full rounded-md border bg-background py-2 pr-3 pl-9 text-sm outline-none focus-visible:ring-2"
+          />
+        </div>
+      </div>
+
       <Tabs value={tab} onValueChange={(v) => setTab(v as FilterTab)}>
         <TabsList>
           <TabsTrigger value="today">Today</TabsTrigger>
@@ -495,6 +630,8 @@ function ReservationsPage() {
                   tables={tables}
                   onEdit={openEdit}
                   onDelete={handleDelete}
+                  onSeat={handleSeat}
+                  onNoShow={handleNoShow}
                   emptyTitle="No reservations today"
                   emptyDescription="Nothing booked for today. Add a walk-in or new booking."
                 />
@@ -507,6 +644,8 @@ function ReservationsPage() {
                   tables={tables}
                   onEdit={openEdit}
                   onDelete={handleDelete}
+                  onSeat={handleSeat}
+                  onNoShow={handleNoShow}
                   emptyTitle="No upcoming reservations"
                   emptyDescription="Nothing scheduled in the next 7 days."
                 />
@@ -519,6 +658,8 @@ function ReservationsPage() {
                   tables={tables}
                   onEdit={openEdit}
                   onDelete={handleDelete}
+                  onSeat={handleSeat}
+                  onNoShow={handleNoShow}
                   emptyTitle="No reservations yet"
                   emptyDescription="Create a new reservation to get started."
                 />

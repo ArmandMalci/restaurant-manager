@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -105,6 +105,65 @@ describe('ReservationService', () => {
     it('throws NotFoundException when not found', async () => {
       prismaMock.reservation.findUnique.mockResolvedValue(null);
       await expect(service.update('x', { partySize: 4 })).rejects.toThrow(NotFoundException);
+    });
+
+    it('allows booked → seated and stamps seatedAt', async () => {
+      prismaMock.reservation.findUnique.mockResolvedValue(mockRes);
+      prismaMock.reservation.update.mockResolvedValue({ ...mockRes, status: 'seated' });
+      await service.update('res-1', { status: 'seated' });
+
+      expect(prismaMock.reservation.update).toHaveBeenCalledWith({
+        where: { id: 'res-1' },
+        data: { status: 'seated', seatedAt: expect.any(Date) },
+      });
+    });
+
+    it('allows booked → no_show', async () => {
+      prismaMock.reservation.findUnique.mockResolvedValue(mockRes);
+      prismaMock.reservation.update.mockResolvedValue({ ...mockRes, status: 'no_show' });
+      await service.update('res-1', { status: 'no_show' });
+
+      expect(prismaMock.reservation.update).toHaveBeenCalledWith({
+        where: { id: 'res-1' },
+        data: { status: 'no_show' },
+      });
+    });
+
+    it('allows any status → cancelled', async () => {
+      prismaMock.reservation.findUnique.mockResolvedValue({ ...mockRes, status: 'seated' });
+      prismaMock.reservation.update.mockResolvedValue({ ...mockRes, status: 'cancelled' });
+      await service.update('res-1', { status: 'cancelled' });
+
+      expect(prismaMock.reservation.update).toHaveBeenCalledWith({
+        where: { id: 'res-1' },
+        data: { status: 'cancelled' },
+      });
+    });
+
+    it('rejects no_show → booked', async () => {
+      prismaMock.reservation.findUnique.mockResolvedValue({ ...mockRes, status: 'no_show' });
+      await expect(service.update('res-1', { status: 'booked' })).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(prismaMock.reservation.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects transitions out of cancelled', async () => {
+      prismaMock.reservation.findUnique.mockResolvedValue({ ...mockRes, status: 'cancelled' });
+      await expect(service.update('res-1', { status: 'seated' })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('treats same-status as a no-op (no seatedAt stamp)', async () => {
+      prismaMock.reservation.findUnique.mockResolvedValue(mockRes);
+      prismaMock.reservation.update.mockResolvedValue(mockRes);
+      await service.update('res-1', { status: 'booked' });
+
+      expect(prismaMock.reservation.update).toHaveBeenCalledWith({
+        where: { id: 'res-1' },
+        data: {},
+      });
     });
   });
 
