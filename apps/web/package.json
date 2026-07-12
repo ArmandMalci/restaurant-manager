@@ -10,7 +10,7 @@
     "gen:api": "orval --config orval.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b --force",
     "lint": "biome check src && eslint src"
   },
   "dependencies": {
