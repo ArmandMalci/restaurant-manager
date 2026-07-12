@@ -43,18 +43,23 @@ reset` prerequisite as every other schema change in this roadmap — confirm it'
 bolting sections onto the table module. Every existing table needs a `sectionId` from day one (required FK, not
 nullable) — the seed migration is what makes that non-breaking for existing data.
 
-- [ ] **Step 1:** Add `Section` model + `Table.sectionId`/`Table.name` to `prisma/schema.prisma`.
-- [ ] **Step 2:** Confirm the Tier 0 `prisma migrate reset` has run this session (or run it now, confirming with
+- [x] **Step 1:** Add `Section` model + `Table.sectionId`/`Table.name` to `prisma/schema.prisma`.
+- [x] **Step 2:** Confirm the Tier 0 `prisma migrate reset` has run this session (or run it now, confirming with
   Armand first — same one-time prerequisite as Plans 15/16), then `pnpm prisma migrate dev --name add_sections`,
-  then `pnpm prisma generate`.
-- [ ] **Step 3:** Update `prisma/seed.ts` to create a default "Main Room" section and assign it to every seeded table.
-- [ ] **Step 4:** Scaffold `apps/api/src/section/` (controller, service, DTOs, module registration) with full CRUD +
+  then `pnpm prisma generate`. *(Prisma's auto-generated migration was rejected — adding a required `sectionId`
+  column to 10 existing rows with no default. Hand-edited the `--create-only` output: create `sections`, seed one
+  "Main Room" row, add `sectionId` nullable, backfill, then enforce `NOT NULL`, then add the FK.)*
+- [x] **Step 3:** Update `prisma/seed.ts` to create a default "Main Room" section and assign it to every seeded table.
+- [x] **Step 4:** Scaffold `apps/api/src/section/` (controller, service, DTOs, module registration) with full CRUD +
   Swagger decorators, following the `table` module's existing conventions.
-- [ ] **Step 5:** Add `sectionId`/`name` to the table create/update DTOs and shared Zod schemas.
-- [ ] **Step 6:** Regenerate the Orval client (`pnpm --filter @restaurant/web gen:api` + biome format on `src/api`).
-- [ ] **Step 7:** `pnpm --filter @restaurant/api typecheck` + unit tests for the new section service/controller
+- [x] **Step 5:** Add `sectionId`/`name` to the table create/update DTOs and shared Zod schemas.
+- [x] **Step 6:** Regenerate the Orval client (`pnpm --filter @restaurant/web gen:api` + biome format on `src/api`).
+  *(Also required `pnpm --filter @restaurant/api gen:spec` first — running `gen:api` alone regenerates against a
+  stale `openapi.json` and silently omits new fields; this gap bit this session more than once.)*
+- [x] **Step 7:** `pnpm --filter @restaurant/api typecheck` + unit tests for the new section service/controller
   (mirror `table.controller.spec.ts`'s pattern, including a delete-guard test — see Task 2).
-- [ ] **Step 8:** Commit: `feat(api): add Section model, section CRUD, table sectionId/name fields`.
+- [x] **Step 8:** Commit: `feat(api): add Section model, section CRUD, table sectionId/name fields`. *(Commit
+  `77a7cfc`.)*
 
 ---
 
@@ -76,16 +81,21 @@ nullable) — the seed migration is what makes that non-breaking for existing da
 The delete-guard mirrors an already-established pattern in this codebase (Plan 14 Task 3), so no new error-handling
 convention is introduced.
 
-- [ ] **Step 1:** Add the section-delete guard to `section.service.ts` (reject with `ConflictException` when the
+- [x] **Step 1:** Add the section-delete guard to `section.service.ts` (reject with `ConflictException` when the
   section has any tables).
-- [ ] **Step 2:** Add section tabs to `floor/index.tsx`, filtering tables by the active section.
-- [ ] **Step 3:** Add the "Manage sections" modal (create/rename/reorder/delete, disabled-with-tooltip on delete
+- [x] **Step 2:** Add section tabs to `floor/index.tsx`, filtering tables by the active section. *(Also fixed the
+  "Add table" dialog, which previously had no way to supply the now-required `sectionId` — it defaults to the
+  active tab.)*
+- [x] **Step 3:** Add the "Manage sections" modal (create/rename/reorder/delete, disabled-with-tooltip on delete
   when the section has tables).
-- [ ] **Step 4:** `pnpm --filter @restaurant/web typecheck` + `pnpm --filter @restaurant/api typecheck` + affected
+- [x] **Step 4:** `pnpm --filter @restaurant/web typecheck` + `pnpm --filter @restaurant/api typecheck` + affected
   tests.
-- [ ] **Step 5:** Verify in-browser: creating a section, switching tabs filters tables correctly, deleting a
-  non-empty section is disabled with an explanatory tooltip, deleting an empty section succeeds.
-- [ ] **Step 6:** Commit: `feat(web,api): section tabs on floor screen, section-aware delete guard`.
+- [x] **Step 5:** Verify in-browser: creating a section, switching tabs filters tables correctly, deleting a
+  non-empty section is disabled with an explanatory tooltip, deleting an empty section succeeds. *(Also caught and
+  fixed a real bug: deleting the active section left `activeSectionId` pointing at nothing, freezing the UI on an
+  empty phantom tab — falls back to the first remaining tab now.)*
+- [x] **Step 6:** Commit: `feat(web,api): section tabs on floor screen, section-aware delete guard`. *(Commit
+  `56a7b45`, bugfix in `e145cef`.)*
 
 ---
 
@@ -104,18 +114,20 @@ convention is introduced.
 primary tap target; status/reservation/delete move to a secondary affordance. Reusing `OrderBuilder` as-is (not
 forking it) avoids maintaining two order-building implementations.
 
-- [ ] **Step 1:** Confirm Plan 14 Task 6 has landed (its `url-modal.tsx` exists) — if not, stop and land that first.
-- [ ] **Step 2:** Change the tile's primary tap to open the order modal (`?tableId=&modal=order`), reusing
-  `OrderBuilder` inside it.
-- [ ] **Step 3:** Move `TableActionSheet` behind a "⋯" icon / long-press, keeping it as its own URL-modal (per
+- [x] **Step 1:** Confirm Plan 14 Task 6 has landed (its `url-modal.tsx` exists) — if not, stop and land that first.
+- [x] **Step 2:** Change the tile's primary tap to open the order modal (`?tableId=&modal=order`), reusing
+  `OrderBuilder` inside it. *(New `-order-modal.tsx` wraps `OrderBuilder` in `UrlModal`.)*
+- [x] **Step 3:** Move `TableActionSheet` behind a "⋯" icon / long-press, keeping it as its own URL-modal (per
   Plan 14 Task 6's existing `tableId`-param migration of this same component — reconcile the two URL params so
   opening the actions sheet vs. the order modal don't fight over the same query key; e.g. `?tableId=&modal=actions`
-  vs. `?tableId=&modal=order`).
-- [ ] **Step 4:** `pnpm --filter @restaurant/web typecheck` + affected tests.
-- [ ] **Step 5:** Verify in-browser: tapping a table tile opens the order builder directly with the floor screen
+  vs. `?tableId=&modal=order`). *(Used `panel=actions` / `panel=order` as the discriminator alongside shared
+  `tableId`.)*
+- [x] **Step 4:** `pnpm --filter @restaurant/web typecheck` + affected tests.
+- [x] **Step 5:** Verify in-browser: tapping a table tile opens the order builder directly with the floor screen
   dimmed behind it; the "⋯" icon opens the actions sheet; both close back to the same floor scroll position/section
   tab; a stale/deleted table shows the existing Tier 4 error toast rather than a broken modal.
-- [ ] **Step 6:** Commit: `feat(web): direct-tap table→order hand-off, actions sheet moves to secondary affordance`.
+- [x] **Step 6:** Commit: `feat(web): direct-tap table→order hand-off, actions sheet moves to secondary affordance`.
+  *(Commit `687c151`.)*
 
 ---
 
