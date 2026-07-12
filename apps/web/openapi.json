@@ -3345,8 +3345,7 @@
             "type": "string"
           },
           "tableId": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "guestName": {
             "type": "string"
@@ -3369,6 +3368,10 @@
             "type": "string",
             "nullable": true
           },
+          "status": {
+            "type": "string",
+            "enum": ["booked", "seated", "no_show", "cancelled"]
+          },
           "createdAt": {
             "type": "string"
           },
@@ -3376,7 +3379,16 @@
             "type": "string"
           }
         },
-        "required": ["id", "guestName", "partySize", "date", "createdAt", "updatedAt"]
+        "required": [
+          "id",
+          "tableId",
+          "guestName",
+          "partySize",
+          "date",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "CreateReservationDto": {
         "type": "object",
@@ -3476,6 +3488,11 @@
             "type": "string",
             "maxLength": 500,
             "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["booked", "seated", "no_show", "cancelled"],
+            "x-nestjs_zod-uses-3-point-1-syntax": true
           }
         }
       },

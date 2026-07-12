@@ -12,6 +12,7 @@ const mockRes = {
   partySize: 2,
   date: new Date('2026-08-01T19:00:00Z'),
   notes: null,
+  status: 'booked',
   createdAt: new Date(),
   updatedAt: new Date(),
 };

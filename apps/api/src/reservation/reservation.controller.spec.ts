@@ -15,6 +15,7 @@ const mockReservation = {
   partySize: 2,
   date: new Date('2026-07-01T19:00:00.000Z').toISOString(),
   notes: null,
+  status: 'booked',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };

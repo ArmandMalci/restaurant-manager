@@ -47,6 +47,7 @@ export class ReservationService {
     if (dto.partySize !== undefined) data.partySize = dto.partySize;
     if (dto.date !== undefined) data.date = new Date(dto.date);
     if (dto.notes !== undefined) data.notes = dto.notes;
+    if (dto.status !== undefined) data.status = dto.status as never;
 
     return this.prisma.reservation.update({ where: { id }, data });
   }

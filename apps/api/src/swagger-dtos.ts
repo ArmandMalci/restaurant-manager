@@ -138,13 +138,14 @@ export class ShiftDto {
 
 export class ReservationDto {
   @ApiProperty() public id!: string;
-  @ApiProperty({ type: String, nullable: true, required: false }) public tableId!: string | null;
+  @ApiProperty() public tableId!: string;
   @ApiProperty() public guestName!: string;
   @ApiProperty({ type: String, nullable: true, required: false }) public guestPhone!: string | null;
   @ApiProperty({ type: String, nullable: true, required: false }) public guestEmail!: string | null;
   @ApiProperty() public partySize!: number;
   @ApiProperty() public date!: string;
   @ApiProperty({ type: String, nullable: true, required: false }) public notes!: string | null;
+  @ApiProperty({ enum: ['booked', 'seated', 'no_show', 'cancelled'] }) public status!: string;
   @ApiProperty() public createdAt!: string;
   @ApiProperty() public updatedAt!: string;
 }

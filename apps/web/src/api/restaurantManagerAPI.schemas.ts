@@ -564,10 +564,18 @@ export interface SubscribeDtoClass {
   keys: SubscribeDtoClassKeys;
 }
 
+export type ReservationDtoStatus = (typeof ReservationDtoStatus)[keyof typeof ReservationDtoStatus];
+
+export const ReservationDtoStatus = {
+  booked: 'booked',
+  seated: 'seated',
+  no_show: 'no_show',
+  cancelled: 'cancelled',
+} as const;
+
 export interface ReservationDto {
   id: string;
-  /** @nullable */
-  tableId?: string | null;
+  tableId: string;
   guestName: string;
   /** @nullable */
   guestPhone?: string | null;
@@ -577,6 +585,7 @@ export interface ReservationDto {
   date: string;
   /** @nullable */
   notes?: string | null;
+  status: ReservationDtoStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -612,6 +621,16 @@ export interface CreateReservationDto {
   notes?: string | null;
 }
 
+export type UpdateReservationDtoStatus =
+  (typeof UpdateReservationDtoStatus)[keyof typeof UpdateReservationDtoStatus];
+
+export const UpdateReservationDtoStatus = {
+  booked: 'booked',
+  seated: 'seated',
+  no_show: 'no_show',
+  cancelled: 'cancelled',
+} as const;
+
 export interface UpdateReservationDto {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
   tableId?: string;
@@ -641,6 +660,7 @@ export interface UpdateReservationDto {
    * @nullable
    */
   notes?: string | null;
+  status?: UpdateReservationDtoStatus;
 }
 
 export interface StaffDto {

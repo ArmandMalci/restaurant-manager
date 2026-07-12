@@ -48,31 +48,19 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-type DerivedStatus = 'confirmed' | 'pending' | 'seated' | 'cancelled';
+type ReservationStatus = ReservationDto['status'];
 
-function deriveStatus(r: ReservationDto): DerivedStatus {
-  const now = new Date();
-  const dt = new Date(r.date);
-  const isPast = dt < now && dt.toDateString() !== now.toDateString();
-
-  if (isPast) return 'cancelled';
-  if (!r.tableId) return 'pending';
-  const diffMins = (dt.getTime() - now.getTime()) / 60_000;
-
-  return diffMins < 30 && diffMins > -120 ? 'seated' : 'confirmed';
-}
-
-const STATUS_TONE: Record<DerivedStatus, Tone> = {
-  confirmed: 'success',
-  pending: 'warning',
+const STATUS_TONE: Record<ReservationStatus, Tone> = {
+  booked: 'success',
   seated: 'info',
+  no_show: 'warning',
   cancelled: 'destructive',
 };
 
-const STATUS_LABELS: Record<DerivedStatus, string> = {
-  confirmed: 'Confirmed',
-  pending: 'Pending',
+const STATUS_LABELS: Record<ReservationStatus, string> = {
+  booked: 'Booked',
   seated: 'Seated',
+  no_show: 'No-show',
   cancelled: 'Cancelled',
 };
 
@@ -278,7 +266,7 @@ function ReservationList({
   return (
     <div className="rounded-lg border bg-card">
       {reservations.map((r) => {
-        const status = deriveStatus(r);
+        const status = r.status;
         const table = tables.find((t) => t.id === r.tableId);
         const tableLabel = table ? `Table ${table.number}` : 'Unassigned';
         const contactLine = [r.guestEmail, r.guestPhone, r.notes].filter(Boolean).join(' · ');
