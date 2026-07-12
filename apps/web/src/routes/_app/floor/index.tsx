@@ -386,7 +386,13 @@ function TablesPage() {
     [sections],
   );
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
-  const effectiveSectionId = activeSectionId ?? sortedSections[0]?.id ?? null;
+  // Falls back to the first section when there's no active tab yet, or when the
+  // previously-active one no longer exists (e.g. just deleted via "Manage sections") —
+  // otherwise the screen gets stuck on a phantom tab with no matching section.
+  const effectiveSectionId =
+    (activeSectionId && sortedSections.some((s) => s.id === activeSectionId)
+      ? activeSectionId
+      : sortedSections[0]?.id) ?? null;
   const filteredTables = effectiveSectionId
     ? tables.filter((t) => t.sectionId === effectiveSectionId)
     : tables;
