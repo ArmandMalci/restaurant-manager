@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
-import { Plus, Pencil, Trash2, Users, X, LayoutGrid, Map as MapIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, X, LayoutGrid, Map as MapIcon, Settings } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatusBadge } from '@/components/ui/status';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -23,9 +24,15 @@ import {
   useTableControllerSaveLayout,
   invalidateTableControllerGetAll,
 } from '@/api/tables/tables';
+import { useSectionControllerGetAll } from '@/api/sections/sections';
 import { useReservationControllerGetAll } from '@/api/reservations/reservations';
 import type { TableStatus } from '@restaurant/shared';
-import type { TableDto, TableDtoShape, ReservationDto } from '@/api/restaurantManagerAPI.schemas';
+import type {
+  TableDto,
+  TableDtoShape,
+  ReservationDto,
+  SectionDto,
+} from '@/api/restaurantManagerAPI.schemas';
 import {
   FloorMap,
   STATUS_LABELS,
@@ -35,6 +42,7 @@ import {
 } from './-floor-map';
 import type { PositionOverride } from './-floor-map';
 import { TableActionSheet } from './-table-action-sheet';
+import { ManageSectionsModal } from './-manage-sections-modal';
 import { DeleteDialog } from './-delete-dialog';
 
 function todayStr() {
@@ -76,17 +84,27 @@ function DialogPanel({ children }: { children: React.ReactNode }) {
 
 interface TableFormDialogProps {
   initial?: Partial<TableDto>;
-  onSave: (data: { number: number; seats: number; status: TableStatus }) => void;
+  sections: SectionDto[];
+  defaultSectionId: string;
+  onSave: (data: { number: number; seats: number; status: TableStatus; sectionId: string }) => void;
   onClose: () => void;
   title: string;
 }
 
-function TableFormDialog({ initial, onSave, onClose, title }: TableFormDialogProps) {
+function TableFormDialog({
+  initial,
+  sections,
+  defaultSectionId,
+  onSave,
+  onClose,
+  title,
+}: TableFormDialogProps) {
   const [number, setNumber] = useState(initial?.number ?? 1);
   const [seats, setSeats] = useState(initial?.seats ?? 2);
   const [status, setStatus] = useState<TableStatus>(
     (initial?.status as TableStatus) ?? 'available',
   );
+  const [sectionId, setSectionId] = useState(initial?.sectionId ?? defaultSectionId);
 
   return (
     <>
@@ -107,10 +125,28 @@ function TableFormDialog({ initial, onSave, onClose, title }: TableFormDialogPro
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onSave({ number, seats, status });
+            onSave({ number, seats, status, sectionId });
           }}
           className="space-y-4"
         >
+          <div className="space-y-1.5">
+            <label htmlFor="table-section" className="text-sm font-medium text-foreground">
+              Section
+            </label>
+            <Select value={sectionId} onValueChange={(v) => setSectionId(v as string)}>
+              <SelectTrigger id="table-section" className="w-full">
+                <SelectValue placeholder="Select section…" />
+              </SelectTrigger>
+              <SelectContent>
+                {sections.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-1.5">
             <label htmlFor="table-number" className="text-sm font-medium text-foreground">
               Table number
@@ -292,6 +328,7 @@ function TablesPage() {
   const navigate = useNavigate();
 
   const { data: tables = [], isLoading } = useTableControllerGetAll();
+  const { data: sections = [] } = useSectionControllerGetAll();
   const createTable = useTableControllerCreate();
   const updateTable = useTableControllerUpdate();
   const deleteTable = useTableControllerRemove();
@@ -314,6 +351,28 @@ function TablesPage() {
     return map;
   }, [todaysReservations]);
 
+  // Section tabs — additive to the map/grid view-toggle, not a replacement (see Plan 17
+  // Task 2). Tables per section, for the "Manage sections" delete guard tooltip too.
+  const sortedSections = useMemo(
+    () => [...sections].sort((a, b) => a.sortOrder - b.sortOrder),
+    [sections],
+  );
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const effectiveSectionId = activeSectionId ?? sortedSections[0]?.id ?? null;
+  const filteredTables = effectiveSectionId
+    ? tables.filter((t) => t.sectionId === effectiveSectionId)
+    : tables;
+  const tableCountBySection = useMemo(() => {
+    const map = new Map<string, number>();
+
+    for (const t of tables) {
+      map.set(t.sectionId, (map.get(t.sectionId) ?? 0) + 1);
+    }
+
+    return map;
+  }, [tables]);
+  const [manageSectionsOpen, setManageSectionsOpen] = useState(false);
+
   // Determine default view: map if any table has posX set
   const hasMapData = useMemo(() => tables.some((t) => t.posX != null), [tables]);
   const [viewMode, setViewMode] = useState<ViewMode | null>(null);
@@ -324,9 +383,9 @@ function TablesPage() {
   const [positions, setPositions] = useState<Record<string, PositionOverride>>({});
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const available = tables.filter((t) => t.status === 'available').length;
-  const occupied = tables.filter((t) => t.status === 'occupied').length;
-  const reserved = tables.filter((t) => t.status === 'reserved').length;
+  const available = filteredTables.filter((t) => t.status === 'available').length;
+  const occupied = filteredTables.filter((t) => t.status === 'occupied').length;
+  const reserved = filteredTables.filter((t) => t.status === 'reserved').length;
 
   // Action sheet is URL-driven (`?tableId=`) — TableActionSheet reads it itself.
   function handleTableClick(table: TableDto) {
@@ -432,7 +491,7 @@ function TablesPage() {
       <div className="space-y-6">
         <PageHeader
           title="Floor"
-          subtitle={`${tables.length} table${tables.length !== 1 ? 's' : ''}`}
+          subtitle={`${filteredTables.length} table${filteredTables.length !== 1 ? 's' : ''}`}
           className="flex-col items-stretch sm:flex-row sm:items-start"
           action={
             editMode ? (
@@ -500,8 +559,35 @@ function TablesPage() {
           }
         />
 
+        {/* Section tabs — additive to the map/grid view-toggle above, not a replacement. */}
+        {sortedSections.length > 0 && (
+          <div className="flex items-center justify-between gap-2">
+            <Tabs
+              value={effectiveSectionId ?? undefined}
+              onValueChange={(v) => setActiveSectionId(v as string)}
+            >
+              <TabsList>
+                {sortedSections.map((section) => (
+                  <TabsTrigger key={section.id} value={section.id}>
+                    {section.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setManageSectionsOpen(true)}
+              aria-label="Manage sections"
+              title="Manage sections"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         {/* Summary counts */}
-        {tables.length > 0 && (
+        {filteredTables.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <StatusBadge tone="success" label={`Available ${available}`} />
             <StatusBadge tone="info" label={`Occupied ${occupied}`} />
@@ -516,9 +602,15 @@ function TablesPage() {
             title="No tables yet"
             description="Add your first table to start tracking status and capacity."
           />
+        ) : filteredTables.length === 0 ? (
+          <EmptyState
+            icon={LayoutGrid}
+            title="No tables in this section"
+            description="Add a table to this section, or switch to another tab."
+          />
         ) : effectiveView === 'map' ? (
           <FloorMap
-            tables={tables}
+            tables={filteredTables}
             onTableClick={handleTableClick}
             editMode={editMode}
             positions={positions}
@@ -530,7 +622,7 @@ function TablesPage() {
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {tables.map((table) => (
+            {filteredTables.map((table) => (
               <TableCard
                 key={table.id}
                 table={table}
@@ -553,20 +645,34 @@ function TablesPage() {
       {/* Action sheet */}
       <TableActionSheet tables={tables} />
 
+      <ManageSectionsModal
+        open={manageSectionsOpen}
+        onOpenChange={setManageSectionsOpen}
+        sections={sortedSections}
+        tableCountBySection={tableCountBySection}
+      />
+
       {/* Dialogs */}
       {modal.type === 'create' && (
         <TableFormDialog
           title="Add Table"
+          sections={sortedSections}
+          defaultSectionId={effectiveSectionId ?? ''}
           onSave={(data) => {
             createTable.mutate(
               {
                 // Default posX/posY so the new table is visible on the map right
                 // away — without this, FloorMap only renders `placed` tables and
                 // the new one is invisible until someone drags it in via Edit
-                // layout. Stagger by current table count so sequential adds
+                // layout. Stagger by current section's table count so sequential adds
                 // don't all land on the exact same spot (still just a starting
                 // point — Edit layout remains the real placement tool).
-                data: { ...data, posX: 8 + ((tables.length * 14) % 84), posY: 12, shape: 'square' },
+                data: {
+                  ...data,
+                  posX: 8 + ((filteredTables.length * 14) % 84),
+                  posY: 12,
+                  shape: 'square',
+                },
               },
               {
                 onSuccess: () => {
@@ -584,6 +690,8 @@ function TablesPage() {
         <TableFormDialog
           title={`Edit Table ${modal.table.number}`}
           initial={modal.table}
+          sections={sortedSections}
+          defaultSectionId={modal.table.sectionId}
           onSave={(dto) => {
             updateTable.mutate(
               { id: modal.table.id, data: dto },

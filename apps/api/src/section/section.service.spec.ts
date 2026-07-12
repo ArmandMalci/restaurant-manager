@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { SectionService } from './section.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -16,6 +16,9 @@ const prismaMock = {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+  },
+  table: {
+    count: jest.fn(),
   },
 };
 
@@ -80,8 +83,9 @@ describe('SectionService', () => {
   });
 
   describe('remove', () => {
-    it('deletes an existing section', async () => {
+    it('deletes an existing section with no tables', async () => {
       prismaMock.section.findUnique.mockResolvedValue(mockSection);
+      prismaMock.table.count.mockResolvedValue(0);
       prismaMock.section.delete.mockResolvedValue(mockSection);
 
       await service.remove('sec-1');
@@ -92,6 +96,14 @@ describe('SectionService', () => {
     it('throws NotFoundException when section missing', async () => {
       prismaMock.section.findUnique.mockResolvedValue(null);
       await expect(service.remove('x')).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws ConflictException when the section still has tables', async () => {
+      prismaMock.section.findUnique.mockResolvedValue(mockSection);
+      prismaMock.table.count.mockResolvedValue(2);
+
+      await expect(service.remove('sec-1')).rejects.toThrow(ConflictException);
+      expect(prismaMock.section.delete).not.toHaveBeenCalled();
     });
   });
 });

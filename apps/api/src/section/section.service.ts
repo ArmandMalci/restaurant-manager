@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateSectionDto, UpdateSectionDto } from '@restaurant/shared';
 
@@ -30,6 +30,12 @@ export class SectionService {
 
   public async remove(id: string) {
     await this.findOne(id);
+
+    const tableCount = await this.prisma.table.count({ where: { sectionId: id } });
+
+    if (tableCount > 0) {
+      throw new ConflictException('Cannot delete a section that still has tables');
+    }
 
     return this.prisma.section.delete({ where: { id } });
   }
