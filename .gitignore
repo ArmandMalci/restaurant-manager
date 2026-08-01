@@ -30,11 +30,9 @@ coverage/
 .superpowers/
 
 # ruflo/claude-flow runtime (generated, not source)
-.claude/agents/
 .claude/commands/
 .claude/helpers/
 .claude/memory.db
-.claude/skills/
 # project-specific definitions (source-controlled)
 !.claude/agents/restaurant/
 !.claude/commands/restaurant/
