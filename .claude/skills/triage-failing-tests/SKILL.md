@@ -1,6 +1,6 @@
 ---
 name: triage-failing-tests
-description: Use when tests are failing and the ask is to make them pass — "fix the failing tests", "fix the tests that are breaking in <module>", a pasted pytest/unittest/Jest/Vitest traceback or FAIL/ERROR block as the opening prompt, or CI reporting red tests. Forces a root-cause verdict BEFORE any edit: read the failing test AND the code under test, check git history of both, then state "the CODE is wrong because X" or "the TEST is stale because Y" with evidence — and fix exactly that one side. Never weaken assertions just to go green. Hard-stops and reverts after 2 failed fix attempts instead of stacking changes. Delegates deep investigation to superpowers:systematic-debugging.
+description: "Use when tests are failing and the ask is to make them pass — \"fix the failing tests\", \"fix the tests that are breaking in <module>\", a pasted pytest/unittest/Jest/Vitest traceback or FAIL/ERROR block as the opening prompt, or CI reporting red tests. Forces a root-cause verdict BEFORE any edit: read the failing test AND the code under test, check git history of both, then state \"the CODE is wrong because X\" or \"the TEST is stale because Y\" with evidence — and fix exactly that one side. Never weaken assertions just to go green. Hard-stops and reverts after 2 failed fix attempts instead of stacking changes. Delegates deep investigation to superpowers:systematic-debugging."
 ---
 
 # Triage failing tests
