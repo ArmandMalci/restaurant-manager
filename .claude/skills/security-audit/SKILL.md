@@ -95,6 +95,13 @@ rule" and "When something goes wrong" sections. All commands use the standard ex
 Per hub doctrine, rows marked "needs your call" are reported but never assigned a severity — flag
 them as `JUDGMENT` in the Severity column and let Armand decide.
 
+## CI wiring
+
+All three layers are headless-compatible. Layer 1's scanners already emit JSON (npm audit --json,
+pip-audit -f json). Layer 2's gitleaks supports --report-format json and non-zero exit on security
+findings — both compatible with CI gate logic. Layer 3 (boundary code review) remains agent-work and
+does not run in CI. See `ci-setup` skill for authoring the workflow job.
+
 ## Report format
 
 One markdown table, most severe first. Columns are fixed:
