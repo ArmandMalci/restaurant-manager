@@ -1,0 +1,14 @@
+{
+  "kitVersion": "2026.08.0",
+  "packs": {
+    "core": "1.0.0",
+    "web-frontend": "1.0.0"
+  },
+  "tiers": {
+    "reasoning": "claude-fable-5",
+    "execution": "sonnet",
+    "grunt": "haiku"
+  },
+  "syncedAt": "2026-08-01",
+  "localPatches": []
+}
