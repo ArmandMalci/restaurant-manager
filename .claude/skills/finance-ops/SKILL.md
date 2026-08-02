@@ -28,8 +28,8 @@ Run this before anything else in the skill.
    filing-deadline calendar is seeded from `Jurisdiction:`; `Entity:` names who's filing), but
    read all five so nothing needs re-asking on a later run by another skill.
 2. **No profile found → interview, one question at a time**, waiting for each answer before
-   asking the next (the same five canonical questions every business-ops skill asks, so whichever
-   skill runs first fully seeds the shared file):
+   asking the next (the same five canonical profile fields every business-ops skill asks — question
+   wording varies by skill — so whichever skill runs first fully seeds the shared file):
    1. "What's the legal entity for this product (name + type), or is one not yet formed?"
    2. "What jurisdiction — country, and state/province if the US — governs this entity's tax
       filings?"

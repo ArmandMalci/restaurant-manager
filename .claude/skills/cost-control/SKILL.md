@@ -149,9 +149,9 @@ no real usage data yet; revisit once usage data exists">.
 Last updated: <date>.
 ```
 
-`billing-pricing` doesn't exist in this hub yet — that's fine. This skill's only obligation is
-writing the note to the named path in the named format, so whenever `billing-pricing` is written
-it has a fixed seam to read rather than one that needs discovering.
+`billing-pricing` exists and consumes `docs/unit-economics.md` to ground the Pricing Review in
+cost-to-serve. This skill's only obligation is writing the note to the named path in the named
+format, so `billing-pricing` has a fixed seam to read rather than one that needs discovering.
 
 ## Definition of Done
 

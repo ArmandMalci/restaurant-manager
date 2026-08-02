@@ -39,7 +39,8 @@ Run this before anything else in the skill.
    5. "Is this B2B or B2C?"
 3. **Offer to save — never save without a yes.** Ask: "Save these answers to
    `.claude/context/business-profile.md` so `legal-kit` / `finance-ops` / `billing-pricing` /
-   `trust-safety` can read them instead of re-asking?" Write only on an explicit yes.
+   `trust-safety` can read them instead of re-asking?" Write only on an explicit yes, in the
+   five-line format above, unchanged.
 4. **Never hardcode a jurisdiction fact.** The DSAR clock, the applicable regime name, and any
    deadline this skill's output states come from the profile or this interview — never from an
    assumption baked into this file.

@@ -17,7 +17,7 @@ NOT for ad-hoc SQL/BI work — that's the `metabase` MCP. NOT for pre-launch pos
 copy — that's `launch-kit`. NOT for one-time technical SEO checks — that's `seo-audit`. This
 skill is the fourth stop in the seo-marketing pack's learning path (see `seo-audit`'s
 `references/learning-path.md` step 9): instrumentation is assumed already correct
-(`analytics-setup`, Phase 5) — this skill reads what's there, it doesn't wire tracking.
+(`analytics-setup`) — this skill reads what's there, it doesn't wire tracking.
 
 ## Prerequisite check
 

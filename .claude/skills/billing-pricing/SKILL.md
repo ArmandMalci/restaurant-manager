@@ -29,8 +29,9 @@ Run this before anything else in the skill.
    (`B2B` or `B2C`). This skill's own logic mainly draws on `Jurisdiction:` (sales-tax/VAT nexus
    shapes the MoR-vs-Stripe-direct call) and `Model:` (B2B leans seat-based, B2C leans
    usage-based — see Pricing Review), but read all five so nothing needs re-asking on a later run.
-2. **No profile found → interview, one question at a time**, the same five canonical questions
-   every business-ops skill asks, waiting for each answer before asking the next:
+2. **No profile found → interview, one question at a time**, the same five canonical profile
+   fields every business-ops skill asks — question wording varies by skill — waiting for each
+   answer before asking the next:
    1. "What's the legal entity for this product (name + type), or is one not yet formed?"
    2. "What jurisdiction — country, and state/province if the US — is the entity in, and where do
       most paying customers live?"
