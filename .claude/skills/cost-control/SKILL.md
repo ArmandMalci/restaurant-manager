@@ -1,6 +1,6 @@
 ---
 name: cost-control
-description: "Use when Armand says \"cost control\", \"spend caps\", \"rate limits\", \"API abuse\", or BEFORE any endpoint calls a paid model or metered API in production. The failure it prevents: one abuser on an unprotected LLM endpoint is a four-figure overnight bill. Three layers: (1) provider-side spend caps and billing alerts — console walkthroughs for Anthropic/OpenAI/cloud marked NEEDS YOUR HANDS, with what-was-set recorded, (2) app-side per-user quotas and rate limits scaffolded at the boundary for the actual stack, deny-by-default for unauthenticated calls to paid paths — advisory code shapes, never auto-applied, (3) a unit-economics note per pricing plan: cost-to-serve one user vs what they pay (billing-pricing consumes this). Judgment calls flagged needs-your-call. NOT for pricing strategy (billing-pricing) and NOT for performance work (frontend-perf)."
+description: "Use when the user says \"cost control\", \"spend caps\", \"rate limits\", \"API abuse\", or BEFORE any endpoint calls a paid model or metered API in production. The failure it prevents: one abuser on an unprotected LLM endpoint is a four-figure overnight bill. Three layers: (1) provider-side spend caps and billing alerts — console walkthroughs for Anthropic/OpenAI/cloud marked NEEDS YOUR HANDS, with what-was-set recorded, (2) app-side per-user quotas and rate limits scaffolded at the boundary for the actual stack, deny-by-default for unauthenticated calls to paid paths — advisory code shapes, never auto-applied, (3) a unit-economics note per pricing plan: cost-to-serve one user vs what they pay (billing-pricing consumes this). Judgment calls flagged needs-your-call. NOT for pricing strategy (billing-pricing) and NOT for performance work (frontend-perf)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -13,7 +13,7 @@ this skill creates or edits `docs/cost-control.md` (provider spend-cap record + 
 rate-limit code shape) and `docs/unit-economics.md` (the layer-3 cost-to-serve note). **It never
 edits application source to actually wire a rate limit** — the Next.js and FastAPI shapes below
 are advisory code blocks that live inside `docs/cost-control.md`; applying them to real route
-files is Armand's call, in a separate, reviewed change, never this skill's own edit. `Bash` is
+files is the user's call, in a separate, reviewed change, never this skill's own edit. `Bash` is
 read-only: detecting the stack (`package.json`/`next.config.*` vs `pyproject.toml`/
 `requirements.txt`) and finding existing paid-API call sites via safe-grep. It never creates a
 provider account, never calls a billing API to set a cap, and never touches production traffic.
@@ -31,7 +31,7 @@ Run first, always.
 
 1. Detect the stack: Next.js (`next.config.*` present, or an `app/` directory with route
    handlers) vs FastAPI (`pyproject.toml`/`requirements.txt` listing `fastapi`, or `from fastapi
-   import` in an entry file) vs something else. If neither is detected, ask Armand rather than
+   import` in an entry file) vs something else. If neither is detected, ask the user rather than
    guessing a code shape for the wrong framework.
 2. Find every call site that hits a paid model or metered API — safe-grep for SDK imports
    (`anthropic`, `openai`, or other metered-API clients) per `.claude/references/safe-grep-
@@ -45,8 +45,8 @@ don't exist yet is premature scope.
 
 ## Layer 1 — provider spend caps & billing alerts (all NEEDS YOUR HANDS)
 
-This skill never has console access — every step here is Armand's, in the provider's own
-dashboard. This skill only tells him what to click and then records what was set.
+This skill never has console access — every step here is the user's, in the provider's own
+dashboard. This skill only tells them what to click and then records what was set.
 
 - **Anthropic Console** — **NEEDS YOUR HANDS:** Plans & Billing → set a workspace-level spend
   limit and, where issuing scoped API keys, a per-API-key spend limit — this is a real hard cap,
@@ -59,14 +59,14 @@ dashboard. This skill only tells him what to click and then records what was set
   OpenAI-backed endpoint.
 - **Cloud (AWS/GCP/Vercel/etc)** — **NEEDS YOUR HANDS:** the platform's native billing-alert
   console (AWS Budgets, GCP Budgets & Alerts, Vercel spend management) — set the threshold with
-  enough headroom below "this would actually hurt" for the alert to reach Armand before the
+  enough headroom below "this would actually hurt" for the alert to reach the user before the
   billing period closes.
 
 Free-tier caps, alert semantics, and whether a threshold hard-stops or just notifies all change
 without notice — **verify current behavior on the provider's own docs at setup time**, don't
 trust a number or a "hard stop vs alert" claim written here as permanent.
 
-**Record what was set** — Armand fills this in after each console step above; this skill only
+**Record what was set** — the user fills this in after each console step above; this skill only
 creates the empty table and asks:
 
 | Provider | Alert / cap type | Threshold set | Hard stop? | Date |
@@ -156,7 +156,7 @@ format, so `billing-pricing` has a fixed seam to read rather than one that needs
 ## Definition of Done
 
 - Paid-API call sites inventoried; any unauthenticated one is flagged first, before anything else.
-- Layer 1: every relevant provider's console walkthrough is completed by Armand (NEEDS YOUR
+- Layer 1: every relevant provider's console walkthrough is completed by the user (NEEDS YOUR
   HANDS), and the record-what-was-set table in `docs/cost-control.md` is filled with real
   thresholds and dates — not left as an empty template.
 - Layer 2: the advisory code shape for the detected stack is written into `docs/cost-control.md`,

@@ -1,6 +1,6 @@
 ---
 name: support-ops
-description: "Use when Armand says \"support setup\", \"canned replies\", \"help docs\", \"knowledge base\", or when a product gets its first real users. Day-one support without a helpdesk suite: (1) intake channel decision — shared inbox vs a Plain/Crisp-class tool, trade-offs in one line each, account creation NEEDS YOUR HANDS, (2) a canned-reply pack drafted from the product's ACTUAL features (billing issue, bug report, refund request, how-do-I — short, in Armand's direct voice), (3) a knowledge-base skeleton generated from existing docs/README with a staleness rule: each KB page names its source doc, and the page regenerates when the source changes. Prerequisite-check-first: no shipped product surface means report-and-stop. NOT for community building and NOT for meeting follow-ups (transcript-to-actions)."
+description: "Use when the user says \"support setup\", \"canned replies\", \"help docs\", \"knowledge base\", or when a product gets its first real users. Day-one support without a helpdesk suite: (1) intake channel decision — shared inbox vs a Plain/Crisp-class tool, trade-offs in one line each, account creation NEEDS YOUR HANDS, (2) a canned-reply pack drafted from the product's ACTUAL features (billing issue, bug report, refund request, how-do-I — short, in the user's direct voice), (3) a knowledge-base skeleton generated from existing docs/README with a staleness rule: each KB page names its source doc, and the page regenerates when the source changes. Prerequisite-check-first: no shipped product surface means report-and-stop. NOT for community building and NOT for meeting follow-ups (transcript-to-actions)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -39,17 +39,17 @@ one still in development.
    A deployment config file, a recorded production URL, or `docs/analytics-setup.md` (the
    `analytics-setup` skill's handoff note, which only exists once instrumentation went in ahead of
    a launch) is evidence of a shipped surface.
-2. Ask Armand directly if the grep above is inconclusive: "Is this product live for real users
-   right now, or still pre-launch?" Take his answer as authoritative over the grep — the grep is a
+2. Ask the user directly if the grep above is inconclusive: "Is this product live for real users
+   right now, or still pre-launch?" Take their answer as authoritative over the grep — the grep is a
    shortcut, not the source of truth.
-3. **No shipped product surface found, and Armand confirms it isn't live → report exactly that and
+3. **No shipped product surface found, and the user confirms it isn't live → report exactly that and
    STOP.** Drafting canned replies and a KB for a product with no users yet is premature scope —
    the same discipline `cost-control` applies to a repo with no paid-API call site and `dsr-ops`
    applies to a repo with no accounts.
 
 ## 1. Intake channel decision
 
-State the trade-off in one line each — this is Armand's call, recorded here, never auto-picked:
+State the trade-off in one line each — this is the user's call, recorded here, never auto-picked:
 
 | Channel | Trade-off |
 |---|---|
@@ -58,13 +58,13 @@ State the trade-off in one line each — this is Armand's call, recorded here, n
 | Crisp-class tool | Adds live chat and a widget on the product itself, which shared inbox and Plain-class both lack — but chat creates an expectation of near-real-time response that a solo founder may not be able to sustain. |
 
 **Account creation for either tool is NEEDS YOUR HANDS** — this skill states the trade-off and
-records Armand's pick in `docs/support/intake-channel.md`; it never signs up for Plain, Crisp, or
-anything else on his behalf.
+records the user's pick in `docs/support/intake-channel.md`; it never signs up for Plain, Crisp, or
+anything else on their behalf.
 
 ```markdown
 # Intake Channel Decision
 
-Picked: <shared inbox / Plain / Crisp — Armand's choice>
+Picked: <shared inbox / Plain / Crisp — the user's choice>
 Why: <one line, referencing the trade-off table above>
 Account setup: NEEDS YOUR HANDS — not created by this skill.
 ```
@@ -93,7 +93,7 @@ Read the README's feature headings and the route/screen list together — that's
 A billing-related reply only gets drafted if a billing route or `stripe`/`paddle`/`lemonsqueezy`
 dependency actually shows up; a feature the grep can't find gets no reply pretending it exists.
 
-Draft four canned replies, each **short and direct, in Armand's actual voice** — pull the register
+Draft four canned replies, each **short and direct, in the user's actual voice** — pull the register
 straight from `.claude/rules/communication_style.md` ("Short, direct, opinionated. No
 throat-clearing.") rather than defaulting to generic support-agent phrasing ("We sincerely
 apologize for any inconvenience..."):
@@ -103,7 +103,7 @@ apologize for any inconvenience..."):
 2. **Bug report** — acknowledge, ask for the one detail needed to reproduce (steps or a
    screenshot), no "we take all feedback seriously" filler.
 3. **Refund request** — state the actual policy if one exists in the docs found above, or say
-   plainly that no refund policy is written yet and this needs Armand's direct answer — never
+   plainly that no refund policy is written yet and this needs the user's direct answer — never
    invent a policy.
 4. **How-do-I** — answer using the actual feature name and location found in the route/screen
    scan above, not a generic "check our help center" deflection.
@@ -163,13 +163,13 @@ before treating the KB as current. **A page with no git history on either side (
 yet committed) or a `Source:` path that's been renamed or deleted prints `UNVERIFIED`, never
 silence** — same discipline `email-deliverability`'s dig checks and `mobile-release`'s
 keystore-backup row use: an unconfirmed row never defaults to clean. Run this check at the start
-of every re-run of this skill, not just when Armand happens to notice a stale page.
+of every re-run of this skill, not just when the user happens to notice a stale page.
 
 ## Definition of Done
 
-- Prerequisite check ran; if no shipped product surface was found and Armand confirmed it isn't
+- Prerequisite check ran; if no shipped product surface was found and the user confirmed it isn't
   live, the run stopped there with nothing else generated.
-- `docs/support/intake-channel.md` records Armand's actual pick (not a default) with the one-line
+- `docs/support/intake-channel.md` records the user's actual pick (not a default) with the one-line
   trade-off that led to it; no account was created by this skill.
 - `docs/support/canned-replies.md` has all four replies, each grounded in a feature the discovery
   commands actually found (or the README/docs), each short and direct per
@@ -185,5 +185,5 @@ If the staleness check's `git log`-based comparison produces false positives (e.
 touched for a typo fix unrelated to its source content), consider adding a `--no-merges` or
 content-hash-based check instead — but don't silently widen the check without recording why here.
 If a new common stack shows up (Django, Rails), add its route-discovery command to step 2 rather
-than guessing a shape for it inline. If Armand corrects a canned reply's tone repeatedly across
+than guessing a shape for it inline. If the user corrects a canned reply's tone repeatedly across
 runs, fold that correction into this file's example replies so the next run doesn't repeat it.

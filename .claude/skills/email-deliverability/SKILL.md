@@ -1,6 +1,6 @@
 ---
 name: email-deliverability
-description: "Use when Armand says \"set up email\", \"SPF DKIM DMARC\", \"emails going to spam\", \"sender reputation\", or when a product first sends transactional mail. Deliverability is mostly sender reputation with DNS plumbing as table stakes — this skill nails the plumbing and teaches the reputation part: generates the exact SPF, DKIM, and DMARC records for the chosen provider (asks: Resend or Postmark — trade-offs in one line each), explains every record in plain English, and verifies them post-publish with dig-based checks. DMARC starts at a monitoring policy (p=none with rua reporting), never jumping straight to reject. Includes the monthly health-check procedure (alignment verification, blacklist spot-check). DNS publishing itself is NEEDS YOUR HANDS — records are generated, never pushed. NOT for newsletter content (newsletter-automation) and NOT for launch copy (launch-kit)."
+description: "Use when the user says \"set up email\", \"SPF DKIM DMARC\", \"emails going to spam\", \"sender reputation\", or when a product first sends transactional mail. Deliverability is mostly sender reputation with DNS plumbing as table stakes — this skill nails the plumbing and teaches the reputation part: generates the exact SPF, DKIM, and DMARC records for the chosen provider (asks: Resend or Postmark — trade-offs in one line each), explains every record in plain English, and verifies them post-publish with dig-based checks. DMARC starts at a monitoring policy (p=none with rua reporting), never jumping straight to reject. Includes the monthly health-check procedure (alignment verification, blacklist spot-check). DNS publishing itself is NEEDS YOUR HANDS — records are generated, never pushed. NOT for newsletter content (newsletter-automation) and NOT for launch copy (launch-kit)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -31,10 +31,10 @@ so the reputation-building period isn't sabotaged by silently dropped legitimate
 
 Run first, always.
 
-1. Ask Armand for the sending domain (or sending subdomain, e.g. `send.` in front of the apex) if
+1. Ask the user for the sending domain (or sending subdomain, e.g. `send.` in front of the apex) if
    not already given this session. **Never guess a real domain from repo config, package name, or
    any other context** — the sending domain is a business decision, not something to infer.
-2. Ask Armand: Resend or Postmark? See the trade-off table below.
+2. Ask the user: Resend or Postmark? See the trade-off table below.
 3. Check whether records already exist: `dig TXT <domain> +short`, `dig TXT
    <selector>._domainkey.<domain> +short`, `dig TXT _dmarc.<domain> +short`. If all three already
    resolve and look correct (see Verifying with dig), this is a health-check run, not first-time
@@ -89,7 +89,7 @@ Value: v=DMARC1; p=none; rua=mailto:dmarc-reports@<yourdomain.com>
 
 ## Plain-English explanations
 
-Write these into `docs/email-deliverability.md` alongside the records so Armand (or anyone else
+Write these into `docs/email-deliverability.md` alongside the records so the user (or anyone else
 reading it later) isn't decoding acronyms under pressure:
 
 - **SPF** — a list of servers allowed to send mail claiming to be from this domain. Mail from
@@ -118,7 +118,7 @@ how legitimate mail disappears without anyone noticing until a customer complain
 
 ## Verifying with dig
 
-Run these against the real domain after Armand confirms the records are published (never before —
+Run these against the real domain after the user confirms the records are published (never before —
 `dig` against unpublished records just confirms they're not there yet):
 
 ```bash
@@ -165,7 +165,7 @@ Run monthly once mail is flowing in production. Log each run in `docs/email-deli
 
 ## Definition of Done
 
-- Sending domain and provider (Resend/Postmark) named by Armand, never guessed.
+- Sending domain and provider (Resend/Postmark) named by the user, never guessed.
 - All three record templates generated in `docs/email-dns-records.md`, DKIM's value marked
   "paste from provider dashboard" rather than invented.
 - DMARC starts at `p=none` with a working `rua` address — never `p=quarantine`/`p=reject` on

@@ -1,6 +1,6 @@
 ---
 name: explain-for-humans
-description: Use when Armand needs a NON-technical, plain-language explanation of code, a system, a feature, a bug, or a technical decision — for a stakeholder, PM, designer, founder, customer, or himself stepping back. Triggers on "explain X for non-devs / in plain English / for a PM / to a stakeholder / to my boss", "ELI5 this", "what does this service/feature actually do", "summarize this codebase for someone non-technical", "why does this matter for the business", "turn this into a release note". NOT for developer-facing explanations or onboarding (answer normally / use code-explorer for that).
+description: Use when the user needs a NON-technical, plain-language explanation of code, a system, a feature, a bug, or a technical decision — for a stakeholder, PM, designer, founder, customer, or themselves stepping back. Triggers on "explain X for non-devs / in plain English / for a PM / to a stakeholder / to my boss", "ELI5 this", "what does this service/feature actually do", "summarize this codebase for someone non-technical", "why does this matter for the business", "turn this into a release note". NOT for developer-facing explanations or onboarding (answer normally / use code-explorer for that).
 ---
 
 # Explain for Humans

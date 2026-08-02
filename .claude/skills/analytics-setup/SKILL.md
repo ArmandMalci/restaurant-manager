@@ -1,6 +1,6 @@
 ---
 name: analytics-setup
-description: "Use when Armand says \"set up analytics\", \"wire Plausible\", \"wire PostHog\", \"instrument the product\", or before a launch — growth-review depends on this being done first. Installs the minimal stack the AIOS standardizes on: Plausible (cookieless — usually no EU consent banner needed for it) site-wide, plus PostHog free tier for in-product events. HARD RULE: activation must be ONE explicitly named product event (\"created first project\"), never \"logged in\" — the skill refuses to finish until that event is named and instrumented. Wires UTM capture so channel attribution works from day one, and records the event names where growth-review will look for them. Console/API-key steps are marked NEEDS YOUR HANDS — the skill never creates accounts. NOT for reading metrics (growth-review) and NOT for event-taxonomy design at scale (product-tracking plugin skills)."
+description: "Use when the user says \"set up analytics\", \"wire Plausible\", \"wire PostHog\", \"instrument the product\", or before a launch — growth-review depends on this being done first. Installs the minimal stack the AIOS standardizes on: Plausible (cookieless — usually no EU consent banner needed for it) site-wide, plus PostHog free tier for in-product events. HARD RULE: activation must be ONE explicitly named product event (\"created first project\"), never \"logged in\" — the skill refuses to finish until that event is named and instrumented. Wires UTM capture so channel attribution works from day one, and records the event names where growth-review will look for them. Console/API-key steps are marked NEEDS YOUR HANDS — the skill never creates accounts. NOT for reading metrics (growth-review) and NOT for event-taxonomy design at scale (product-tracking plugin skills)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -21,7 +21,7 @@ lives in the environment. `Bash` is for the repo's own package manager (installi
 detect the framework and any analytics already wired; **never read a dotenv file to look for an
 existing key** — check exported environment variables only, same discipline as `growth-review`'s
 prerequisite check. This skill never creates the Plausible site or PostHog project itself — those
-are Armand's console steps, always (see NEEDS YOUR HANDS markers below).
+are the user's console steps, always (see NEEDS YOUR HANDS markers below).
 
 ## Overview
 
@@ -86,7 +86,7 @@ Site-wide, cookieless traffic tracking. One script tag, one domain.
   `/api/event` endpoint through the app's own domain (a Next.js `rewrites()` rule or a Cloudflare
   Worker route) instead of loading `plausible.io` directly — same script, different `src`/endpoint.
 
-**NEEDS YOUR HANDS:** Armand creates the Plausible site in the Plausible console (or self-hosted
+**NEEDS YOUR HANDS:** the user creates the Plausible site in the Plausible console (or self-hosted
 instance) and gives this skill the resulting site domain — this skill never signs up or creates
 the site itself.
 
@@ -95,7 +95,7 @@ the site itself.
 In-product event tracking, plus the one event that gates this whole skill.
 
 **HARD RULE — do not report this skill finished until the activation event is ONE explicitly
-named product event, instrumented at its real call site.** If Armand hasn't already named one
+named product event, instrumented at its real call site.** If the user hasn't already named one
 this session, ask: "what's the one action that means someone actually got value — not
 'logged in,' something like 'created first project' or 'sent first message'?" A vague answer
 ("engagement," "used the app") or "logged in" is not an answer — re-ask rather than substitute a
@@ -112,14 +112,14 @@ Once the event is named:
      env-var-sourced key/host pair.
 2. **Find the real call site.** Grep the codebase for the handler that actually completes the
    named action (e.g. the project-creation success path) — don't guess a component name. If more
-   than one candidate matches, ask Armand which one is the real completion point.
+   than one candidate matches, ask the user which one is the real completion point.
 3. **The capture call:** `posthog.capture('<named event, e.g. "created first project">')` at that
    exact call site — not in a generic middleware, not on every page load.
 
-**NEEDS YOUR HANDS:** Armand creates the PostHog project (free tier) and gives this skill the
+**NEEDS YOUR HANDS:** the user creates the PostHog project (free tier) and gives this skill the
 project API key and host region (`https://us.posthog.com` / `https://eu.posthog.com` /
 self-hosted) — this skill never creates the project itself. The key is set as an env var by
-Armand; this skill never writes the literal key into a file.
+the user; this skill never writes the literal key into a file.
 
 ## UTM capture
 

@@ -13,9 +13,9 @@ description: "Use when adding a new function, route, component, or any logic tha
 
 ## Steps
 
-1. **State the behavior** in one sentence. Get Armand's confirmation if ambiguous. Example: "When `parseInvoice` is called with a valid PDF, it returns `{ amount, currency, dueDate }`."
+1. **State the behavior** in one sentence. Get the user's confirmation if ambiguous. Example: "When `parseInvoice` is called with a valid PDF, it returns `{ amount, currency, dueDate }`."
 
-2. **Write the failing test.** Pick the test file matching the implementation file (`foo.ts` → `foo.test.ts`, `foo.py` → `test_foo.py`). Add ONE test that asserts the simplest case of the behavior. Show the test diff to Armand.
+2. **Write the failing test.** Pick the test file matching the implementation file (`foo.ts` → `foo.test.ts`, `foo.py` → `test_foo.py`). Add ONE test that asserts the simplest case of the behavior. Show the test diff to the user.
 
 3. **Run the test. Confirm RED for the right reason.**
    - TS: `pnpm test <file>` or `vitest <file>`

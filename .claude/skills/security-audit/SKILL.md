@@ -1,6 +1,6 @@
 ---
 name: security-audit
-description: "Use when Armand says \"security audit\", \"run a security scan\", \"check this repo for vulnerabilities\", \"audit dependencies\", \"is this safe to ship\", or before a release/PR on auth-, payment-, or user-data-touching code. Runs a three-layer pass: (1) dependency vulnerabilities via the repo's native scanner (npm audit / pnpm audit / pip-audit / osv-scanner when present), (2) secrets scan of the working tree (gitleaks if installed, else a documented grep fallback), (3) an OWASP-informed code review of boundary files (auth, input validation, SQL, shell exec, file paths) per .claude/rules/security_conventions.md. Outputs a severity-ranked markdown report; every finding explains WHY it is dangerous in plain English and cites file:line. NOT for fixing findings (that is a normal code task), NOT a replacement for the built-in /security-review on pending diffs — this audits the whole repo, /security-review audits a changeset."
+description: "Use when the user says \"security audit\", \"run a security scan\", \"check this repo for vulnerabilities\", \"audit dependencies\", \"is this safe to ship\", or before a release/PR on auth-, payment-, or user-data-touching code. Runs a three-layer pass: (1) dependency vulnerabilities via the repo's native scanner (npm audit / pnpm audit / pip-audit / osv-scanner when present), (2) secrets scan of the working tree (gitleaks if installed, else a documented grep fallback), (3) an OWASP-informed code review of boundary files (auth, input validation, SQL, shell exec, file paths) per .claude/rules/security_conventions.md. Outputs a severity-ranked markdown report; every finding explains WHY it is dangerous in plain English and cites file:line. NOT for fixing findings (that is a normal code task), NOT a replacement for the built-in /security-review on pending diffs — this audits the whole repo, /security-review audits a changeset."
 allowed_tools: [Read, Bash, Glob, Grep]
 ---
 
@@ -93,7 +93,7 @@ rule" and "When something goes wrong" sections. All commands use the standard ex
 | Missing path validation | `-E "path\.(join\|resolve)\(.*req\.(query\|params\|body)"` without a nearby `validatePath`/`resolve`+prefix-check pair | **Needs your call** — confirm manually whether traversal is actually reachable |
 
 Per hub doctrine, rows marked "needs your call" are reported but never assigned a severity — flag
-them as `JUDGMENT` in the Severity column and let Armand decide.
+them as `JUDGMENT` in the Severity column and let the user decide.
 
 ## CI wiring
 

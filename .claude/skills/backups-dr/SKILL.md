@@ -1,6 +1,6 @@
 ---
 name: backups-dr
-description: "Use when Armand says \"set up backups\", \"disaster recovery\", \"restore test\", \"what if the DB dies\", or when a product first stores real user data. Doctrine: an untested backup is not a backup, and platform redundancy protects the PLATFORM, not your data in it (shared-responsibility model). Does three things: (1) inventories what must survive — DB, object storage, secrets custody, signing keys (cross-references mobile-release's keystore gate), (2) wires the backup path for the actual stack (Postgres/Supabase dump schedule, storage sync) plus a scheduled RESTORE-TEST: restore into a scratch instance and verify a known row, never just check the file exists, (3) writes the one-page DR plan with RPO/RTO in plain numbers and the exact restore commands. Prerequisite-check-first. NOT for git repos (already distributed) and NOT for incident response (monitoring-setup's runbook owns that)."
+description: "Use when the user says \"set up backups\", \"disaster recovery\", \"restore test\", \"what if the DB dies\", or when a product first stores real user data. Doctrine: an untested backup is not a backup, and platform redundancy protects the PLATFORM, not your data in it (shared-responsibility model). Does three things: (1) inventories what must survive — DB, object storage, secrets custody, signing keys (cross-references mobile-release's keystore gate), (2) wires the backup path for the actual stack (Postgres/Supabase dump schedule, storage sync) plus a scheduled RESTORE-TEST: restore into a scratch instance and verify a known row, never just check the file exists, (3) writes the one-page DR plan with RPO/RTO in plain numbers and the exact restore commands. Prerequisite-check-first. NOT for git repos (already distributed) and NOT for incident response (monitoring-setup's runbook owns that)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -35,7 +35,7 @@ Run first. Backing up nothing is free; the check is whether there's anything rea
 
 1. Detect a real, non-ephemeral data store: `schema.prisma` / `drizzle` config, a `DATABASE_URL`
    / `SUPABASE_URL` env reference in the app, or a `docker-compose.yml` service named
-   `postgres`/`db`. Confirm with Armand which one is the production data store if more than one
+   `postgres`/`db`. Confirm with the user which one is the production data store if more than one
    turns up (e.g. a local dev Postgres alongside a hosted Supabase project).
 2. Detect object storage usage if any: search app config for an S3/R2/Supabase Storage bucket
    reference.
@@ -52,10 +52,10 @@ List every category that must survive a total platform loss, for this specific p
 |---|---|---|
 | Primary database | Restorable to a point in time, verified by restore-test below | This skill |
 | Object storage (user uploads, generated assets) | Synced to a second location/provider, not just replicated within one provider | This skill (wiring only — see below) |
-| Secrets custody (API keys, DB credentials, signing secrets) | Held in a password manager or secret store the team can access without the original machine | Confirm with Armand; this skill does not manage secrets storage itself |
-| Signing keys (mobile app, code-signing certs) | **Cross-reference only** — this is `mobile-release`'s Gate 1 (credential custody). Point Armand there rather than re-deriving expiry checks or backup-location judgment calls here; duplicating that logic in two places is how it drifts out of sync. |
+| Secrets custody (API keys, DB credentials, signing secrets) | Held in a password manager or secret store the team can access without the original machine | Confirm with the user; this skill does not manage secrets storage itself |
+| Signing keys (mobile app, code-signing certs) | **Cross-reference only** — this is `mobile-release`'s Gate 1 (credential custody). Point the user there rather than re-deriving expiry checks or backup-location judgment calls here; duplicating that logic in two places is how it drifts out of sync. |
 
-For the object-storage and secrets rows, this skill confirms an answer exists (asks Armand
+For the object-storage and secrets rows, this skill confirms an answer exists (asks the user
 directly if not obvious from repo config) but does not implement secret-manager migrations or
 storage replication — those are stack-specific enough to be a separate task once named.
 
@@ -90,7 +90,7 @@ rclone sync source:my-bucket dest:my-bucket-backup
 
 **NEEDS YOUR HANDS:** wiring the actual schedule into a cron/CI dashboard, enabling any paid
 PITR/replication add-on, and creating the second-provider storage bucket — this skill generates
-the commands, Armand (or an already-approved CI config) runs them on a schedule.
+the commands, the user (or an already-approved CI config) runs them on a schedule.
 
 ## Restore-test procedure
 

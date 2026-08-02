@@ -3,7 +3,7 @@
 > Source: `docs/superpowers/specs/2026-08-01-claude-setup-program-design.md` §7. Ten steps,
 > dependency-ordered — each one only makes sense once the step before it is understood. `seo-audit`
 > covers steps 1–5 directly (its checklist maps onto them); steps 6–8 are covered by `launch-kit`;
-> steps 9–10 by `growth-review`. SKILL.md's Teaching Contract names whichever step Armand hasn't
+> steps 9–10 by `growth-review`. SKILL.md's Teaching Contract names whichever step the user hasn't
 > seen covered yet at the end of every run — this file is what gets taught, in order.
 
 ## 1. The crawl → render → index → rank model

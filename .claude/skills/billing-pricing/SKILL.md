@@ -1,6 +1,6 @@
 ---
 name: billing-pricing
-description: "Use when Armand says \"set up billing\", \"Merchant of Record\", \"pricing review\", \"subscriptions\", \"dunning\", or before a product charges its first customer. Two halves: (1) BILLING PLUMBING — the MoR decision first: a Paddle/Lemon-Squeezy-class Merchant of Record offloads global sales-tax/VAT nexus, the compliance trap solo founders miss; Stripe-direct only with that trade-off stated plainly. Then the webhook-handler checklist for the subscription lifecycle, including failed-payment dunning — recovered revenue routinely beats new marketing spend. (2) PRICING REVIEW — a periodic pass over tiers vs unit economics, consuming cost-control's cost-to-serve note; usage-vs-seat trade-offs stated in plain English. All account/console steps NEEDS YOUR HANDS; pricing decisions needs-your-call. NOT for tax filing or runway (finance-ops)."
+description: "Use when the user says \"set up billing\", \"Merchant of Record\", \"pricing review\", \"subscriptions\", \"dunning\", or before a product charges its first customer. Two halves: (1) BILLING PLUMBING — the MoR decision first: a Paddle/Lemon-Squeezy-class Merchant of Record offloads global sales-tax/VAT nexus, the compliance trap solo founders miss; Stripe-direct only with that trade-off stated plainly. Then the webhook-handler checklist for the subscription lifecycle, including failed-payment dunning — recovered revenue routinely beats new marketing spend. (2) PRICING REVIEW — a periodic pass over tiers vs unit economics, consuming cost-control's cost-to-serve note; usage-vs-seat trade-offs stated in plain English. All account/console steps NEEDS YOUR HANDS; pricing decisions needs-your-call. NOT for tax filing or runway (finance-ops)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -14,7 +14,7 @@ record, the webhook-handler checklist, dunning notes, and the pricing review) pl
 consent only, the shared `.claude/context/business-profile.md` (see Interview-or-profile). It
 never creates a Stripe/Paddle/Lemon Squeezy account, never registers a real webhook endpoint, and
 never changes a live price — every account/console step is NEEDS YOUR HANDS and every pricing
-change is needs-your-call, Armand's decision recorded here, never auto-applied. `Bash` is
+change is needs-your-call, the user's decision recorded here, never auto-applied. `Bash` is
 read-only: detecting the stack and dependency manifest, and safe-grepping for a billing SDK
 already integrated so the MoR/webhook advice matches what's actually there, not a guess.
 `Read`/`Glob`/`Grep` also read `docs/unit-economics.md` (the seam `cost-control` writes) for the
@@ -75,15 +75,15 @@ State the trade-off plainly, every time, before any webhook detail:
   might be in. This offloads the compliance trap solo founders most often miss: crossing a
   registration threshold in a country or US state without knowing it, then owing back taxes and
   penalties with no accountant watching for it. Trade-off: the MoR takes a materially larger cut
-  than a payment processor's raw fee, and Armand gives up some checkout/branding control.
+  than a payment processor's raw fee, and the user gives up some checkout/branding control.
 - **Stripe-direct (or an equivalent PSP)** — cheaper per-transaction, full control over checkout
-  and branding, but Armand's entity is the seller of record and owns sales-tax/VAT registration
+  and branding, but the user's entity is the seller of record and owns sales-tax/VAT registration
   and remittance everywhere it applies. This is viable only with that obligation genuinely
   understood and, ideally, an accountant or tax-automation add-on in the loop — never silently
   assumed away.
 
 **Default recommendation for a solo founder with no dedicated finance/tax function: MoR first,
-Stripe-direct only as a deliberate, informed trade-off** — record which Armand picked and why in
+Stripe-direct only as a deliberate, informed trade-off** — record which the user picked and why in
 `docs/billing-pricing.md`; this is a needs-your-call decision, never auto-selected.
 
 ### Webhook-handler checklist (subscription lifecycle)
@@ -142,7 +142,7 @@ explain and predict but rewards low-usage customers and punishes high-usage ones
 plan; usage-based (price per unit consumed) tracks cost-to-serve more accurately but is harder to
 predict and can surprise customers with variable bills. The profile's `Model:` line is a starting
 signal — B2B seat licenses are a familiar procurement shape, B2C usage-based can align price with
-value more directly — but this is Armand's call, never this skill's default.
+value more directly — but this is the user's call, never this skill's default.
 
 **Every pricing change coming out of this review is needs-your-call** — the skill states the
 trade-off and the unit-economics evidence; it never edits a live price, plan, or checkout

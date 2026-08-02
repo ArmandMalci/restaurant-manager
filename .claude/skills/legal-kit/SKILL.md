@@ -1,6 +1,6 @@
 ---
 name: legal-kit
-description: "Use when Armand says \"terms of service\", \"privacy policy\", \"DPA\", \"cookie banner\", \"legal pages\", or before a product's public signup opens. EVERY artifact carries a hard flag: DRAFT — a human lawyer reviews before publish; this skill assists, it never signs off. Interview-or-profile first: reads .claude/context/business-profile.md when present, else asks one question at a time (entity, jurisdiction, data collected, processors, B2B/B2C) and offers to save the answers there. Generates: ToS and Privacy Policy drafts matched to what the product ACTUALLY collects (cross-references analytics-setup choices — Plausible's cookieless design often removes the consent-banner need), a DPA template for B2B customers, and a records-of-processing skeleton. Every clause carries a plain-English why. NOT for the deletion/export mechanics (dsr-ops) and NOT for entity-formation advice (lawyer/accountant territory, flagged as such)."
+description: "Use when the user says \"terms of service\", \"privacy policy\", \"DPA\", \"cookie banner\", \"legal pages\", or before a product's public signup opens. EVERY artifact carries a hard flag: DRAFT — a human lawyer reviews before publish; this skill assists, it never signs off. Interview-or-profile first: reads .claude/context/business-profile.md when present, else asks one question at a time (entity, jurisdiction, data collected, processors, B2B/B2C) and offers to save the answers there. Generates: ToS and Privacy Policy drafts matched to what the product ACTUALLY collects (cross-references analytics-setup choices — Plausible's cookieless design often removes the consent-banner need), a DPA template for B2B customers, and a records-of-processing skeleton. Every clause carries a plain-English why. NOT for the deletion/export mechanics (dsr-ops) and NOT for entity-formation advice (lawyer/accountant territory, flagged as such)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -13,7 +13,7 @@ allowed_tools: [Read, Write, Bash, Glob, Grep]
 `docs/legal/privacy-policy.md`, `docs/legal/dpa-template.md`, and
 `docs/legal/records-of-processing.md`; (2) `.claude/context/business-profile.md` — the shared
 interview-profile file also read/written by `dsr-ops` and later business-ops skills — and only
-after Armand explicitly says yes to saving (see Interview-or-profile below). This skill never
+after the user explicitly says yes to saving (see Interview-or-profile below). This skill never
 writes anywhere else: no application source, no `.env`, no actual publish target (a marketing
 site's `/terms` route, a CMS). Publishing a drafted page live is a separate, human-reviewed step
 this skill does not take. `Bash` is read-only here — detecting the dependency manifest
@@ -80,7 +80,7 @@ data-collection or processing practice the product doesn't evidence.**
    profile's `Processors:` line names something the manifest scan can't see (e.g. a processor
    used only server-side via a raw HTTP call with no SDK dependency).
 3. Reconcile the profile's `Data collected:` / `Processors:` lines against steps 1–2. Where they
-   disagree, ask Armand which is authoritative before drafting — never silently pick one side.
+   disagree, ask the user which is authoritative before drafting — never silently pick one side.
 
 ## Generating the artifacts
 
@@ -91,7 +91,7 @@ never a hardcoded date left over from a template):
 > DRAFT — a human lawyer reviews before publish. Generated <YYYY-MM-DD> by legal-kit.
 ```
 
-Every clause below that banner carries a one-line **why** — the reader (Armand, or the lawyer
+Every clause below that banner carries a one-line **why** — the reader (the user, or the lawyer
 reviewing it) should never have to guess what a clause is protecting against.
 
 **`docs/legal/tos.md`** — Terms of Service. Sections scaled to the profile's `Model:` (B2B adds
@@ -111,7 +111,7 @@ the reviewing lawyer, never as legal advice this skill is qualified to give.
 **`docs/legal/dpa-template.md`** — Data Processing Agreement template, generated only when the
 profile's `Model:` is `B2B` (a DPA governs the relationship between this product as a processor
 and a business customer as controller, or vice versa — it has no B2C analogue). If `Model:` is
-`B2C` and Armand asks for one anyway, generate it but flag that a DPA's usual trigger (a B2B
+`B2C` and the user asks for one anyway, generate it but flag that a DPA's usual trigger (a B2B
 customer requesting one contractually) doesn't apply here — needs-your-call whether it's still
 useful.
 
@@ -127,7 +127,7 @@ elsewhere).
 - Interview-or-profile ran first; the profile was read if present, or the five questions were
   asked one at a time and a save was offered (never assumed) before drafting began.
 - Prerequisite check ran: `docs/analytics-setup.md` checked, dependency manifest grepped for
-  known processor SDKs, and any profile/evidence mismatch was surfaced to Armand rather than
+  known processor SDKs, and any profile/evidence mismatch was surfaced to the user rather than
   silently resolved.
 - Every generated file in `docs/legal/` opens with the literal DRAFT banner, dated at run time.
 - Privacy Policy's "What we collect" and "Third parties" sections list only evidenced or
@@ -144,5 +144,5 @@ If `analytics-setup`'s handoff-note format at `docs/analytics-setup.md` changes 
 step 1 of the Prerequisite check to match — this skill and that one must stay pointed at the same
 file and format. If a new processor category becomes common (a new payments or email provider),
 add its SDK name to the grep patterns in step 2 rather than missing it silently on future runs.
-If Armand corrects a drafted clause's substance repeatedly across runs, fold the correction into
+If the user corrects a drafted clause's substance repeatedly across runs, fold the correction into
 the relevant artifact section here so the next draft doesn't repeat the same lawyer-flagged issue.

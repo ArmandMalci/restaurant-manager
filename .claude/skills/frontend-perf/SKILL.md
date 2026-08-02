@@ -1,6 +1,6 @@
 ---
 name: frontend-perf
-description: "Use when Armand says \"why is this page slow\", \"bundle analysis\", \"check Core Web Vitals\", \"performance audit the frontend\", or after a dependency-heavy feature lands. Two layers: (1) build-time — bundle analysis via the framework's native tooling (next build stats / expo-atlas / vite --report), flagging the top-10 heaviest modules, duplicate dependencies, and un-lazy-loaded routes; (2) field — Core Web Vitals as FIELD data (CrUX p75 over 28 days: LCP <2.5s, INP <200ms, CLS <0.1) when the site has traffic, clearly labeled lab-only otherwise — a green local Lighthouse run alone proves nothing and the report must say so. Findings ranked by user-impact with a plain-English why per finding and the single highest-leverage fix named first. NOT for full SEO audits (seo-audit covers CWV in context) and NOT for backend latency (that is profiling work)."
+description: "Use when the user says \"why is this page slow\", \"bundle analysis\", \"check Core Web Vitals\", \"performance audit the frontend\", or after a dependency-heavy feature lands. Two layers: (1) build-time — bundle analysis via the framework's native tooling (next build stats / expo-atlas / vite --report), flagging the top-10 heaviest modules, duplicate dependencies, and un-lazy-loaded routes; (2) field — Core Web Vitals as FIELD data (CrUX p75 over 28 days: LCP <2.5s, INP <200ms, CLS <0.1) when the site has traffic, clearly labeled lab-only otherwise — a green local Lighthouse run alone proves nothing and the report must say so. Findings ranked by user-impact with a plain-English why per finding and the single highest-leverage fix named first. NOT for full SEO audits (seo-audit covers CWV in context) and NOT for backend latency (that is profiling work)."
 allowed_tools: [Read, Bash, Glob, Grep]
 ---
 
@@ -28,7 +28,7 @@ entry in the final report, never as a silent skip.
    - `app.json` containing an `"expo"` key, or `"expo"` under `package.json` dependencies → Expo
    - `vite.config.{js,ts,mjs}` → Vite
 
-   Zero matches, or more than one (a monorepo with several apps) → ask Armand which target
+   Zero matches, or more than one (a monorepo with several apps) → ask the user which target
    app/package before continuing. Never infer the framework from `react` being present alone.
 2. **Package manager.** Detect from the lockfile: `pnpm-lock.yaml` → pnpm, `bun.lockb` → bun,
    `yarn.lock` → yarn, else `package-lock.json` → npm. This decides the exact command shape used
@@ -45,7 +45,7 @@ entry in the final report, never as a silent skip.
    — never read `.env`/dotenv files to find it, check the exported var only). Missing → the field
    layer has no data source; report lab-only. A local Lighthouse run is never a substitute for
    this — see Layer 2.
-6. **Site has traffic.** Ask Armand, or check for a production URL. CrUX only has a record once
+6. **Site has traffic.** Ask the user, or check for a production URL. CrUX only has a record once
    an origin has enough real Chrome traffic over 28 days — a brand-new or local-only app has
    nothing to query. That's an N/A by definition, not a missing-tool gap; don't conflate the two
    in the report.
@@ -124,7 +124,7 @@ is not duplicated here.
 - Traffic + `CRUX_API_KEY` both present (prerequisites 5–6): run the CrUX check from that item,
   report the three p75 metrics labeled **FIELD DATA**.
 - Either missing: skip field data entirely. It's fine to run Lighthouse as a local sanity check if
-  Armand wants one, but every number from it must be labeled **LAB ONLY — not the CrUX ranking
+  the user wants one, but every number from it must be labeled **LAB ONLY — not the CrUX ranking
   signal**, never presented bare as "Performance: 94".
 
 ## Report format
@@ -167,7 +167,7 @@ convention). Structure, in this exact order:
 
 ## Self-Improvement Loop
 
-When the heavy-lib grep list (Next.js/Vite un-lazy-loaded-route check) misses a library Armand
+When the heavy-lib grep list (Next.js/Vite un-lazy-loaded-route check) misses a library the user
 actually cares about, or flags noise for something intentionally eager-loaded, update the list in
 Layer 1 above before moving on — don't let the fix live only in a one-off report. Same for the
 framework-detection glob patterns if a new meta-framework version changes its config filename

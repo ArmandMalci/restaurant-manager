@@ -1,6 +1,6 @@
 ---
 name: finance-ops
-description: "Use when Armand says \"runway\", \"taxes\", \"bookkeeping\", \"quarterly filing\", or when the quarterly finance Routine fires. Not an accountant — a disciplined nag with a spreadsheet: (1) runway tracker — burn vs cash in one table, computed only from numbers Armand provides in the session, never guessed or scraped, (2) filing-deadline calendar seeded by jurisdiction from .claude/context/business-profile.md (asks if absent; deadlines are jurisdiction-specific and the calendar says so — an accountant confirms dates), (3) the quarterly checklist: reconcile payouts, estimated-tax reminder, receipts sweep, one what-changed note. Every output carries the human-accountant-reviews flag. Report-only when run by the Routine — it never books, files, or moves money. NOT for pricing strategy (billing-pricing) and NOT for spend caps (cost-control)."
+description: "Use when the user says \"runway\", \"taxes\", \"bookkeeping\", \"quarterly filing\", or when the quarterly finance Routine fires. Not an accountant — a disciplined nag with a spreadsheet: (1) runway tracker — burn vs cash in one table, computed only from numbers the user provides in the session, never guessed or scraped, (2) filing-deadline calendar seeded by jurisdiction from .claude/context/business-profile.md (asks if absent; deadlines are jurisdiction-specific and the calendar says so — an accountant confirms dates), (3) the quarterly checklist: reconcile payouts, estimated-tax reminder, receipts sweep, one what-changed note. Every output carries the human-accountant-reviews flag. Report-only when run by the Routine — it never books, files, or moves money. NOT for pricing strategy (billing-pricing) and NOT for spend caps (cost-control)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -61,7 +61,7 @@ the real date at run time — never a hardcoded date left over from a template):
 
 ## 1. Runway tracker
 
-Burn vs cash in one table — **computed only from numbers Armand provides in this session**.
+Burn vs cash in one table — **computed only from numbers the user provides in this session**.
 Never guessed, never scraped from a bank or processor API (this skill has no such access and
 would not use it if it did). If a number is missing, ask for it and stop there rather than
 estimating.
@@ -75,16 +75,16 @@ Write to `docs/finance/runway.md`:
 # Runway Tracker
 
 > DRAFT — a human accountant reviews before use. Generated <YYYY-MM-DD> by finance-ops.
-> Report-only. Numbers below are exactly what Armand provided this session — nothing scraped,
+> Report-only. Numbers below are exactly what the user provided this session — nothing scraped,
 > nothing estimated.
 
 | Metric | Value | As of |
 |---|---|---|
-| Cash on hand | $<from Armand> | <date> |
-| Avg monthly burn | $<from Armand> | <date> |
+| Cash on hand | $<from the user> | <date> |
+| Avg monthly burn | $<from the user> | <date> |
 | Runway (cash ÷ burn) | <computed> months | <date> |
 
-Notes: <any one-off inflow/outflow Armand named, e.g. "Q3 includes a one-time $X invoice payout">.
+Notes: <any one-off inflow/outflow the user named, e.g. "Q3 includes a one-time $X invoice payout">.
 ```
 
 ## 2. Filing-deadline calendar
@@ -110,7 +110,7 @@ Write to `docs/finance/filing-calendar.md`:
 | <e.g. annual entity return> | Annual | <example date> | [ ] |
 
 Rows are named from common patterns for the stated jurisdiction — not a complete or authoritative
-list. Armand's accountant is the source of truth for what actually applies and when.
+list. The user's accountant is the source of truth for what actually applies and when.
 ```
 
 ## 3. Quarterly checklist
@@ -123,15 +123,15 @@ skill reconciles, reminds, and notes; it never executes a booking, filing, or tr
    ```bash
    grep -n "stripe\|paddle\|lemonsqueezy" package.json pyproject.toml requirements.txt 2>/dev/null
    ```
-   Ask Armand for this quarter's payout total from that processor's own dashboard (this skill has
-   no API access to fetch it) and whether it matches his expectation. Record any mismatch as a
+   Ask the user for this quarter's payout total from that processor's own dashboard (this skill has
+   no API access to fetch it) and whether it matches their expectation. Record any mismatch as a
    flagged item — never silently resolve it.
 2. **Estimated-tax reminder.** Point at the next illustrative date in the filing calendar above
-   and remind Armand it's approaching — never compute or suggest a specific amount to pay; that's
+   and remind the user it's approaching — never compute or suggest a specific amount to pay; that's
    the accountant's call.
-3. **Receipts sweep.** Ask Armand to gather this quarter's receipts (or confirm they're already
+3. **Receipts sweep.** Ask the user to gather this quarter's receipts (or confirm they're already
    filed somewhere); this skill has no mailbox or storage access to fetch them itself.
-4. **What-changed note.** One line, in Armand's own words if possible: what changed in the
+4. **What-changed note.** One line, in the user's own words if possible: what changed in the
    business this quarter (new plan, pricing change, entity change, new processor). Feeds
    `docs/finance/quarterly-checklist.md` and flags `legal-kit`/`billing-pricing` re-runs if the
    change touches their scope.
@@ -145,17 +145,17 @@ Write the completed pass to `docs/finance/quarterly-checklist.md`:
 
 | Item | Outcome | Date |
 |---|---|---|
-| Reconcile payouts | <matched / mismatch flagged, with the number Armand gave> | <date> |
+| Reconcile payouts | <matched / mismatch flagged, with the number the user gave> | <date> |
 | Estimated-tax reminder | <next illustrative deadline surfaced> | <date> |
 | Receipts sweep | <gathered / confirmed already filed> | <date> |
-| What-changed note | <one line, Armand's words> | <date> |
+| What-changed note | <one line, the user's words> | <date> |
 ```
 
 ## Report-only mode (the finance-quarterly Routine)
 
 When this skill is invoked by the `finance-quarterly` Routine (or any other unattended/headless
 run), it runs strictly in report-only mode: for every number in sections 1–3 above that isn't
-already known from the session, it lists exactly what it needs from Armand and **stops there** —
+already known from the session, it lists exactly what it needs from the user and **stops there** —
 it never estimates, never carries over a stale number from a prior run as current, and never
 books, files, or moves anything, regardless of how the run was triggered.
 
@@ -163,7 +163,7 @@ books, files, or moves anything, regardless of how the run was triggered.
 
 - Interview-or-profile ran first; profile read if present, or the five questions asked one at a
   time with a save offered (never assumed).
-- Runway tracker in `docs/finance/runway.md` contains only numbers Armand gave this session — no
+- Runway tracker in `docs/finance/runway.md` contains only numbers the user gave this session — no
   guessed or scraped figures — or explicitly lists what's still missing and stops.
 - Filing calendar in `docs/finance/filing-calendar.md` is seeded from the profile's
   `Jurisdiction:` line, every row marked illustrative, every "Accountant-confirmed?" checkbox

@@ -1,6 +1,6 @@
 ---
 name: launch-kit
-description: "Use when Armand says \"launch kit\", \"write my landing page copy\", \"prepare the Product Hunt / Show HN launch\", \"positioning for X\", \"launch plan\", or when a project nears shippable. HARD GATE: runs a JTBD positioning interview FIRST (what job is this hired for, what real alternative it displaces, functional/emotional/social outcomes) and REFUSES to generate any copy until it is answered — copy-before-positioning is the classic indie-launch failure. Then produces: a positioning one-pager (including an explicit \"who this is NOT for\" section), PAS-structured landing hero copy with JTBD-framed feature lines (\"so you can ___\"), per-channel launch briefs (Product Hunt hour-by-hour day-of checklist + maker's comment; Show HN title + first-comment draft; Reddit disclosure-first framing; X demo-clip script), and a 3-email pre-launch sequence, each artifact carrying an inline why-comment. NOT for ongoing content marketing (newsletter-automation / repurpose-youtube) and NOT for SEO mechanics (seo-audit)."
+description: "Use when the user says \"launch kit\", \"write my landing page copy\", \"prepare the Product Hunt / Show HN launch\", \"positioning for X\", \"launch plan\", or when a project nears shippable. HARD GATE: runs a JTBD positioning interview FIRST (what job is this hired for, what real alternative it displaces, functional/emotional/social outcomes) and REFUSES to generate any copy until it is answered — copy-before-positioning is the classic indie-launch failure. Then produces: a positioning one-pager (including an explicit \"who this is NOT for\" section), PAS-structured landing hero copy with JTBD-framed feature lines (\"so you can ___\"), per-channel launch briefs (Product Hunt hour-by-hour day-of checklist + maker's comment; Show HN title + first-comment draft; Reddit disclosure-first framing; X demo-clip script), and a 3-email pre-launch sequence, each artifact carrying an inline why-comment. NOT for ongoing content marketing (newsletter-automation / repurpose-youtube) and NOT for SEO mechanics (seo-audit)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -8,14 +8,14 @@ allowed_tools: [Read, Write, Bash, Glob, Grep]
 
 ## Overview
 
-Armand named marketing his weakest area. This skill is a thinking tool, not a template
+The user named marketing their weakest area. This skill is a thinking tool, not a template
 filler: it forces a Jobs-to-be-Done positioning decision before it will write a single
 line of copy, because copy written before positioning is the classic indie-launch
 failure — polished sentences arguing for the wrong thing, fixed by rewriting everything
 after launch day instead of before it.
 
 Reads the target project (README, package.json/pyproject, existing landing page if any)
-to ground the interview in specifics, then interviews Armand, then writes five artifacts
+to ground the interview in specifics, then interviews the user, then writes five artifacts
 into a `launch/` folder in the target project. NOT for recurring content (newsletter-automation,
 repurpose-youtube — see the seo-marketing pack), NOT for SEO mechanics (seo-audit), NOT for
 post-launch metrics (growth-review — this skill only states the rule, growth-review is where
@@ -88,8 +88,8 @@ count is vanity if none of it converts to the one named activation event (e.g. "
 project" — never "logged in", per the same naming discipline growth-review uses for its
 funnel). Launch day success is measured by how many of today's signups do the activating
 action, not by how many people showed up. State this rule in `channel-briefs.md`'s Product
-Hunt section — that's the artifact Armand opens first on launch morning, so the reminder
-lands right before he needs it, not buried in a one-pager he read a week earlier.
+Hunt section — that's the artifact the user opens first on launch morning, so the reminder
+lands right before they need it, not buried in a one-pager they read a week earlier.
 
 ## Output layout
 
@@ -187,7 +187,7 @@ Three emails, pre-launch:
 
 If a channel's real mechanics change — Product Hunt's ranking window shifts, Reddit
 tightens or loosens self-promotion rules, Show HN's comment-ranking behavior changes — or
-if Armand's JTBD answers keep circling a question this interview doesn't ask, update the
+if the user's JTBD answers keep circling a question this interview doesn't ask, update the
 interview questions or the channel-briefs section in this file directly. Don't let the
 correction live only in one project's `launch/` output — the next launch should start from
 the improved version, not repeat the same gap.

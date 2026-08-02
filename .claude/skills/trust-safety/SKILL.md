@@ -1,6 +1,6 @@
 ---
 name: trust-safety
-description: "Use ONLY when a product has UGC surfaces — uploads, comments, DMs, public profiles — and Armand says \"trust and safety\", \"moderation\", \"report button\", \"UGC policy\", or a store submission nears for a UGC app. App review treats this as a GATE: missing report/block flows get UGC apps rejected, not critiqued. Generates: (1) the moderation policy doc — what is banned, the enforcement ladder, the appeal path, (2) the report/block UX spec — where the controls live, what happens on tap, the moderation-queue shape, (3) DMCA-agent and child-safety reporting notes where applicable, jurisdiction facts via interview-or-profile and flagged for human legal review. Prerequisite-check-first with teeth: no UGC surface detected in the product means SAY SO AND STOP — moderation must not be bolted onto non-UGC apps. Automated content-scanning is out of scope, named only as a future integration point. NOT for support workflows (support-ops)."
+description: "Use ONLY when a product has UGC surfaces — uploads, comments, DMs, public profiles — and the user says \"trust and safety\", \"moderation\", \"report button\", \"UGC policy\", or a store submission nears for a UGC app. App review treats this as a GATE: missing report/block flows get UGC apps rejected, not critiqued. Generates: (1) the moderation policy doc — what is banned, the enforcement ladder, the appeal path, (2) the report/block UX spec — where the controls live, what happens on tap, the moderation-queue shape, (3) DMCA-agent and child-safety reporting notes where applicable, jurisdiction facts via interview-or-profile and flagged for human legal review. Prerequisite-check-first with teeth: no UGC surface detected in the product means SAY SO AND STOP — moderation must not be bolted onto non-UGC apps. Automated content-scanning is out of scope, named only as a future integration point. NOT for support workflows (support-ops)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -14,7 +14,7 @@ allowed_tools: [Read, Write, Bash, Glob, Grep]
 plus, with explicit consent only, the shared `.claude/context/business-profile.md` (see
 Interview-or-profile). It never edits application source, never wires a real report/block
 endpoint, and never calls or stubs a content-moderation API — every artifact here is a spec for
-Armand and a human reviewer to act on. `Bash` is read-only: safe-grepping the codebase for
+the user and a human reviewer to act on. `Bash` is read-only: safe-grepping the codebase for
 UGC-surface evidence (uploads, comment models, DM routes, public profile pages) — never a database
 command, never an API call. `Read`/`Glob`/`Grep` also pick up any prior `docs/trust-safety/*` from
 a re-run.
@@ -95,11 +95,11 @@ find . -path "*/app/*" -iname "*profile*" -not -path "*/node_modules/*" -not -pa
 ```
 
 **HARD GATE — do not generate any moderation artifact past this point until at least one UGC
-surface is confirmed.** A hit in any of the four categories above, or Armand directly naming a
+surface is confirmed.** A hit in any of the four categories above, or the user directly naming a
 UGC surface the grep can't see (e.g. a raw HTTP upload with no SDK dependency), counts as
 confirmation.
 
-**No UGC surface found, and Armand doesn't name one directly → SAY SO AND STOP.** The exact
+**No UGC surface found, and the user doesn't name one directly → SAY SO AND STOP.** The exact
 refusal: "No upload endpoint, comment model, DM route, or public profile page was found in this
 repo, and none was named. This skill does not draft a moderation policy for a UGC surface that
 doesn't exist — moderation must not be bolted onto a non-UGC app on the chance one gets added
@@ -201,7 +201,7 @@ of accuracy, cost, and false-positive rate.
 ## Definition of Done
 
 - Prerequisite check ran; a UGC surface was either found by the grep above or named directly by
-  Armand — or the run stopped with the exact refusal language above and generated nothing else.
+  the user — or the run stopped with the exact refusal language above and generated nothing else.
 - Interview-or-profile ran (if the Prerequisite check passed); profile read if present, or the five
   questions asked one at a time with a save offered (never assumed).
 - `docs/trust-safety/moderation-policy.md` states the enforcement ladder's four steps each with a

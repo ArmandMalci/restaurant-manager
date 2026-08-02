@@ -1,6 +1,6 @@
 ---
 name: api-docs
-description: "Use when Armand says \"generate API docs\", \"OpenAPI spec\", \"document these endpoints\", or \"is the spec stale\". For FastAPI: exports the framework-native OpenAPI JSON and audits it for undocumented response models, missing examples, and Any-typed bodies. For Next.js routes / Spring: derives the spec from route handlers and DTOs, flagging handlers whose types cannot be derived (they get a needs-your-call marker, never guessed). DRIFT MODE compares the committed spec against current routes and lists added/removed/changed endpoints. Output: openapi.json (or .yaml matching repo convention) + a drift report. NOT for writing user-facing docs prose (doc-updater) and NOT for designing new endpoints (that is feature work with db-design/code-architect)."
+description: "Use when the user says \"generate API docs\", \"OpenAPI spec\", \"document these endpoints\", or \"is the spec stale\". For FastAPI: exports the framework-native OpenAPI JSON and audits it for undocumented response models, missing examples, and Any-typed bodies. For Next.js routes / Spring: derives the spec from route handlers and DTOs, flagging handlers whose types cannot be derived (they get a needs-your-call marker, never guessed). DRIFT MODE compares the committed spec against current routes and lists added/removed/changed endpoints. Output: openapi.json (or .yaml matching repo convention) + a drift report. NOT for writing user-facing docs prose (doc-updater) and NOT for designing new endpoints (that is feature work with db-design/code-architect)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -117,7 +117,7 @@ schema:
 ```
 
 List every `needs-your-call` marker in the final report as its own section — these are gaps
-Armand resolves, not gaps this skill fills in with a plausible-looking guess.
+the user resolves, not gaps this skill fills in with a plausible-looking guess.
 
 ## DRIFT MODE
 

@@ -148,7 +148,7 @@ crawlable server-rendered HTML (items 8–9) plus correct, extractable structure
 especially `FAQPage`). Treat "add an `llms.txt`" as a request that should be redirected back to
 these existing checks, not a new item to add.
 
-**Check:** none — this item's check is the absence of a check. If Armand asks about `llms.txt`
+**Check:** none — this item's check is the absence of a check. If the user asks about `llms.txt`
 specifically, the audit should state this reasoning rather than silently adding the file to
 scope.
 

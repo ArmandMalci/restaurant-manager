@@ -1,6 +1,6 @@
 ---
 name: ci-setup
-description: "Use when Armand says \"set up CI\", \"add GitHub Actions\", \"add a lint/test gate\", \"why is CI slow\", or when a repo has no .github/workflows. Generates a right-sized GitHub Actions pipeline for the repo's actual stack (detected, not assumed): lint + typecheck + test as the base gate; Playwright/Lighthouse jobs only when the repo has them; caching for the package manager it actually uses; concurrency-cancel on stale runs. Opinionated per the AIOS anti-pattern rule — composes proven actions, never generates bespoke infra beyond workflows. Also AUDIT mode for existing pipelines: flags missing gates, cache misses, and jobs that run on every push but matter only on PRs. Every generated job carries a one-line why-comment. NOT for deployment/hosting choices (framework-native: Vercel/EAS/Modal per tech_stack.md) and NOT for incident response (engineering plugin skills)."
+description: "Use when the user says \"set up CI\", \"add GitHub Actions\", \"add a lint/test gate\", \"why is CI slow\", or when a repo has no .github/workflows. Generates a right-sized GitHub Actions pipeline for the repo's actual stack (detected, not assumed): lint + typecheck + test as the base gate; Playwright/Lighthouse jobs only when the repo has them; caching for the package manager it actually uses; concurrency-cancel on stale runs. Opinionated per the AIOS anti-pattern rule — composes proven actions, never generates bespoke infra beyond workflows. Also AUDIT mode for existing pipelines: flags missing gates, cache misses, and jobs that run on every push but matter only on PRs. Every generated job carries a one-line why-comment. NOT for deployment/hosting choices (framework-native: Vercel/EAS/Modal per tech_stack.md) and NOT for incident response (engineering plugin skills)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -22,7 +22,7 @@ Two modes:
 - **GENERATE** — no `.github/workflows/`, or it's empty: detect the stack, copy the matching
   base-gate template from `references/`, append gated jobs only where their config file exists.
 - **AUDIT** — `.github/workflows/*.yml` already exists: read every workflow, score it against the
-  checklist below, output gaps. Don't touch existing files unless Armand asks for the fix applied.
+  checklist below, output gaps. Don't touch existing files unless the user asks for the fix applied.
 
 The generated pipeline is deliberately small — lint + typecheck + test as the base gate, nothing
 speculative. Deploy/hosting is out of scope; Vercel/EAS/Modal own that per

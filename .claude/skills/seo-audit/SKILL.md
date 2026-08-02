@@ -1,6 +1,6 @@
 ---
 name: seo-audit
-description: "Use when Armand says \"SEO audit\", \"check my SEO\", \"why isn't this page ranking/indexed\", \"audit meta tags / structured data / Core Web Vitals\", \"check AI search visibility / GEO\", or before launching a web app. Crawls the target site's full sitemap with Playwright plus Lighthouse (SEO/perf/a11y/agentic categories), validates every page's title/description uniqueness, canonical correctness, JSON-LD against schema.org, Next.js metadataBase, robots.txt AI-crawler policy, and (for Expo apps) AASA/assetlinks deep-link plumbing. Cross-checks lab vs field data (CrUX p75) when reachable. Outputs one markdown report: pass/fail per check with a plain-English \"why this fails and why it matters\" line per failure — teaching the crawl→render→index→rank model as it runs (references/learning-path.md). Judgment items (ASO copy, content quality) are flagged \"needs your call\", never auto-scored. NOT for writing marketing copy (use launch-kit) and NOT for retention metrics (use growth-review)."
+description: "Use when the user says \"SEO audit\", \"check my SEO\", \"why isn't this page ranking/indexed\", \"audit meta tags / structured data / Core Web Vitals\", \"check AI search visibility / GEO\", or before launching a web app. Crawls the target site's full sitemap with Playwright plus Lighthouse (SEO/perf/a11y/agentic categories), validates every page's title/description uniqueness, canonical correctness, JSON-LD against schema.org, Next.js metadataBase, robots.txt AI-crawler policy, and (for Expo apps) AASA/assetlinks deep-link plumbing. Cross-checks lab vs field data (CrUX p75) when reachable. Outputs one markdown report: pass/fail per check with a plain-English \"why this fails and why it matters\" line per failure — teaching the crawl→render→index→rank model as it runs (references/learning-path.md). Judgment items (ASO copy, content quality) are flagged \"needs your call\", never auto-scored. NOT for writing marketing copy (use launch-kit) and NOT for retention metrics (use growth-review)."
 allowed_tools: [Read, Bash, Glob, Grep]
 ---
 
@@ -16,7 +16,7 @@ numbered items) — this file only routes to them by number so the checklist has
 source of truth. `references/learning-path.md` holds the 10-step dependency-ordered model this
 skill teaches as it runs.
 
-Armand named SEO his weakest area. The teaching contract below is not optional flavor text — a
+The user named SEO their weakest area. The teaching contract below is not optional flavor text — a
 run that reports pass/fail without the why-lines and the next-learning-step name has not met this
 skill's Definition of Done.
 
@@ -27,7 +27,7 @@ prerequisite shrinks scope, it never halts the audit.
 
 1. **Target reachable.** `curl -sI <url>` (or the site's local dev URL — try the project's own
    dev-server convention first, `localhost:3000` for Next.js by default). No response / non-2xx
-   after redirects → STOP, nothing downstream can run. Ask Armand for the correct URL rather than
+   after redirects → STOP, nothing downstream can run. Ask the user for the correct URL rather than
    guessing further.
 2. **Sitemap present.** Fetch `<origin>/sitemap.xml`. **If absent, this IS Finding #1** (routes to
    checklist item 5 — sitemap hygiene) — report it, do not treat it as a blocker. Continue in
@@ -129,10 +129,10 @@ One markdown report, written to `docs/seo-audit-<YYYY-MM-DD>.md` in the target r
 
 The why-line on every failure **is part of this skill's output contract**, not supplementary
 commentary — a report that states "FAIL" without explaining why it matters has not satisfied
-this skill's job. Armand named SEO his weakest area specifically so that these audits double as
+this skill's job. The user named SEO their weakest area specifically so that these audits double as
 lessons, not just checklists.
 
-Every run ends with one line naming the **next** `references/learning-path.md` step Armand
+Every run ends with one line naming the **next** `references/learning-path.md` step the user
 hasn't been shown yet: check the target repo's prior `docs/seo-audit-*.md` reports for a
 "Learning path covered: step N" footer (this run appends its own), take the highest N seen so
 far, and name step N+1 in one sentence pulled from `learning-path.md`. A first-ever run for a
@@ -156,5 +156,5 @@ When a new AI crawler user-agent appears (item 6's list will age — 2026's five
 final), or a grep/check target in `references/checklist-2026.md` produces noise or misses a
 pattern, update that reference file before moving on — don't let the fix live only in one-off
 audit reports. Same for `references/learning-path.md` if the dependency ordering turns out wrong
-in practice (e.g. Armand needs step 4 explained before step 3 makes sense to him) — the path
+in practice (e.g. the user needs step 4 explained before step 3 makes sense to them) — the path
 should reflect what actually teaches well, not just what looked logical on paper.

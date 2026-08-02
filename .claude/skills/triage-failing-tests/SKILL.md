@@ -20,7 +20,7 @@ Verdict before edits. The test and the code disagree — decide which one is lyi
 
 3. **VERDICT GATE — no edits allowed yet**: read the failing test in full and the code it exercises; run `git log --oneline -5` on BOTH files to see which changed most recently, and read those commit messages for intended behavior. Invoke superpowers:systematic-debugging Phase 1 if the cause isn't clear from this.
 
-4. **State the verdict with evidence**: "CODE is wrong — commit <sha> intended X but does Y" or "TEST is stale — code intent changed in <sha>, test still asserts old behavior; aligning test with current code intent". If genuinely ambiguous, ask Armand one AskUserQuestion (code-intent vs test-intent) — do not guess.
+4. **State the verdict with evidence**: "CODE is wrong — commit <sha> intended X but does Y" or "TEST is stale — code intent changed in <sha>, test still asserts old behavior; aligning test with current code intent". If genuinely ambiguous, ask the user one AskUserQuestion (code-intent vs test-intent) — do not guess.
 
 5. **Fix exactly ONE side, minimally.** Forbidden: editing both test and code in one attempt; loosening an assertion (broader matcher, removed assert, try/except, skip/xfail) without the verdict explicitly justifying it from code intent.
 

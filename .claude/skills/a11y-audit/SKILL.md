@@ -1,6 +1,6 @@
 ---
 name: a11y-audit
-description: "Use when Armand says \"accessibility audit\", \"a11y check\", \"WCAG check\", \"can screen readers use this\", or before shipping user-facing UI. Runs axe-core via Playwright across the app's routes (changed routes by default, --all for the full app), plus the manual-judgment checklist axe cannot see: focus order, visible focus indicators, keyboard-only task completion, color-as-only-signal, real label elements. Findings mapped to WCAG 2.2 AA criteria, ranked blocker/serious/moderate, each with the affected users named in plain English (who this locks out and how) and the concrete fix per design_principles.md's accessibility section. Judgment items are listed as a manual checklist with instructions, never auto-passed. NOT for visual design critique (impeccable / design-critique) and NOT for i18n string issues (i18n-check)."
+description: "Use when the user says \"accessibility audit\", \"a11y check\", \"WCAG check\", \"can screen readers use this\", or before shipping user-facing UI. Runs axe-core via Playwright across the app's routes (changed routes by default, --all for the full app), plus the manual-judgment checklist axe cannot see: focus order, visible focus indicators, keyboard-only task completion, color-as-only-signal, real label elements. Findings mapped to WCAG 2.2 AA criteria, ranked blocker/serious/moderate, each with the affected users named in plain English (who this locks out and how) and the concrete fix per design_principles.md's accessibility section. Judgment items are listed as a manual checklist with instructions, never auto-passed. NOT for visual design critique (impeccable / design-critique) and NOT for i18n string issues (i18n-check)."
 allowed_tools: [Read, Bash, Glob, Grep]
 ---
 
@@ -10,8 +10,8 @@ allowed_tools: [Read, Bash, Glob, Grep]
 
 Two independent layers. Layer 1 is automated: axe-core scans each in-scope route for
 mechanically-detectable violations (missing alt text, contrast ratios, ARIA misuse, etc.). Layer 2
-is a fixed 5-item manual checklist for what axe cannot see — it never runs code, it tells Armand
-exactly what to do with his own hands and eyes. Layer 2 items are always reported as `JUDGMENT` and
+is a fixed 5-item manual checklist for what axe cannot see — it never runs code, it tells the user
+exactly what to do with their own hands and eyes. Layer 2 items are always reported as `JUDGMENT` and
 never auto-passed, even if Layer 1 came back clean — a clean automated scan proves nothing about
 keyboard-only completion or focus order.
 
@@ -40,7 +40,7 @@ git diff --name-only origin/main...HEAD -- 'app/**/page.tsx' 'app/**/page.ts' 'p
 ```
 Map each matched file to its route: Next.js App Router strips the `app` prefix and `page.tsx`
 suffix (route groups `(name)` don't count as segments); Pages Router strips `pages` and the
-extension. Dynamic segments (`[id]`) need a real sample URL — ask Armand for one, or note the route
+extension. Dynamic segments (`[id]`) need a real sample URL — ask the user for one, or note the route
 as "dynamic, needs a sample" rather than guessing.
 
 `--all` (full route manifest, no git diff filter):
@@ -109,7 +109,7 @@ every A criterion too, so Level A items are in scope):
 ## Manual-judgment checklist
 
 Always run all 5, regardless of what Layer 1 found. Report every row as `JUDGMENT` — never mark one
-"passed" on Armand's behalf.
+"passed" on the user's behalf.
 
 | # | Check | WCAG SC | How to test |
 |---|---|---|---|

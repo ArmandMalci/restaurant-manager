@@ -1,6 +1,6 @@
 ---
 name: dsr-ops
-description: "Use when Armand says \"GDPR delete\", \"account deletion\", \"data export\", \"DSAR\", or before ANY store release of an account-based app — Apple rejects account-creation apps without in-app deletion, and this skill is what mobile-release Gate 3 points at. The privacy policy promises rights; this makes them real: (1) scaffolds the delete-account path (endpoint + UI entry-point shape for the actual stack) with a deletion-cascade checklist across every third-party processor the repo actually uses (analytics, email, billing — mined from dependencies), listed for HUMAN verification and never auto-executed, (2) export endpoint shape (machine-readable dump of user-owned data), (3) DSAR intake note: where requests arrive and the 30-day clock. Interview-or-profile for jurisdiction specifics. NOT for policy text (legal-kit) and NOT for the store checklist itself (mobile-release)."
+description: "Use when the user says \"GDPR delete\", \"account deletion\", \"data export\", \"DSAR\", or before ANY store release of an account-based app — Apple rejects account-creation apps without in-app deletion, and this skill is what mobile-release Gate 3 points at. The privacy policy promises rights; this makes them real: (1) scaffolds the delete-account path (endpoint + UI entry-point shape for the actual stack) with a deletion-cascade checklist across every third-party processor the repo actually uses (analytics, email, billing — mined from dependencies), listed for HUMAN verification and never auto-executed, (2) export endpoint shape (machine-readable dump of user-owned data), (3) DSAR intake note: where requests arrive and the 30-day clock. Interview-or-profile for jurisdiction specifics. NOT for policy text (legal-kit) and NOT for the store checklist itself (mobile-release)."
 allowed_tools: [Read, Write, Bash, Glob, Grep]
 ---
 
@@ -49,7 +49,7 @@ Run this before anything else in the skill.
 
 The privacy policy (`legal-kit`'s output) promises deletion and export rights; this skill is what
 makes the promise mechanically real — a scaffold, a cascade checklist, and an intake note, all
-for Armand and a human reviewer to act on. It never acts on its own: **no deletion this skill
+for the user and a human reviewer to act on. It never acts on its own: **no deletion this skill
 generates is ever executed by this skill.** This is also the named seam `mobile-release` Gate 3
 points at — that gate confirms a delete-account *screen* exists in the app UI; this skill is what
 generates the backend scaffold and the cascade evidence behind that screen, run before the store
@@ -62,7 +62,7 @@ Run first, always.
 
 1. **Detect the stack** — Next.js (`next.config.*` or an `app/` route-handler directory),
    FastAPI (`pyproject.toml`/`requirements.txt` listing `fastapi`, or `from fastapi import` in an
-   entry file), or Expo/RN (`app.json` with an `"expo"` key). Neither detected → ask Armand rather
+   entry file), or Expo/RN (`app.json` with an `"expo"` key). Neither detected → ask the user rather
    than guessing a code shape for the wrong framework.
 2. **Detect an account system.** Safe-grep per `.claude/references/safe-grep-patterns.md` for
    signup/auth surfaces and known auth dependencies:
@@ -86,18 +86,18 @@ Run first, always.
      grep -n "posthog\|@sentry\|plausible" package.json pyproject.toml requirements.txt 2>/dev/null
      ```
    - Cross-reference against the profile's `Processors:` line; reconcile disagreements with
-     Armand rather than silently picking one side.
-   **Only emit a cascade row for a processor actually evidenced here or confirmed by Armand** —
+     the user rather than silently picking one side.
+   **Only emit a cascade row for a processor actually evidenced here or confirmed by the user** —
    never a boilerplate row for a processor the repo doesn't use.
 
 ## Deletion-cascade checklist (HUMAN VERIFIES — never auto-executed)
 
 Write to `docs/dsr-ops.md`. **This skill never runs a deletion against any of these processors or
-the app's own database — every row below is Armand's action to take and confirm**, mirroring
+the app's own database — every row below is the user's action to take and confirm**, mirroring
 `cost-control`'s "advisory, never auto-applied" discipline but for data destruction instead of
 code:
 
-| Processor | What it holds | Deletion mechanism | Verified by Armand |
+| Processor | What it holds | Deletion mechanism | Verified by the user |
 |---|---|---|---|
 | App's own database | account row, user-owned content | cascade `DELETE` (or soft-delete + purge job) on the user's primary key across all owning tables | [ ] |
 | PostHog (if mined above) | event history keyed to the user's distinct ID | PostHog's person-deletion API/dashboard action | [ ] |
@@ -106,9 +106,9 @@ code:
 | Stripe (if mined above) | payment method, billing/transaction history | Stripe customer anonymization API — full erasure is usually blocked by tax/legal record-retention requirements; note this constraint explicitly rather than promising full deletion | [ ] |
 | Sentry (if mined above) | error events that may include user identifiers if not scrubbed | Sentry's data-scrubbing settings + manual event purge | [ ] |
 
-Only the rows evidenced in the Prerequisite check's mining step (or confirmed by Armand) appear in
+Only the rows evidenced in the Prerequisite check's mining step (or confirmed by the user) appear in
 the real output — the table above is the reference set this skill draws from, not a fixed
-template to reproduce unchanged. Each row's checkbox stays unchecked until Armand has personally
+template to reproduce unchanged. Each row's checkbox stays unchecked until the user has personally
 verified the deletion mechanism against that processor's real current behavior — this skill marks
 nothing verified on its own.
 
@@ -129,7 +129,7 @@ export async function DELETE(req: NextRequest) {
   // 1. cascade-delete (or soft-delete + queue purge) every owning table for userId
   // 2. record the deletion for the audit trail BEFORE dropping the row it references
   // 3. this route triggers the app's own DB deletion only — the cascade table above's
-  //    third-party rows are Armand's separate, verified actions, not this endpoint's job
+  //    third-party rows are the user's separate, verified actions, not this endpoint's job
   return NextResponse.json({ status: 'deletion scheduled' });
 }
 ```
@@ -172,7 +172,7 @@ export async function GET(req: NextRequest) {
 
 ## DSAR intake note
 
-Ask Armand, and record in `docs/dsr-ops.md`: "Where do deletion/export requests arrive today — a
+Ask the user, and record in `docs/dsr-ops.md`: "Where do deletion/export requests arrive today — a
 support inbox address, a form, both?" Never invent an address.
 
 **The 30-day clock, with the jurisdiction caveat this skill always carries:** GDPR's commonly
@@ -192,11 +192,11 @@ universal.
   run stopped and reported "no accounts found" — that's a valid, complete run), processor list
   mined from the dependency manifest and `docs/analytics-setup.md`.
 - The cascade table in `docs/dsr-ops.md` contains only rows evidenced by mining or confirmed by
-  Armand, every "Verified by Armand" checkbox starts unchecked, and this skill has not executed
+  the user, every "Verified by the user" checkbox starts unchecked, and this skill has not executed
   any deletion against anything.
 - Delete-account and export endpoint shapes are written into `docs/dsr-ops.md` only — no
   application source file was created or edited.
-- The DSAR intake note names a real request-arrival channel Armand gave, and the 30-day figure
+- The DSAR intake note names a real request-arrival channel the user gave, and the 30-day figure
   carries the jurisdiction caveat rather than being stated as this product's actual deadline.
 - No jurisdiction fact is hardcoded as universal anywhere in this file.
 

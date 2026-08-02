@@ -1,6 +1,6 @@
 ---
 name: refactor-safely
-description: "Use when Armand wants to refactor code that has insufficient test coverage to feel safe. Writes \"pinning tests\" capturing CURRENT behavior FIRST, then refactors, then re-verifies. Solves the \"refactor is scary\" problem by establishing a safety net before any change. Skip for: code that already has good coverage (just refactor directly)."
+description: "Use when the user wants to refactor code that has insufficient test coverage to feel safe. Writes \"pinning tests\" capturing CURRENT behavior FIRST, then refactors, then re-verifies. Solves the \"refactor is scary\" problem by establishing a safety net before any change. Skip for: code that already has good coverage (just refactor directly)."
 ---
 
 # Refactor Safely
@@ -35,7 +35,7 @@ description: "Use when Armand wants to refactor code that has insufficient test 
 ## Rules
 - **Never refactor without a green baseline.** This is the rule that turns refactoring from terrifying to routine.
 - **Don't change behavior during a refactor.** If you discover a bug, file it / fix it in a separate commit AFTER the refactor lands.
-- **If a pinning test reveals existing behavior is wrong**, surface that to Armand. Refactor decisions change when the current behavior is itself a bug.
+- **If a pinning test reveals existing behavior is wrong**, surface that to the user. Refactor decisions change when the current behavior is itself a bug.
 - **Don't refactor and add features in the same PR.** Two PRs. Always.
 
 ## When NOT to use this skill

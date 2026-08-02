@@ -133,6 +133,7 @@
     ".claude/skills/tdd-cycle/SKILL.md",
     ".claude/skills/triage-failing-tests/SKILL.md",
     ".claude/skills/trust-safety/SKILL.md",
-    ".claude/skills/ui-to-code/SKILL.md"
+    ".claude/skills/ui-to-code/SKILL.md",
+    ".claude/skills/ui-to-code/references/rules.md"
   ]
 }

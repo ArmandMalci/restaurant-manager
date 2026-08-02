@@ -85,7 +85,7 @@ Wrap this in a `validatePath(input, allowedRoot)` helper called at the boundary.
 
 If you (Claude) detect a likely security issue while editing:
 1. STOP the edit.
-2. Tell Armand the specific issue with file:line.
+2. Tell the user the specific issue with file:line.
 3. Wait for direction. Don't auto-fix security code without confirmation.
 
 Likely-security-issue triggers:

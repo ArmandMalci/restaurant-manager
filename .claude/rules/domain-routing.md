@@ -8,7 +8,7 @@ reachable from wherever this file was synced to.
 
 - **hub-only** — lives in shadow-monarchy's `.claude/skills/` or `.claude/rules/`. Not
   synced into this repo. Open a shadow-monarchy session to use it.
-- **user-level** — lives under `~/.claude/skills/` on Armand's machine. Works in ANY repo
+- **user-level** — lives under `~/.claude/skills/` on the user's machine. Works in ANY repo
   session, including this one — check this repo's own `.claude/skills/` first, some Krea
   repos ship a repo-local version and that one wins.
 - **plugin-provided** — a marketplace plugin skill (`plugin-name:skill-name`). Only
@@ -23,10 +23,10 @@ reachable from wherever this file was synced to.
 | Trigger phrase | Tool | Where it lives |
 |---|---|---|
 | Palette / type scale / spacing / motion / a11y rules | `design_principles.md`, `ui_guidelines.md` | in this repo's `.claude/rules/` (synced by this pack) |
-| "design a UI" / "build a landing page" | `front-end-design` skill | hub-only |
+| "design a UI" / "build a landing page" | `front-end-design` skill | pack-synced via the web-frontend pack — at this repo's `.claude/skills/` if that pack is installed, else hub-only |
 | "set the design direction" / "pick a vibe" / "make it not look like AI slop" | `design-taste` skill | hub-only |
-| "critique / audit / polish / refine this UI" | `impeccable` skill | hub-only |
-| "turn this design into code" | `ui-to-code` skill (sole executor) | hub-only |
+| "critique / audit / polish / refine this UI" | `impeccable` skill | pack-synced via the web-frontend pack — at this repo's `.claude/skills/` if that pack is installed, else hub-only |
+| "turn this design into code" | `ui-to-code` skill (sole executor) | pack-synced via the web-frontend pack — at this repo's `.claude/skills/` if that pack is installed, else hub-only |
 | "redesign this screen via UX Pilot" | `ux-pilot` skill | hub-only |
 | "generate UI mockup images" | `imagegen-frontend-web` / `imagegen-frontend-mobile` skills | hub-only |
 | "make a brand identity / logo board" | `brandkit` skill | hub-only |
@@ -60,6 +60,6 @@ review — but not taste-direction or brand generation.
 ## Linear / Notion connectors (shared)
 
 Any row above that touches Linear or Notion (`work-on-ticket`, `transcript-to-actions`,
-tracking-plugin ticket creation) needs one-time auth by Armand — via claude.ai connector
+tracking-plugin ticket creation) needs one-time auth by the repo owner — via claude.ai connector
 settings, or `/mcp` in an interactive session. Until that's done, these tools must degrade
 gracefully: state what's blocked, don't fail silently and don't fabricate ticket IDs.

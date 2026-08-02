@@ -42,7 +42,7 @@ Record:
 
 ### Determine destination
 
-Ask Armand:
+Ask the user:
 > "Where should I create bug tasks — **Linear** or **Notion**?"
 
 If Linear: ask which team (or look up via MCP)
@@ -142,7 +142,7 @@ If the `debugger` sub-agent is unavailable, write the hypothesis manually from t
 
 ## Phase 3 — Playwright Deep E2E Scan
 
-**Skip if:** no dev server available, Playwright not configured, or Armand declines.
+**Skip if:** no dev server available, Playwright not configured, or the user declines.
 If Phase 3 is skipped: report static and test-suite bugs only; note "E2E scan skipped" in the terminal summary.
 
 If running, first ask: "What URL should I scan? (e.g., http://localhost:3000)"
@@ -302,7 +302,7 @@ BUGS FOUND: <N> critical · <N> high · <N> medium · <N> low
 Bug reports written to: .bug-reports/2026-05-17/
 ```
 
-Ask Armand:
+Ask the user:
 > "Create tasks for Critical + High bugs in <Linear/Notion>? Medium/Low will be grouped into one batch task. [y/n]"
 
 ---
@@ -371,7 +371,7 @@ This skill is complete when:
 - Every bug has a local `.bug-reports/<date>/<slug>.md` file
 - E2E bugs have a screenshot in `.bug-reports/<date>/screenshots/`
 - The ranked bug report has been printed to terminal
-- Armand has confirmed or declined task creation
+- The user has confirmed or declined task creation
 - If confirmed: all Critical/High bugs have individual tasks in Linear or Notion; Medium/Low are in one batch task
 - All task URLs printed
 

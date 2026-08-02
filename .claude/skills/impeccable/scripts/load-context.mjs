@@ -26,7 +26,7 @@
  *   3. Auto-fallback subdirectories of cwd: .claude/context/, .agents/context/, docs/
  *   4. cwd as a default "no context found" location
  *
- * This skill is wired to Armand's shadow-monarchy AIOS context layout:
+ * This skill is wired to the user's shadow-monarchy AIOS context layout:
  *   - PRODUCT (who is this for / brand / tone) <- .claude/context/about_me.md
  *   - DESIGN  (colors / type / spacing / motion) <- .claude/rules/design_principles.md
  * The canonical impeccable names (PRODUCT.md / DESIGN.md) are still accepted as
@@ -34,7 +34,7 @@
  * take precedence when both are present.
  *
  * DESIGN has its OWN fallback lookup independent of the resolved context dir,
- * because Armand's design_principles.md lives under .claude/rules/, not in the
+ * because the user's design_principles.md lives under .claude/rules/, not in the
  * same directory as about_me.md (.claude/context/). Without this, DESIGN would
  * always resolve null when PRODUCT resolves from .claude/context/.
  *

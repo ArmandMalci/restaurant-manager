@@ -1,6 +1,6 @@
 ---
 name: i18n-check
-description: "Use when Armand says \"i18n check\", \"find hardcoded strings\", \"is this translatable\", \"locale completeness\", or before adding a second language. Static pass over the UI codebase: user-visible string literals outside the i18n system (JSX text nodes, alert/placeholder/aria-label attributes), locale-file completeness across languages (keys present in one locale but missing in another), concatenation-built sentences that break under translation, and date/number formatting not using Intl. Reports per-file with counts, worst offenders first, each finding with the why (what breaks when a translator or RTL layout meets this code). If the repo has no i18n system, says so and recommends one for the stack instead of scanning. NOT for translating content and NOT for hreflang/SEO locale tags (seo-audit)."
+description: "Use when the user says \"i18n check\", \"find hardcoded strings\", \"is this translatable\", \"locale completeness\", or before adding a second language. Static pass over the UI codebase: user-visible string literals outside the i18n system (JSX text nodes, alert/placeholder/aria-label attributes), locale-file completeness across languages (keys present in one locale but missing in another), concatenation-built sentences that break under translation, and date/number formatting not using Intl. Reports per-file with counts, worst offenders first, each finding with the why (what breaks when a translator or RTL layout meets this code). If the repo has no i18n system, says so and recommends one for the stack instead of scanning. NOT for translating content and NOT for hreflang/SEO locale tags (seo-audit)."
 allowed_tools: [Read, Bash, Glob, Grep]
 ---
 
@@ -167,7 +167,7 @@ Per-file, worst offenders (highest count) first:
   the two heuristic checks — JSX-text-node matches can't tell a real UI string from a code sample,
   brand name, or already-translated text the grep missed; date/number matches can't tell a
   user-facing display from internal date math with no render path. Never auto-confirm a `JUDGMENT`
-  row; list it and let Armand's eyes make the call, same as `security-audit`'s permissive-regex and
+  row; list it and let the user's eyes make the call, same as `security-audit`'s permissive-regex and
   path-validation rows.
 - `Count`: total matches for that file, after excluding matches already routed through the detected
   i18n system.
@@ -185,14 +185,14 @@ Per-file, worst offenders (highest count) first:
 - Locale-completeness output lists every locale a key is missing from, not just "some locale."
 - Every `JUDGMENT`-confidence row (hardcoded JSX text, non-Intl date/number) is reported as
   `JUDGMENT`, never silently upgraded to a confirmed finding — the two heuristic checks can't tell a
-  real UI string from a code sample or brand name, and that call is Armand's, not the scan's.
+  real UI string from a code sample or brand name, and that call is the user's, not the scan's.
 
 ## Self-Improvement Loop
 
 If a grep shape above starts drowning real findings in false positives (a component library with
 JSX text nodes that are legitimately non-translatable, e.g. code samples), add an exclusion pattern
 here before the next run rather than eyeballing past it each time. If a new i18n library becomes
-common for a stack Armand uses, add it to the Prerequisite check's detection grep and the stack
+common for a stack the user uses, add it to the Prerequisite check's detection grep and the stack
 recommendation table.
 
 **Known limitation — same-line false negative in the JSX text-node filter:** the `awk` stage in

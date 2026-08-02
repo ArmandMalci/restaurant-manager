@@ -1,6 +1,6 @@
 ---
 name: pr-self-review
-description: Use when Armand is ready to open a PR. Runs code-reviewer on the full diff, generates the PR description from commits + PRD, attaches Playwright screenshots for UI changes, and opens via `gh pr create`. Pre-empts human reviewer feedback so PRs merge faster.
+description: Use when the user is ready to open a PR. Runs code-reviewer on the full diff, generates the PR description from commits + PRD, attaches Playwright screenshots for UI changes, and opens via `gh pr create`. Pre-empts human reviewer feedback so PRs merge faster.
 ---
 
 # PR Self-Review
@@ -20,11 +20,11 @@ description: Use when Armand is ready to open a PR. Runs code-reviewer on the fu
 1. **Confirm tests pass locally.**
    - TS: `pnpm test && pnpm tsc --noEmit && pnpm lint`
    - Python: `uv run pytest && uv run mypy && uv run ruff check`
-   - If anything fails, STOP and tell Armand. Don't open a red PR.
+   - If anything fails, STOP and tell the user. Don't open a red PR.
 
 2. **Generate the diff summary.** Run `git diff main...HEAD --stat` and `git log main..HEAD --oneline`. Pipe through to understand the shape of the change.
 
-3. **Dispatch `code-reviewer` sub-agent** with the diff. If it returns issues, surface them. Armand decides which to fix before opening vs. accept as nits.
+3. **Dispatch `code-reviewer` sub-agent** with the diff. If it returns issues, surface them. The user decides which to fix before opening vs. accept as nits.
 
 4. **If UI changed**, dispatch `ui-qa-tester` sub-agent. Capture screenshots at 375 / 768 / 1280 widths for each changed route. Save to `/tmp/pr-screenshots/<branch>/`.
 
@@ -40,7 +40,7 @@ description: Use when Armand is ready to open a PR. Runs code-reviewer on the fu
 
 7. **Open the PR** via `gh pr create --title "<title>" --body "$(cat <pr-description-file>)"` (HEREDOC pattern). If a base branch other than `main` is appropriate (e.g., `develop`), pass `--base`.
 
-8. **Report back** with the PR URL and a one-line summary of any code-reviewer concerns Armand should know about.
+8. **Report back** with the PR URL and a one-line summary of any code-reviewer concerns the user should know about.
 
 ## Rules
 - Title format: `<type>(<scope>): <what>` (Conventional Commits). E.g., `feat(auth): add Magic Link login`.

@@ -14,7 +14,7 @@ Designs and iterates production-grade frontend interfaces. Real working code, co
 
 Before any design work or file edits:
 
-1. Load context (Armand's `about_me.md` + `design_principles.md`) via the loader script.
+1. Load context (the user's `about_me.md` + `design_principles.md`) via the loader script.
 2. Identify the register and load the matching register reference (brand.md or product.md).
 3. **If the user invoked a sub-command (e.g. `craft`, `shape`, `audit`), load its reference file too.** This is non-negotiable: `craft` without `craft.md` loaded means you'll skip the shape-and-confirm step the user expects.
 
@@ -22,7 +22,7 @@ Skipping these produces generic output that ignores the project.
 
 ### 1. Context gathering
 
-Two roles, wired to Armand's shadow-monarchy AIOS context. The loader resolves a context dir (project root, then `.claude/context/`, `.agents/context/`, `docs/`) and reads:
+Two roles, wired to the user's shadow-monarchy AIOS context. The loader resolves a context dir (project root, then `.claude/context/`, `.agents/context/`, `docs/`) and reads:
 
 - **PRODUCT** (required: users, brand, tone, anti-references, strategic principles) ← `.claude/context/about_me.md`. Legacy `PRODUCT.md` / `.impeccable.md` are still accepted as aliases.
 - **DESIGN** (strongly recommended: colors, typography, elevation, components) ← `.claude/rules/design_principles.md`. DESIGN has its own fallback lookup (`.claude/rules/` → `.claude/context/` → `.agents/context/` → `docs/`) because `design_principles.md` lives under `.claude/rules/`, not alongside `about_me.md`. Legacy `DESIGN.md` is still accepted.
@@ -43,7 +43,7 @@ If the output is already in this session's conversation history, don't re-run. E
 
 `{{command_prefix}}impeccable live` already warms context via `live.mjs`. If you've run `live.mjs`, don't also run `load-context.mjs` this session.
 
-If the PRODUCT source (`about_me.md` / legacy `PRODUCT.md`) is missing, empty, or placeholder (`[TODO]`/`<!-- -->` markers, <200 chars): run `{{command_prefix}}impeccable teach`, then resume the user's original task with the fresh context. If the original task was `{{command_prefix}}impeccable craft`, resume into `{{command_prefix}}impeccable shape` before any implementation work. (Note: Armand's `about_me.md` currently ships as a stub — expect this nudge until it's filled.)
+If the PRODUCT source (`about_me.md` / legacy `PRODUCT.md`) is missing, empty, or placeholder (`[TODO]`/`<!-- -->` markers, <200 chars): run `{{command_prefix}}impeccable teach`, then resume the user's original task with the fresh context. If the original task was `{{command_prefix}}impeccable craft`, resume into `{{command_prefix}}impeccable shape` before any implementation work. (Note: the user's `about_me.md` currently ships as a stub — expect this nudge until it's filled.)
 
 If the DESIGN source (`design_principles.md` / legacy `DESIGN.md`) is missing: nudge once per session (*"Run `{{command_prefix}}impeccable document` for more on-brand output"*), then proceed.
 

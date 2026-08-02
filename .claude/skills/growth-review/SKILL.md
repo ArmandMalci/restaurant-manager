@@ -1,6 +1,6 @@
 ---
 name: growth-review
-description: "Use when Armand says \"growth review\", \"weekly metrics\", \"how is the funnel\", \"retention check\", or on a recurring cadence after a product launches. Queries the existing analytics stack read-only — Plausible for traffic/conversion, PostHog built-in funnels and cohorts for in-product behavior (never hand-rolled SQL) — and produces a one-page recap: visitors→signups→activation (activation = one explicitly named event, never \"logged in\")→D7 return; D1/D7/D30 cohorts by signup week (D30 ≥25-30% ≈ PMF territory for B2B-ish products); channel attribution by UTM/referrer; and ONE written interpretation of what changed and why, explicitly flagging leading indicators vs the goal metric so vanity metrics don't win. Quarterly, adds the Sean Ellis pulse (~40% \"very disappointed\" = pre-PMF threshold). If the analytics stack is absent, reports exactly what to install (Plausible + PostHog free tier — deliberately not GA4/Amplitude-scale) and stops. NOT for ad-hoc SQL/BI (metabase MCP) and NOT for launch prep (launch-kit)."
+description: "Use when the user says \"growth review\", \"weekly metrics\", \"how is the funnel\", \"retention check\", or on a recurring cadence after a product launches. Queries the existing analytics stack read-only — Plausible for traffic/conversion, PostHog built-in funnels and cohorts for in-product behavior (never hand-rolled SQL) — and produces a one-page recap: visitors→signups→activation (activation = one explicitly named event, never \"logged in\")→D7 return; D1/D7/D30 cohorts by signup week (D30 ≥25-30% ≈ PMF territory for B2B-ish products); channel attribution by UTM/referrer; and ONE written interpretation of what changed and why, explicitly flagging leading indicators vs the goal metric so vanity metrics don't win. Quarterly, adds the Sean Ellis pulse (~40% \"very disappointed\" = pre-PMF threshold). If the analytics stack is absent, reports exactly what to install (Plausible + PostHog free tier — deliberately not GA4/Amplitude-scale) and stops. NOT for ad-hoc SQL/BI (metabase MCP) and NOT for launch prep (launch-kit)."
 allowed_tools: [Read, Bash, Glob, Grep]
 ---
 
@@ -11,7 +11,7 @@ allowed_tools: [Read, Bash, Glob, Grep]
 Recurring metrics recap for a product that's already live. Read-only end to end: this skill
 never writes to the analytics stack, never runs ad-hoc SQL against an events table, and (per
 its own `allowed_tools`) never writes a file — the recap is delivered inline in the response.
-If Armand wants it saved, that's a separate `capture-note`/manual step, not this skill's job.
+If the user wants it saved, that's a separate `capture-note`/manual step, not this skill's job.
 
 NOT for ad-hoc SQL/BI work — that's the `metabase` MCP. NOT for pre-launch positioning or
 copy — that's `launch-kit`. NOT for one-time technical SEO checks — that's `seo-audit`. This
@@ -23,7 +23,7 @@ skill is the fourth stop in the seo-marketing pack's learning path (see `seo-aud
 
 Run first, always. Never read `.env`/`.env.local`/dotenv files to find keys — dotenv files may
 hold other secrets and reading them is out of bounds regardless of task. Check for exported
-**environment variables** only; if any required var is unset, tell Armand which `export
+**environment variables** only; if any required var is unset, tell the user which `export
 VAR=...` line to run and stop for that surface (degrade gracefully, don't fabricate the rest).
 
 1. **Plausible.** Requires `PLAUSIBLE_API_KEY` and `PLAUSIBLE_SITE_ID` (add `PLAUSIBLE_HOST` for
@@ -49,7 +49,7 @@ VAR=...` line to run and stop for that surface (degrade gracefully, don't fabric
 3. **Named signup + activation events.** Check `docs/analytics-setup.md` (the `analytics-setup`
    handoff note) with `Read` for both the `Signup event:` and `Activation event:` lines — the
    funnel and Trends recipes below both need the signup event name, not just activation. Note
-   absent, or either line unnamed → ask Armand for that one event; "logged in" is never a valid
+   absent, or either line unnamed → ask the user for that one event; "logged in" is never a valid
    answer for either (see Overview) — re-ask rather than substitute it.
 4. **Both surfaces unreachable/unset.** STOP. Report exactly what to install: **Plausible**
    (traffic/conversion, self-hostable or plausible.io free trial → paid) **+ PostHog free tier**
@@ -127,9 +127,9 @@ One page, delivered inline in the response (no file write — see Overview). Sec
 
 This skill runs on demand today. It's designed to pair with a Routine once a product has enough
 signup volume for weekly numbers to mean anything — **do not create that Routine now**; wait
-until a product is actually live and Armand asks for the cadence to be wired up (see
+until a product is actually live and the user asks for the cadence to be wired up (see
 `.claude/references/cadence-setup.md` for how Routines are set up when that day comes). Running
-this skill manually first, a few times, is also how Armand notices whether weekly or biweekly is
+this skill manually first, a few times, is also how the user notices whether weekly or biweekly is
 the right interval before automating it.
 
 ## Definition of Done
@@ -150,7 +150,7 @@ the right interval before automating it.
 
 If a Plausible or PostHog API surface changes shape (endpoint path, auth header, region
 hosts) and a query recipe above starts 404ing, fix the recipe in this file — don't let the
-correction live only in one review's output. If Armand's real D30/Sean Ellis numbers keep
+correction live only in one review's output. If the user's real D30/Sean Ellis numbers keep
 landing outside the stated heuristic bands for a product that's clearly doing fine (or clearly
 not), record that as a note in the heuristics disclaimer rather than silently keeping the
-generic 25-30%/40% bands — the bands are a starting prior, not a fact about his products.
+generic 25-30%/40% bands — the bands are a starting prior, not a fact about their products.

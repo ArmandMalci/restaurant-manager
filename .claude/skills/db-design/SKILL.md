@@ -1,6 +1,6 @@
 ---
 name: db-design
-description: "Use when Armand says \"review this schema\", \"design the data model\", \"is this migration safe\", \"add a table/column\", or before any change to the data model (code_quality_lifecycle Phase 1 trigger). Two modes: DESIGN (proposes schema for a feature: entities, relations, indexes for the actual query patterns, constraints at the DB layer per security_conventions — RLS, NOT NULL, FKs — with the trade-offs stated) and MIGRATION REVIEW (checks a pending migration for: destructive operations without a rollback note, table-locking operations on hot tables, missing indexes for new query paths, backfill strategy for NOT NULL additions). Every recommendation states the why in one plain-English line. Output: schema sketch or migration verdict with a rollback plan. NOT for query optimization on existing schemas (profiling work) and NOT for app-layer validation design (zod/pydantic at boundaries per security_conventions)."
+description: "Use when the user says \"review this schema\", \"design the data model\", \"is this migration safe\", \"add a table/column\", or before any change to the data model (code_quality_lifecycle Phase 1 trigger). Two modes: DESIGN (proposes schema for a feature: entities, relations, indexes for the actual query patterns, constraints at the DB layer per security_conventions — RLS, NOT NULL, FKs — with the trade-offs stated) and MIGRATION REVIEW (checks a pending migration for: destructive operations without a rollback note, table-locking operations on hot tables, missing indexes for new query paths, backfill strategy for NOT NULL additions). Every recommendation states the why in one plain-English line. Output: schema sketch or migration verdict with a rollback plan. NOT for query optimization on existing schemas (profiling work) and NOT for app-layer validation design (zod/pydantic at boundaries per security_conventions)."
 allowed_tools: [Read, Bash, Glob, Grep]
 ---
 
@@ -10,14 +10,14 @@ allowed_tools: [Read, Bash, Glob, Grep]
 
 Advisory only — this skill proposes, it never runs a migration or touches a live database.
 `allowed_tools` has no `Edit`/`Write`: output is always a markdown sketch or verdict delivered
-inline, never a file this skill writes itself. Two modes, chosen by what Armand asks for:
+inline, never a file this skill writes itself. Two modes, chosen by what the user asks for:
 
 - **DESIGN** — "design the data model", "add a table/column" → propose a schema for a new
   feature.
 - **MIGRATION REVIEW** — "is this migration safe" → review a migration that already exists
   (a pending PR, a draft `.sql`/ORM migration file, or pasted DDL).
 
-If it's ambiguous which mode applies (e.g. "review this schema" could be either), ask Armand
+If it's ambiguous which mode applies (e.g. "review this schema" could be either), ask the user
 one question rather than guessing — a schema sketch and a migration verdict have different
 shapes and re-running the wrong one wastes the turn.
 
@@ -37,7 +37,7 @@ recommendation traces back to one of them, don't just assert "best practice."
    [structure] from speculation": a `metadata_json` catch-all column added "in case we need it
    later" is exactly that kind of premature abstraction, applied to schema instead of code.
    Present as a short table per entity (column, type, nullable?, FK target) plus a one-line
-   relation list, not a full CREATE TABLE unless Armand asks for the DDL.
+   relation list, not a full CREATE TABLE unless the user asks for the DDL.
 3. **Index for the actual query patterns from step 1** — not "index every foreign key" or
    "index every column that might get filtered." Each proposed index names the specific query
    shape it serves (e.g. "composite index on `(org_id, created_at)` — serves the dashboard's
@@ -94,7 +94,7 @@ order — each one gets a plain-English "why" sentence, not just a flag:
      lock) followed by a separate `VALIDATE CONSTRAINT` step (takes a lighter lock, can run
      later).
    - "Hot table" here means anything with meaningful write traffic in production — when in
-     doubt, ask Armand rather than assume a table is quiet.
+     doubt, ask the user rather than assume a table is quiet.
 3. **Missing indexes for new query paths.** Same rule as DESIGN mode step 3, applied in
    reverse: if this migration adds a column that a shipped or soon-to-ship query will filter,
    join, or sort on, and no corresponding index appears in this migration (or an adjacent one),
