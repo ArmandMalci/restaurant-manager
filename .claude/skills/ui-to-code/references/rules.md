@@ -1,6 +1,6 @@
 # ui-to-code — Detailed Rules
 
-> Routed from `.claude/skills/ui-to-code.md`. Read when the skill triggers and Armand wants the full discipline checklist.
+> Routed from `.claude/skills/ui-to-code.md`. Read when the skill triggers and the user wants the full discipline checklist.
 
 ## Source identification rules
 
@@ -23,7 +23,7 @@ Use Playwright MCP:
 2. Navigate to component preview route.
 3. Screenshot at 375px, 768px, 1280px.
 4. Compare to source design.
-5. Self-correct loop (max 3 iterations): diff spacing / alignment / font weight / color contrast, fix the largest visible mismatch, re-screenshot. After 3 iterations with no convergence, STOP and tell Armand which element is wrong.
+5. Self-correct loop (max 3 iterations): diff spacing / alignment / font weight / color contrast, fix the largest visible mismatch, re-screenshot. After 3 iterations with no convergence, STOP and tell the user which element is wrong.
 
 ## Final checks
 
