@@ -46,10 +46,11 @@ VAR=...` line to run and stop for that surface (degrade gracefully, don't fabric
    ```
    Non-`200` (or the vars unset) → PostHog-derived rows (activation, D1/D7/D30, Sean Ellis
    survey) are out of scope for this run.
-3. **Named activation event.** Check the project's `analytics-setup` output (a docs/README note
-   naming the activation event) with `Read`/`Glob` if one exists. No documented event and
-   Armand hasn't named one in-session → ask him for the one event; "logged in" is never a valid
-   answer (see Overview) — re-ask rather than substitute it.
+3. **Named signup + activation events.** Check `docs/analytics-setup.md` (the `analytics-setup`
+   handoff note) with `Read` for both the `Signup event:` and `Activation event:` lines — the
+   funnel and Trends recipes below both need the signup event name, not just activation. Note
+   absent, or either line unnamed → ask Armand for that one event; "logged in" is never a valid
+   answer for either (see Overview) — re-ask rather than substitute it.
 4. **Both surfaces unreachable/unset.** STOP. Report exactly what to install: **Plausible**
    (traffic/conversion, self-hostable or plausible.io free trial → paid) **+ PostHog free tier**
    (product analytics — funnels, retention, surveys, generous free monthly event quota).

@@ -7,17 +7,18 @@
     "security": "1.0.0",
     "seo-marketing": "1.0.0",
     "testing-qa": "1.0.0",
-    "devops": "1.0.0",
+    "devops": "1.1.0",
     "docs-a11y-i18n": "1.0.0",
     "product-project": "1.0.0",
-    "data-analytics": "1.0.0"
+    "data-analytics": "1.1.0",
+    "business-ops": "1.0.0"
   },
   "tiers": {
     "reasoning": "claude-fable-5",
     "execution": "sonnet",
     "grunt": "haiku"
   },
-  "syncedAt": "2026-08-01",
+  "syncedAt": "2026-08-02",
   "localPatches": [],
   "files": [
     ".claude/agents/code-reviewer/SKILL.md",
@@ -37,14 +38,21 @@
     ".claude/rules/typescript_conventions.md",
     ".claude/rules/ui_guidelines.md",
     ".claude/skills/a11y-audit/SKILL.md",
+    ".claude/skills/analytics-setup/SKILL.md",
     ".claude/skills/api-docs/SKILL.md",
+    ".claude/skills/backups-dr/SKILL.md",
+    ".claude/skills/billing-pricing/SKILL.md",
     ".claude/skills/ci-setup/SKILL.md",
     ".claude/skills/ci-setup/references/node-pnpm.yml",
     ".claude/skills/ci-setup/references/python-uv.yml",
+    ".claude/skills/cost-control/SKILL.md",
     ".claude/skills/coverage-audit/SKILL.md",
     ".claude/skills/coverage-audit/references/method.md",
     ".claude/skills/db-design/SKILL.md",
+    ".claude/skills/dsr-ops/SKILL.md",
+    ".claude/skills/email-deliverability/SKILL.md",
     ".claude/skills/explain-for-humans/SKILL.md",
+    ".claude/skills/finance-ops/SKILL.md",
     ".claude/skills/find-bugs/SKILL.md",
     ".claude/skills/find-bugs/SKILL.md",
     ".claude/skills/front-end-design/SKILL.md",
@@ -113,6 +121,8 @@
     ".claude/skills/impeccable/scripts/modern-screenshot.umd.js",
     ".claude/skills/impeccable/scripts/pin.mjs",
     ".claude/skills/launch-kit/SKILL.md",
+    ".claude/skills/legal-kit/SKILL.md",
+    ".claude/skills/monitoring-setup/SKILL.md",
     ".claude/skills/pr-self-review/SKILL.md",
     ".claude/skills/refactor-safely/SKILL.md",
     ".claude/skills/remember/SKILL.md",
@@ -120,8 +130,10 @@
     ".claude/skills/seo-audit/SKILL.md",
     ".claude/skills/seo-audit/references/checklist-2026.md",
     ".claude/skills/seo-audit/references/learning-path.md",
+    ".claude/skills/support-ops/SKILL.md",
     ".claude/skills/tdd-cycle/SKILL.md",
     ".claude/skills/triage-failing-tests/SKILL.md",
+    ".claude/skills/trust-safety/SKILL.md",
     ".claude/skills/ui-to-code/SKILL.md"
   ]
 }
