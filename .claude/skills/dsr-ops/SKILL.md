@@ -82,7 +82,7 @@ Run first, always.
      ```bash
      grep -n "stripe\|paddle\|lemonsqueezy" package.json pyproject.toml requirements.txt 2>/dev/null
      grep -n "resend\|postmark\|sendgrid\|nodemailer" package.json pyproject.toml requirements.txt 2>/dev/null
-     grep -n "posthog\|@sentry" package.json pyproject.toml requirements.txt 2>/dev/null
+     grep -n "posthog\|@sentry\|plausible" package.json pyproject.toml requirements.txt 2>/dev/null
      ```
    - Cross-reference against the profile's `Processors:` line; reconcile disagreements with
      Armand rather than silently picking one side.

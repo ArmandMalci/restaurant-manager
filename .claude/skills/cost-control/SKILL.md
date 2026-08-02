@@ -173,6 +173,6 @@ When a provider changes whether its budget/threshold is a hard stop or an alert-
 has reportedly shifted on OpenAI's platform before — verify rather than trust either state as
 permanent), update the Layer 1 walkthrough and the record-what-was-set table header before the
 next run relies on a stale assumption. When a new paid-API provider gets
-adopted, add its console walkthrough here rather than improvising one inline mid-run. When
-`billing-pricing` is written, confirm it reads `docs/unit-economics.md` at this same path —
-if its location ever needs to change, update it here first.
+adopted, add its console walkthrough here rather than improvising one inline mid-run.
+`billing-pricing` now exists and reads `docs/unit-economics.md` at this same path — if its
+location ever needs to change, update it here first.
