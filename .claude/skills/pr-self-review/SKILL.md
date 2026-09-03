@@ -1,6 +1,6 @@
 ---
 name: pr-self-review
-description: Use when the user is ready to open a PR. Runs code-reviewer on the full diff, generates the PR description from commits + PRD, attaches Playwright screenshots for UI changes, and opens via `gh pr create`. Pre-empts human reviewer feedback so PRs merge faster.
+description: Use when the user is ready to open a PR. Runs code-reviewer on the full diff, dispatches ui-qa-tester + a11y-reviewer + design-critic on UI changes (each only if installed in this repo), generates the PR description from commits + PRD, attaches Playwright screenshots for UI changes, and opens via `gh pr create`. Pre-empts human reviewer feedback so PRs merge faster.
 ---
 
 # PR Self-Review
@@ -26,7 +26,16 @@ description: Use when the user is ready to open a PR. Runs code-reviewer on the 
 
 3. **Dispatch `code-reviewer` sub-agent** with the diff. If it returns issues, surface them. The user decides which to fix before opening vs. accept as nits.
 
-4. **If UI changed**, dispatch `ui-qa-tester` sub-agent. Capture screenshots at 375 / 768 / 1280 widths for each changed route. Save to `/tmp/pr-screenshots/<branch>/`.
+4. **If UI changed**, dispatch the UI review fan-out — each only if present in this repo's
+   `.claude/agents/` (`test -d .claude/agents/<name>` first; not every repo has the full
+   `web-frontend` roster):
+   - `ui-qa-tester` — capture screenshots at 375 / 768 / 1280 widths for each changed route,
+     save to `/tmp/pr-screenshots/<branch>/`.
+   - `a11y-reviewer` — WCAG-mapped findings on the changed routes/components.
+   - `design-critic` — visual-quality critique on the changed routes/components.
+   Combine all three reports into one section of the PR description rather than three
+   disconnected blocks — dedupe overlapping findings, note where reports agree (stronger
+   signal) or disagree (worth a human look).
 
 5. **Generate PR description** using `.claude/references/pr-description-template.md` as the scaffold. Fill in:
    - One-line summary of what this PR does
