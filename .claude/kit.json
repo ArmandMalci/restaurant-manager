@@ -9,10 +9,10 @@
     "testing-qa": "1.0.1",
     "devops": "1.1.0",
     "docs-a11y-i18n": "1.0.0",
-    "product-project": "1.1.0",
+    "product-project": "1.2.0",
     "data-analytics": "1.2.0",
     "business-ops": "1.0.0",
-    "research": "1.0.0"
+    "research": "1.1.0"
   },
   "tiers": {
     "reasoning": "claude-fable-5",
@@ -31,7 +31,9 @@
     ".claude/agents/design-director/SKILL.md",
     ".claude/agents/design-implementer/SKILL.md",
     ".claude/agents/frontend-architect/SKILL.md",
+    ".claude/agents/product-strategist/SKILL.md",
     ".claude/agents/react-implementer/SKILL.md",
+    ".claude/agents/research-analyst/SKILL.md",
     ".claude/agents/ui-qa-tester/SKILL.md",
     ".claude/rules/code_quality_lifecycle.md",
     ".claude/rules/coding_conventions.md",
@@ -62,6 +64,8 @@
     ".claude/skills/dsr-ops/SKILL.md",
     ".claude/skills/email-deliverability/SKILL.md",
     ".claude/skills/emil-design-eng/SKILL.md",
+    ".claude/skills/emil-design-eng/references/ai-slop-motion-checklist.md",
+    ".claude/skills/emil-design-eng/references/component-recipes.md",
     ".claude/skills/explain-for-humans/SKILL.md",
     ".claude/skills/feature-plan/SKILL.md",
     ".claude/skills/finance-ops/SKILL.md",

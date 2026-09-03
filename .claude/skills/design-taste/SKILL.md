@@ -13,6 +13,42 @@ This file is the **SPINE**: the dial system, architecture, and bias-correction d
 
 # PART I — THE SPINE
 
+## 0. Brief inference (read the room before anything else)
+
+> Ported from Leonxlnx/taste-skill §0 (MIT License), 2026-09-03. Original:
+> https://github.com/leonxlnx/taste-skill
+
+Before touching code or tuning dials, infer what's actually wanted. Most bad LLM design
+output comes from jumping to a default aesthetic instead of reading the room.
+
+**Read these signals first:**
+1. **Page kind** — landing (SaaS/consumer/agency/event), portfolio, redesign, editorial/blog.
+2. **Vibe words** used — "minimalist", "Linear-style", "Awwwards", "brutalist", "premium
+   consumer", "serious B2B", "glassy", "dark tech".
+3. **Reference signals** — URLs linked, screenshots pasted, products named, brands cited.
+4. **Audience** — B2B procurement panel vs. design-conscious consumer vs. recruiter scanning
+   a portfolio. The audience picks the aesthetic, not your taste.
+5. **Brand assets that already exist** — logo, color, type, photography (starting material for
+   redesigns, not optional input).
+6. **Quiet constraints** — accessibility-first audiences, public-sector, regulated industries,
+   trust-first commerce, kids' products. These OVERRIDE aesthetic preference.
+
+**Output a one-line "Design Read" before generating anything:**
+*"Reading this as: \<page kind> for \<audience>, with a \<vibe> language, leaning toward
+\<design system or aesthetic family>."*
+
+Example: *"Reading this as: B2B SaaS landing for technical buyers, with a Linear-style
+minimalist language, leaning toward Tailwind + Geist + restrained motion."*
+
+**If the brief is ambiguous:** ask exactly one clarifying question, never a multi-question
+dump, and only when the design read genuinely diverges (e.g. "Should this feel closer to
+Linear-clean or Awwwards-experimental?"). If you can confidently infer from context, don't ask.
+
+**Anti-default discipline:** don't default to AI-purple gradients, centered hero over dark
+mesh, three equal feature cards, generic glassmorphism on everything, infinite-loop
+micro-animations everywhere, Inter + slate-900. These are the LLM defaults this whole skill
+exists to reach past — declare the design read and proceed deliberately.
+
 ## 1. Active baseline dials
 The single source of truth for design intensity. Three dials, 1–10:
 
@@ -301,6 +337,52 @@ These bans apply to the spine AND every technique pack. They are stated ONCE her
 * **NO startup-slop names:** "Acme", "Nexus", "SmartFlow" — invent premium contextual brand names.
 * **NO filler words:** "Elevate", "Seamless", "Unleash", "Next-Gen", "Game-changer", "Delve" — use concrete verbs.
 * **NO filler UI chrome:** "Scroll to explore", "Swipe down", scroll arrows, bouncing chevrons.
+
+## Production-test tells (empirically-derived, banned outright)
+
+> Ported from Leonxlnx/taste-skill §9.F-G (MIT License), 2026-09-03. These came out of real
+> LLM-generated landing-page tests — the signatures the model defaults to when it tries to
+> "look designed." Hard bans unless the brief explicitly calls for one.
+
+**Hero & section labels:**
+* **NO version labels in the hero** (`V0.6`, `BETA`, `INVITE-ONLY PREVIEW`, `ALPHA`) unless the
+  brief is explicitly about a product launch/preview status.
+* **NO section-number eyebrows** (`00 / INDEX`, `001 · Capabilities`, `02 · how it works`) —
+  name the topic in plain language instead.
+* **NO `01 / 4`-style pagination labels** on images/bento tiles, and no `Scroll · 001`-style
+  scroll cues.
+
+**Separators, dots, typography flourishes:**
+* **The middle-dot (`·`) is rationed** — max 1 per line in metadata strips, never the default
+  separator for everything.
+* **NO decorative colored status dots** on every list/nav/badge unless it conveys real
+  semantic state (a live server status), and even then sparingly.
+* **NO `<br>`-broken-and-italicized headlines** as a default move, no vertical rotated text
+  (agency-portfolio cliché) unless the brief is explicitly Awwwards/experimental, no crosshair
+  hairline grid lines drawn purely to "feel designed."
+
+**Fake previews & marketing-copy tells:**
+* **NO div-based fake product UI in the hero** (fake terminal, fake dashboard built from
+  styled divs) — the #1 LLM-design tell. Use a real screenshot, a generated image, or none.
+* **NO "Quietly in use at" / "Field notes" / "We respect the French ones"-style** performative-
+  craftsman copy. Use plain functional labels.
+* **NO generic step labels** ("Stage 1 / Stage 2", "Phase 01 / Phase 02") — the actual step
+  content (verb-noun: "Install", "Configure", "Ship") is the label.
+* **NO pills/tags overlaid on images**, no invented photo-credit captions on stock/picsum
+  images, no version footers (`v1.4.2`, `Build 0048`) on marketing/landing pages.
+* **NO decoration text strips** at hero bottom (`BRAND. MOTION. SPATIAL.`) unless the strip
+  carries real, navigable content.
+* **NO floating top-right corner paragraph** next to a giant left-aligned headline — put
+  sub-text directly under the headline or build a clean 2-column header instead.
+* **Locale/time/weather strips are banned for 99% of briefs** — allowed only for an explicitly
+  globally-distributed studio, a travel brand, or a real physical venue.
+
+**EM-DASH BAN (the single most-violated tell — zero tolerance, no exceptions):**
+The em-dash (`—`) and en-dash-as-separator (`–`) are completely banned from any user-facing
+output — headlines, eyebrows, pills, button text, body copy, quote attribution, captions, alt
+text. Not "use sparingly" — zero. Use a period, a comma, parentheses, a colon, or a regular
+hyphen instead. Date/number ranges use a hyphen (`2018-2026`, `€40-80k`). If output contains a
+single `—` or `–` anywhere visible to the user, it fails pre-flight and must be rewritten.
 
 ## External resources & components
 * **NO broken Unsplash links** — use `https://picsum.photos/seed/{random_string}/800/600` or SVG UI avatars.
