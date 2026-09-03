@@ -3,7 +3,7 @@
   "packs": {
     "core": "1.1.0",
     "web-frontend": "1.2.0",
-    "backend": "1.0.0",
+    "backend": "1.1.0",
     "security": "1.0.0",
     "seo-marketing": "1.0.0",
     "testing-qa": "1.0.1",
@@ -31,7 +31,6 @@
     ".claude/rules/domain-routing.md",
     ".claude/rules/domain-routing.md",
     ".claude/rules/domain-routing.md",
-    ".claude/rules/python_conventions.md",
     ".claude/rules/security_conventions.md",
     ".claude/rules/security_conventions.md",
     ".claude/rules/testing_discipline.md",
