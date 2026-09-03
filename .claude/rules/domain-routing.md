@@ -1,7 +1,8 @@
-# Domain Routing — design / product-project / data-analytics
+# Domain Routing — design / product-project / data-analytics / research
 
-Shared reference for three routing packs. No new skills are introduced here — every row
-points at a tool that already exists. Use the legend to know whether a row's tool is
+Shared reference for four routing packs. No new skills are introduced here except where
+noted (`research-brief`, the one new skill from the Phase 7 `research` pack) — every other
+row points at a tool that already exists. Use the legend to know whether a row's tool is
 reachable from wherever this file was synced to.
 
 ## Location legend
@@ -56,6 +57,16 @@ review — but not taste-direction or brand generation.
 | "run my weekly roundup" | `weekly-analyst` skill (Stripe + GitHub + Linear + YouTube → markdown recap) | hub-only |
 | "query X" / "build a dashboard" | metabase MCP | MCP — needs the metabase server configured for this session |
 | "run a growth review" | `growth-review` skill | pack-synced via the `seo-marketing` pack — present at this repo's `.claude/skills/growth-review` if that pack is installed here, else hub-only |
+
+## Research
+
+| Trigger phrase | Tool | Where it lives |
+|---|---|---|
+| "research X" / "what does the evidence say" / "write me a brief on Y" — or before citing any external claim anywhere in this system | `research-brief` skill — enforces a citation contract (author + venue + year + link, or explicit UNVERIFIED) written directly against a fabricated-bibliography failure mode found in an evaluated third-party skill | pack-synced via the `research` pack — present at this repo's `.claude/skills/research-brief` if that pack is installed here, else hub-only |
+| "snapshot the competitors" / competitive landscape | `competitor-watch` skill | pack-synced via `research` |
+| "fresh content ideas backed by real signals" | `idea-mining` skill | pack-synced via `research` |
+| source-grounded, citation-backed answers from a NotebookLM notebook | `notebooklm` skill | user-level (`~/.claude/skills/notebooklm`) — works in any repo session |
+| turn any input (code, docs, papers) into a queryable knowledge graph | `graphify` skill | user-level (`~/.claude/skills/graphify`) — works in any repo session |
 
 ## Linear / Notion connectors (shared)
 
