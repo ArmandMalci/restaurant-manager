@@ -47,6 +47,7 @@ review — but not taste-direction or brand generation.
 | "summarize my last meeting" | `transcript-to-actions` skill | hub-only |
 | "write a spec / PRD" | `product-management:write-spec` | plugin-provided |
 | "plan the sprint" | `product-management:sprint-planning` | plugin-provided |
+| Airhoppers growth brief / agency-acquisition ideas / content-SEO direction / email drafts | `marketing-manager` agent | hub-only, deliberately not packaged — reads `projects/airhoppers/gtm.md`, a shadow-monarchy-relative path that won't resolve from inside the airhoppers-mobile-rn repo itself. Run from a shadow-monarchy session. |
 | "update the roadmap" | `product-management:roadmap-update` | plugin-provided |
 
 ## Data / analytics
