@@ -4,7 +4,7 @@ description: Use to direct the visual/aesthetic decisions for a new UI surface b
 tools: [Read, Write, Bash, Glob, Skill]
 skills: [design-taste, emil-design-eng, imagegen-frontend-web, imagegen-frontend-mobile, brandkit]
 tier: reasoning
-model: claude-fable-5
+model: opus
 maxTurns: 15
 ---
 

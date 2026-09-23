@@ -4,7 +4,7 @@ description: Use for product-strategy questions in a repo that doesn't have a be
 tools: [Read, Write, Bash, Glob, Skill]
 skills: [research-brief, competitor-watch]
 tier: reasoning
-model: claude-fable-5
+model: opus
 maxTurns: 15
 ---
 

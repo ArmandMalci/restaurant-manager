@@ -3,7 +3,7 @@ name: frontend-architect
 description: Use for the plan gate on a React/TypeScript feature touching >2 files, a new dependency, shared component boundaries, or a data-fetching contract. Prefer this over the generic code-architect when the change is primarily component/UI-shaped — component tree design, server vs client boundary, data-fetching strategy, and design-token usage are FE-specific decisions the generic architect doesn't reason about. Skip for single-file changes, bug fixes, and backend-only work (code-architect or a repo's own backend-architect owns those).
 tools: [Read, Bash, Glob]
 tier: reasoning
-model: claude-fable-5
+model: opus
 maxTurns: 12
 ---
 

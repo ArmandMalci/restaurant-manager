@@ -15,11 +15,11 @@
     "research": "1.1.0"
   },
   "tiers": {
-    "reasoning": "claude-fable-5",
+    "reasoning": "opus",
     "execution": "sonnet",
     "grunt": "haiku"
   },
-  "syncedAt": "2026-09-03",
+  "syncedAt": "2026-09-23",
   "localPatches": [],
   "files": [
     ".claude/agents/a11y-reviewer/SKILL.md",
