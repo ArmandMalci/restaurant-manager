@@ -37,9 +37,9 @@
 
 ## Task 1: Schema + shared Zod
 
-- [ ] **Step 1:** `prisma/schema.prisma` `Table` — add `posX Float?`, `posY Float?`, `shape String @default("square")`.
-- [ ] **Step 2:** Migrate — `PATH="$HOME/.nvm/versions/node/v24.11.1/bin:$PATH" DATABASE_URL="..." node_modules/.bin/prisma migrate dev --name add_table_layout` from repo root (additive; **no reset** — stop & report if prompted). Run `prisma generate` if needed.
-- [ ] **Step 3:** `packages/shared/src/schemas/table.ts` — add to `TableSchema`: `posX: z.number().min(0).max(100).nullable().default(null)`, `posY: z.number().min(0).max(100).nullable().default(null)`, `shape: z.enum(['square', 'round']).default('square')`. Add:
+- [x] **Step 1:** `prisma/schema.prisma` `Table` — add `posX Float?`, `posY Float?`, `shape String @default("square")`.
+- [x] **Step 2:** Migrate — `PATH="$HOME/.nvm/versions/node/v24.11.1/bin:$PATH" DATABASE_URL="..." node_modules/.bin/prisma migrate dev --name add_table_layout` from repo root (additive; **no reset** — stop & report if prompted). Run `prisma generate` if needed.
+- [x] **Step 3:** `packages/shared/src/schemas/table.ts` — add to `TableSchema`: `posX: z.number().min(0).max(100).nullable().default(null)`, `posY: z.number().min(0).max(100).nullable().default(null)`, `shape: z.enum(['square', 'round']).default('square')`. Add:
 
 ```typescript
 export const TableLayoutItemSchema = z.object({
@@ -52,8 +52,8 @@ export const SaveTableLayoutSchema = z.object({ tables: z.array(TableLayoutItemS
 export type SaveTableLayoutDto = z.infer<typeof SaveTableLayoutSchema>;
 ```
 
-- [ ] **Step 4:** `pnpm --filter @restaurant/shared build` + `pnpm --filter @restaurant/api run build` → exit 0.
-- [ ] **Step 5:** Commit (`--no-verify`; `feat: table layout fields (posX/posY/shape) + layout schema`).
+- [x] **Step 4:** `pnpm --filter @restaurant/shared build` + `pnpm --filter @restaurant/api run build` → exit 0.
+- [x] **Step 5:** Commit (`--no-verify`; `feat: table layout fields (posX/posY/shape) + layout schema`).
 
 ---
 
@@ -61,7 +61,7 @@ export type SaveTableLayoutDto = z.infer<typeof SaveTableLayoutSchema>;
 
 **Interfaces:** Produces `TableService.saveLayout(tables: { id: string; posX: number; posY: number; shape: string }[])` → updates each in a `$transaction`.
 
-- [ ] **Step 1: Failing test** — in `table.service.spec.ts` (extend `prismaMock` with `$transaction: jest.fn()` + ensure `table.update` mock):
+- [x] **Step 1: Failing test** — in `table.service.spec.ts` (extend `prismaMock` with `$transaction: jest.fn()` + ensure `table.update` mock):
 
 ```typescript
 it('saves layout positions for each table in a transaction', async () => {
@@ -79,8 +79,8 @@ it('saves layout positions for each table in a transaction', async () => {
 });
 ```
 
-- [ ] **Step 2: Run → fail.**
-- [ ] **Step 3: Implement** — add to `TableService`:
+- [x] **Step 2: Run → fail.**
+- [x] **Step 3: Implement** — add to `TableService`:
 
 ```typescript
 public saveLayout(tables: { id: string; posX: number; posY: number; shape: string }[]) {
@@ -95,15 +95,15 @@ public saveLayout(tables: { id: string; posX: number; posY: number; shape: strin
 }
 ```
 
-- [ ] **Step 4: Run → pass.** **Step 5: Commit** (`--no-verify`; `feat(api): bulk table layout save service`).
+- [x] **Step 4: Run → pass.** **Step 5: Commit** (`--no-verify`; `feat(api): bulk table layout save service`).
 
 ---
 
 ## Task 3: Layout endpoint + DTO + swagger + regen
 
-- [ ] **Step 1:** `apps/api/src/table/dto/table.dto.ts` — add `export class SaveTableLayoutDto extends createZodDto(SaveTableLayoutSchema) {}` (import `SaveTableLayoutSchema` from `@restaurant/shared`).
-- [ ] **Step 2:** `apps/api/src/swagger-dtos.ts` — extend `TableDto` with `@ApiProperty({ type: Number, nullable: true }) posX!: number | null`, same `posY`, and `@ApiProperty({ enum: ['square','round'] }) shape!: string`.
-- [ ] **Step 3:** `table.controller.ts` — import `SaveTableLayoutDto`; add the endpoint **immediately after `create` and BEFORE `@Patch(':id')`** (route-order matters):
+- [x] **Step 1:** `apps/api/src/table/dto/table.dto.ts` — add `export class SaveTableLayoutDto extends createZodDto(SaveTableLayoutSchema) {}` (import `SaveTableLayoutSchema` from `@restaurant/shared`).
+- [x] **Step 2:** `apps/api/src/swagger-dtos.ts` — extend `TableDto` with `@ApiProperty({ type: Number, nullable: true }) posX!: number | null`, same `posY`, and `@ApiProperty({ enum: ['square','round'] }) shape!: string`.
+- [x] **Step 3:** `table.controller.ts` — import `SaveTableLayoutDto`; add the endpoint **immediately after `create` and BEFORE `@Patch(':id')`** (route-order matters):
 
 ```typescript
 @Patch('layout')
@@ -117,8 +117,8 @@ public saveLayout(@Body() dto: SaveTableLayoutDto) {
 }
 ```
 
-- [ ] **Step 4:** `pnpm --filter @restaurant/api run build` (exit 0); `pnpm gen:api` (Node 22+/pnpm 10). Confirm `apps/web/src/api/tables/tables.ts` exports `useTableControllerSaveLayout` and `TableDto` carries `posX/posY/shape`.
-- [ ] **Step 5: Commit** (`git add apps/api/src/table apps/api/src/swagger-dtos.ts apps/web/src/api apps/web/openapi.json`; `--no-verify`; `feat(api): PATCH /tables/layout + regenerate hooks`).
+- [x] **Step 4:** `pnpm --filter @restaurant/api run build` (exit 0); `pnpm gen:api` (Node 22+/pnpm 10). Confirm `apps/web/src/api/tables/tables.ts` exports `useTableControllerSaveLayout` and `TableDto` carries `posX/posY/shape`.
+- [x] **Step 5: Commit** (`git add apps/api/src/table apps/api/src/swagger-dtos.ts apps/web/src/api apps/web/openapi.json`; `--no-verify`; `feat(api): PATCH /tables/layout + regenerate hooks`).
 
 ---
 
@@ -126,10 +126,10 @@ public saveLayout(@Body() dto: SaveTableLayoutDto) {
 
 **Files:** Create `apps/web/src/routes/_app/floor/-floor-map.tsx`; modify `floor/index.tsx`.
 
-- [ ] **Step 1:** Read the current `floor/index.tsx` (the Plan-3 dense grid) to reuse its data hook (`useTableControllerGetAll`), status→tone mapping, and `PageHeader`.
-- [ ] **Step 2:** Create `-floor-map.tsx` exporting `FloorMap({ tables, onTableClick })`: a `relative` canvas (`aspect-[3/2]` or `min-h-[420px]`, `bg-card border rounded-lg overflow-hidden`); each table with non-null `posX/posY` is an absolutely-positioned tile (`style={{ left: \`${posX}%\`, top: \`${posY}%\`, transform: 'translate(-50%,-50%)' }}`), shape `rounded-full` (round) vs `rounded-md` (square), size by `seats` (e.g. `seats<=2 → h-14 w-14`, `<=4 → h-16 w-16`, else `h-20 w-20`), background tinted by status tone, showing `T{number}` + seats. Tables with null position are NOT drawn here (they live in the grid/tray).
-- [ ] **Step 3:** In `floor/index.tsx` add a **view toggle** (`map` | `grid`, local state; default `map` if any table has `posX != null`, else `grid`). Render `<FloorMap tables=… onTableClick=…>` for map, the existing grid for grid. Keep the summary/PageHeader. Tapping a tile/card calls a shared `onTableClick(table)` (wired in Task 6).
-- [ ] **Step 4:** `pnpm --filter @restaurant/web run build` (exit 0) + test green. Lead screenshots map + grid. Commit (`--no-verify`; `feat(web): floor map view + map/grid toggle`).
+- [x] **Step 1:** Read the current `floor/index.tsx` (the Plan-3 dense grid) to reuse its data hook (`useTableControllerGetAll`), status→tone mapping, and `PageHeader`.
+- [x] **Step 2:** Create `-floor-map.tsx` exporting `FloorMap({ tables, onTableClick })`: a `relative` canvas (`aspect-[3/2]` or `min-h-[420px]`, `bg-card border rounded-lg overflow-hidden`); each table with non-null `posX/posY` is an absolutely-positioned tile (`style={{ left: \`${posX}%\`, top: \`${posY}%\`, transform: 'translate(-50%,-50%)' }}`), shape `rounded-full` (round) vs `rounded-md` (square), size by `seats` (e.g. `seats<=2 → h-14 w-14`, `<=4 → h-16 w-16`, else `h-20 w-20`), background tinted by status tone, showing `T{number}` + seats. Tables with null position are NOT drawn here (they live in the grid/tray).
+- [x] **Step 3:** In `floor/index.tsx` add a **view toggle** (`map` | `grid`, local state; default `map` if any table has `posX != null`, else `grid`). Render `<FloorMap tables=… onTableClick=…>` for map, the existing grid for grid. Keep the summary/PageHeader. Tapping a tile/card calls a shared `onTableClick(table)` (wired in Task 6).
+- [x] **Step 4:** `pnpm --filter @restaurant/web run build` (exit 0) + test green. Lead screenshots map + grid. Commit (`--no-verify`; `feat(web): floor map view + map/grid toggle`).
 
 ---
 
@@ -137,9 +137,9 @@ public saveLayout(@Body() dto: SaveTableLayoutDto) {
 
 **Files:** Modify `floor/index.tsx`, `-floor-map.tsx`.
 
-- [ ] **Step 1:** Add an **"Edit layout"** toggle (manager) to the Floor header. In edit mode, `FloorMap` becomes draggable: track `dragId` on `onPointerDown` of a tile; on the canvas `onPointerMove`, compute `posX = clamp(((e.clientX - rect.left)/rect.width)*100, 0, 100)`, `posY` likewise, and update a local `positions` map; `onPointerUp` clears `dragId`. Unplaced tables show in a **tray** below the canvas; dragging one onto the canvas assigns its first position. A small shape toggle (□/○) appears on each tile in edit mode.
-- [ ] **Step 2:** "Save layout" → `useTableControllerSaveLayout` with `{ data: { tables: <all tiles with positions> } }` → invalidate `useTableControllerGetAll`; "Cancel" reverts local state. Only the single primary CTA ("Save layout") is accented in edit mode.
-- [ ] **Step 3:** Build + test green. Lead verifies dragging + save persists (reload). Commit (`--no-verify`; `feat(web): floor layout drag editor + save`).
+- [x] **Step 1:** Add an **"Edit layout"** toggle (manager) to the Floor header. In edit mode, `FloorMap` becomes draggable: track `dragId` on `onPointerDown` of a tile; on the canvas `onPointerMove`, compute `posX = clamp(((e.clientX - rect.left)/rect.width)*100, 0, 100)`, `posY` likewise, and update a local `positions` map; `onPointerUp` clears `dragId`. Unplaced tables show in a **tray** below the canvas; dragging one onto the canvas assigns its first position. A small shape toggle (□/○) appears on each tile in edit mode.
+- [x] **Step 2:** "Save layout" → `useTableControllerSaveLayout` with `{ data: { tables: <all tiles with positions> } }` → invalidate `useTableControllerGetAll`; "Cancel" reverts local state. Only the single primary CTA ("Save layout") is accented in edit mode.
+- [x] **Step 3:** Build + test green. Lead verifies dragging + save persists (reload). Commit (`--no-verify`; `feat(web): floor layout drag editor + save`).
 
 ---
 
@@ -147,12 +147,12 @@ public saveLayout(@Body() dto: SaveTableLayoutDto) {
 
 **Files:** Modify `floor/index.tsx`; modify `apps/web/src/routes/_app/order/-builder.tsx`.
 
-- [ ] **Step 1:** `onTableClick(table)` (view mode) opens a `Sheet` with:
+- [x] **Step 1:** `onTableClick(table)` (view mode) opens a `Sheet` with:
   - **Start / continue order** `Button` → `navigate({ to: '/order', search: { tableId: table.id } })`.
   - **Current order + running bill:** from `useOrderControllerGetAll`, find this table's order with status ∈ `{draft,sent,in_progress,ready}`; list its items (`{qty}× {name}` + modifier names) and show the running total `Σ (unitPrice + Σ modifier.priceDelta) × quantity`. If none, "No open order."
   - **Status:** buttons to set available / occupied via `useTableControllerSetStatus` → invalidate.
-- [ ] **Step 2:** In `order/-builder.tsx`, read a `tableId` search param (via the route's `useSearch` or `Route.useSearch`) and, when the builder opens, preselect that table in its table `Select` (and open the builder automatically if `tableId` is present). Keep manual selection working when absent. (Add the optional `tableId` to the `/order` route's `validateSearch` if the route validates search params; otherwise read it loosely.)
-- [ ] **Step 3:** Build + test green. Lead verifies: tap a table → sheet → "Start order" lands on the builder with the table preselected; bill shows for a table with an order; status change works. Screenshot the action sheet. Commit (`--no-verify`; `feat(web): floor table action sheet + order/bill/status`).
+- [x] **Step 2:** In `order/-builder.tsx`, read a `tableId` search param (via the route's `useSearch` or `Route.useSearch`) and, when the builder opens, preselect that table in its table `Select` (and open the builder automatically if `tableId` is present). Keep manual selection working when absent. (Add the optional `tableId` to the `/order` route's `validateSearch` if the route validates search params; otherwise read it loosely.)
+- [x] **Step 3:** Build + test green. Lead verifies: tap a table → sheet → "Start order" lands on the builder with the table preselected; bill shows for a table with an order; status change works. Screenshot the action sheet. Commit (`--no-verify`; `feat(web): floor table action sheet + order/bill/status`).
 
 ---
 

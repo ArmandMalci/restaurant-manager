@@ -8,6 +8,7 @@ export type ModifierSelectionType = z.infer<typeof ModifierSelectionTypeSchema>;
 
 export const ModifierOptionSchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   groupId: z.string().uuid(),
   name: z.string().min(1).max(100),
   priceDelta: z.number().default(0),
@@ -15,10 +16,15 @@ export const ModifierOptionSchema = z.object({
 });
 export type ModifierOption = z.infer<typeof ModifierOptionSchema>;
 
-export const CreateModifierOptionSchema = ModifierOptionSchema.omit({ id: true, groupId: true });
+export const CreateModifierOptionSchema = ModifierOptionSchema.omit({
+  id: true,
+  restaurantId: true,
+  groupId: true,
+});
 
 export const ModifierGroupSchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   name: z.string().min(1).max(100),
   selectionType: ModifierSelectionTypeSchema,
   required: z.boolean().default(false),
@@ -39,6 +45,7 @@ export type UpdateModifierGroupDto = z.infer<typeof UpdateModifierGroupSchema>;
 
 export const MenuCategorySchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   name: z.string().min(1).max(100),
   sortOrder: z.number().int().nonnegative().default(0),
 });
@@ -46,6 +53,7 @@ export type MenuCategory = z.infer<typeof MenuCategorySchema>;
 
 export const MenuItemSchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   categoryId: z.string().uuid(),
   name: z.string().min(1).max(200),
   description: z.string().max(1000).nullable().default(null),
@@ -58,7 +66,7 @@ export const MenuItemSchema = z.object({
 });
 export type MenuItem = z.infer<typeof MenuItemSchema>;
 
-export const CreateMenuCategorySchema = MenuCategorySchema.omit({ id: true });
+export const CreateMenuCategorySchema = MenuCategorySchema.omit({ id: true, restaurantId: true });
 export type CreateMenuCategoryDto = z.infer<typeof CreateMenuCategorySchema>;
 
 export const UpdateMenuCategorySchema = CreateMenuCategorySchema.partial();
@@ -66,6 +74,7 @@ export type UpdateMenuCategoryDto = z.infer<typeof UpdateMenuCategorySchema>;
 
 export const CreateMenuItemSchema = MenuItemSchema.omit({
   id: true,
+  restaurantId: true,
   createdAt: true,
   updatedAt: true,
   modifierGroupIds: true,

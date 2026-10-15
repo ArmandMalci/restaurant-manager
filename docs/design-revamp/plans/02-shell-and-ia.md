@@ -59,7 +59,7 @@ Renames the five screens and redirects the old paths. The screen *components* an
 **Interfaces:**
 - Produces: the new route paths `/service`, `/floor`, `/order`, `/door`, `/checkout` (typed into the generated tree) that Task 2/3 nav links reference.
 
-- [ ] **Step 1: Move the five route files and update each `createFileRoute` id**
+- [x] **Step 1: Move the five route files and update each `createFileRoute` id**
 
 For each row in the rename map, move the file and change its `createFileRoute('…')` argument. Example (dashboard → service):
 
@@ -75,7 +75,7 @@ export const Route = createFileRoute('/_app/service/')({
 
 Repeat for: `tables→floor` (`/_app/floor/`), `orders→order` (`/_app/order/`), `reservations→door` (`/_app/door/`), `billing→checkout` (`/_app/checkout/`). Change ONLY the `createFileRoute` id string in each moved file; leave the component body untouched.
 
-- [ ] **Step 2: Create redirect stubs at all old paths**
+- [x] **Step 2: Create redirect stubs at all old paths**
 
 Create a redirect file at each old path using this template (substitute `<OLD_ID>` and `<NEW_PATH>` per the table below):
 
@@ -102,21 +102,21 @@ export const Route = createFileRoute('<OLD_ID>')({
 
 > Staff's old directory page is replaced by a redirect (people-admin moves into Settings in a later feature plan). Notifications becomes the bell feed (Task 3); its route redirects to `/service`.
 
-- [ ] **Step 3: Update the hardcoded `/dashboard` redirects**
+- [x] **Step 3: Update the hardcoded `/dashboard` redirects**
 
 In `routes/index.tsx` and `routes/_auth.tsx` and `routes/_auth/login.tsx`, replace every `to: '/dashboard'` (and any `navigate({ to: '/dashboard' })`) with `'/service'`.
 
-- [ ] **Step 4: Verify build + typecheck (regenerates the route tree)**
+- [x] **Step 4: Verify build + typecheck (regenerates the route tree)**
 
 Run (from `apps/web/`): `pnpm run build`
 Expected: builds clean (exit 0). The TanStack plugin regenerates `routeTree.gen.ts`; no TS errors about unknown routes. If `to="/dashboard"` etc. remain anywhere, the typed `Link`/`redirect` will error here — fix those references.
 
-- [ ] **Step 5: Verify redirects in the browser**
+- [x] **Step 5: Verify redirects in the browser**
 
 Use the `run-web` skill; log in and visit `/dashboard`, `/tables`, `/orders`, `/reservations`, `/billing`, `/staff`, `/notifications`.
 Expected: each redirects to its new path (`/service`, `/floor`, `/order`, `/door`, `/checkout`, `/settings`, `/service`) and the screen renders.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/web/src/routes
@@ -136,7 +136,7 @@ Creates one shared `NAV_GROUPS` module and rewrites the sidebar into grouped sec
 **Interfaces:**
 - Produces: `NAV_GROUPS: { label: string; items: { to: string; label: string; icon: LucideIcon }[] }[]` consumed by sidebar (Task 2) and topbar (Task 3).
 
-- [ ] **Step 1: Write the failing nav-data test**
+- [x] **Step 1: Write the failing nav-data test**
 
 Create `apps/web/src/components/layout/nav.test.ts`:
 
@@ -160,12 +160,12 @@ describe('NAV_GROUPS', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/layout/nav.test.ts`
 Expected: FAIL — cannot resolve module `./nav`.
 
-- [ ] **Step 3: Create the shared nav module**
+- [x] **Step 3: Create the shared nav module**
 
 Create `apps/web/src/components/layout/nav.ts`:
 
@@ -221,12 +221,12 @@ export const NAV_GROUPS: NavGroup[] = [
 
 > The "Kitchen" group (KDS) is intentionally omitted until the KDS screen exists (a later feature plan).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/layout/nav.test.ts`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Rewrite the sidebar to use grouped nav**
+- [x] **Step 5: Rewrite the sidebar to use grouped nav**
 
 Replace the entire body of `apps/web/src/components/layout/sidebar.tsx` with:
 
@@ -304,12 +304,12 @@ export function Sidebar() {
 
 > Note the active state is `bg-sidebar-accent` + bold text — **no `border-l-2` side-stripe** (removing the banned pattern still present in the old sidebar). Confirm the `useAuthStore` selector usage matches the store (it exposes `user`); if the store has no selector form, use `const { user } = useAuthStore();`.
 
-- [ ] **Step 6: Verify build + screenshot**
+- [x] **Step 6: Verify build + screenshot**
 
 Run: `pnpm run build` (expect exit 0). Then use the `run-web` skill to screenshot the app at desktop width.
 Expected: grouped sidebar with "Service" and "Back office" section labels, terracotta active item (no left stripe), warm light sidebar. Compare spacing to `docs/design-revamp/mockups/service-warm-canvas.html` and nudge padding/gaps to match.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/web/src/components/layout/nav.ts apps/web/src/components/layout/nav.test.ts apps/web/src/components/layout/sidebar.tsx
@@ -329,7 +329,7 @@ Rewrites the topbar to reuse `NAV_GROUPS` in the mobile drawer, update page-titl
 **Interfaces:**
 - Consumes: `NAV_GROUPS` from Task 2; `Sheet`/`SheetContent`/`SheetTrigger` from `@/components/ui/sheet`; `EmptyState` from `@/components/ui/empty-state`.
 
-- [ ] **Step 1: Create the notification feed panel**
+- [x] **Step 1: Create the notification feed panel**
 
 Create `apps/web/src/components/notification-feed.tsx`:
 
@@ -352,7 +352,7 @@ export function NotificationFeed() {
 
 > Placeholder until the alert engine (later plan) feeds real items; that plan adds the unread badge + live list.
 
-- [ ] **Step 2: Rewrite the topbar**
+- [x] **Step 2: Rewrite the topbar**
 
 Replace the entire body of `apps/web/src/components/layout/topbar.tsx` with:
 
@@ -487,17 +487,17 @@ export function Topbar() {
 
 > Confirm the logout handler: the old topbar had a `handleLogout`; this uses `useAuthStore`'s `logout`. If logout requires navigation, keep whatever the old `handleLogout` did (check the old file before overwriting) — preserve its exact behavior.
 
-- [ ] **Step 3: Verify build**
+- [x] **Step 3: Verify build**
 
 Run: `pnpm run build`
 Expected: exit 0; no unused-import or type errors.
 
-- [ ] **Step 4: Verify behavior + screenshot**
+- [x] **Step 4: Verify behavior + screenshot**
 
 Use the `run-web` skill: at desktop width click the bell → a right Sheet "Notifications" with the empty-state opens; at mobile width (resize to 390px) the hamburger opens the grouped drawer; page title reflects the new route names.
 Expected: matches; screenshot both states.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/components/layout/topbar.tsx apps/web/src/components/notification-feed.tsx
@@ -513,7 +513,7 @@ Fix the literal-color component the Plan 1 theme retune exposed.
 **Files:**
 - Modify: `apps/web/src/components/offline-banner.tsx`
 
-- [ ] **Step 1: Replace literal yellow with warning tokens**
+- [x] **Step 1: Replace literal yellow with warning tokens**
 
 In `offline-banner.tsx`, replace the literal classes `border-yellow-200 bg-yellow-50 text-yellow-800` with semantic warning tokens. The result:
 
@@ -536,12 +536,12 @@ export function OfflineBanner() {
 
 > Keep the existing import/export shape if it differs (read the file first); only the wrapper `className` and the literal colors change.
 
-- [ ] **Step 2: Verify build**
+- [x] **Step 2: Verify build**
 
 Run: `pnpm run build`
 Expected: exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/src/components/offline-banner.tsx

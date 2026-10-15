@@ -6,21 +6,65 @@ datasource db {
   provider = "postgresql"
 }
 
+model Restaurant {
+  id            String   @id @default(uuid())
+  name          String   @default("My Restaurant")
+  description   String?
+  phone         String?
+  email         String?
+  address       String?
+  openingHours  String?
+  baseCurrency  String   @default("EUR")
+  exchangeRates Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  staff           Staff[]
+  sections        Section[]
+  tables          Table[]
+  menuCategories  MenuCategory[]
+  menuItems       MenuItem[]
+  modifierGroups  ModifierGroup[]
+  modifierOptions ModifierOption[]
+  orders          Order[]
+  reservations    Reservation[]
+  shifts          Shift[]
+  inventoryItems  InventoryItem[]
+
+  @@map("restaurants")
+}
+
+model PlatformAdmin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("platform_admins")
+}
+
 model Staff {
   id           String    @id @default(uuid())
+  restaurantId String
   name         String
   email        String    @unique
+  username     String
   passwordHash String
   role         StaffRole
   active       Boolean   @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  orders             Order[]
-  shifts             Shift[]
-  refreshTokens      RefreshToken[]
-  pushSubscriptions  PushSubscription[]
+  restaurant        Restaurant          @relation(fields: [restaurantId], references: [id])
+  orders            Order[]
+  shifts            Shift[]
+  refreshTokens     RefreshToken[]
+  pushSubscriptions PushSubscription[]
 
+  @@unique([restaurantId, username])
+  @@index([restaurantId])
   @@map("staff")
 }
 
@@ -37,85 +81,107 @@ model RefreshToken {
 }
 
 model Section {
-  id        String @id @default(uuid())
-  name      String
-  sortOrder Int    @default(0)
+  id           String @id @default(uuid())
+  restaurantId String
+  name         String
+  sortOrder    Int    @default(0)
 
-  tables Table[]
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  tables     Table[]
 
+  @@index([restaurantId])
   @@map("sections")
 }
 
 model Table {
-  id        String      @id @default(uuid())
-  number    Int         @unique
-  name      String?
-  seats     Int
-  status    TableStatus @default(available)
-  seatedAt  DateTime?
-  posX      Float?
-  posY      Float?
-  shape     String      @default("square")
-  sectionId String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  restaurantId String
+  number       Int
+  name         String?
+  seats        Int
+  status       TableStatus @default(available)
+  seatedAt     DateTime?
+  posX         Float?
+  posY         Float?
+  shape        String      @default("square")
+  sectionId    String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
   section      Section       @relation(fields: [sectionId], references: [id])
   orders       Order[]
   reservations Reservation[]
 
+  @@unique([restaurantId, number])
+  @@index([restaurantId])
   @@map("tables")
 }
 
 model MenuCategory {
-  id        String     @id @default(uuid())
-  name      String
-  sortOrder Int        @default(0)
-  items     MenuItem[]
+  id           String     @id @default(uuid())
+  restaurantId String
+  name         String
+  sortOrder    Int        @default(0)
 
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  items      MenuItem[]
+
+  @@index([restaurantId])
   @@map("menu_categories")
 }
 
 model MenuItem {
-  id          String          @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal         @db.Decimal(10, 2)
-  categoryId  String
-  available   Boolean         @default(true)
-  station     KitchenStation?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id           String          @id @default(uuid())
+  restaurantId String
+  name         String
+  description  String?
+  price        Decimal         @db.Decimal(10, 2)
+  categoryId   String
+  available    Boolean         @default(true)
+  station      KitchenStation?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
-  category        MenuCategory           @relation(fields: [categoryId], references: [id])
+  restaurant      Restaurant               @relation(fields: [restaurantId], references: [id])
+  category        MenuCategory             @relation(fields: [categoryId], references: [id])
   orderItems      OrderItem[]
   inventoryUsages InventoryUsage[]
   modifierGroups  MenuItemModifierGroup[]
 
+  @@index([restaurantId])
   @@map("menu_items")
 }
 
 model ModifierGroup {
   id            String                @id @default(uuid())
+  restaurantId  String
   name          String
   selectionType ModifierSelectionType @default(single)
   required      Boolean               @default(false)
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
-  options       ModifierOption[]
-  menuItems     MenuItemModifierGroup[]
 
+  restaurant Restaurant               @relation(fields: [restaurantId], references: [id])
+  options    ModifierOption[]
+  menuItems  MenuItemModifierGroup[]
+
+  @@index([restaurantId])
   @@map("modifier_groups")
 }
 
 model ModifierOption {
-  id         String        @id @default(uuid())
-  groupId    String
-  name       String
-  priceDelta Decimal       @default(0) @db.Decimal(10, 2)
-  sortOrder  Int           @default(0)
+  id           String        @id @default(uuid())
+  restaurantId String
+  groupId      String
+  name         String
+  priceDelta   Decimal       @default(0) @db.Decimal(10, 2)
+  sortOrder    Int           @default(0)
+
+  restaurant Restaurant    @relation(fields: [restaurantId], references: [id])
   group      ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
+  @@index([restaurantId])
   @@map("modifier_options")
 }
 
@@ -131,22 +197,25 @@ model MenuItemModifierGroup {
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  tableId   String
-  staffId   String
-  status    OrderStatus @default(draft)
-  notes     String?
-  sentAt    DateTime?
-  readyAt   DateTime?
-  servedAt  DateTime?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  restaurantId String
+  tableId      String
+  staffId      String
+  status       OrderStatus @default(draft)
+  notes        String?
+  sentAt       DateTime?
+  readyAt      DateTime?
+  servedAt     DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  table Table      @relation(fields: [tableId], references: [id])
-  staff Staff      @relation(fields: [staffId], references: [id])
-  items OrderItem[]
-  bill  Bill?
+  restaurant Restaurant  @relation(fields: [restaurantId], references: [id])
+  table      Table       @relation(fields: [tableId], references: [id])
+  staff      Staff       @relation(fields: [staffId], references: [id])
+  items      OrderItem[]
+  bill       Bill?
 
+  @@index([restaurantId])
   @@map("orders")
 }
 
@@ -182,47 +251,56 @@ model OrderItemModifier {
 }
 
 model Reservation {
-  id         String            @id @default(uuid())
-  tableId    String
-  guestName  String
-  guestEmail String?
-  guestPhone String?
-  partySize  Int
-  date       DateTime
-  notes      String?
-  status     ReservationStatus @default(booked)
-  seatedAt   DateTime?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  id           String            @id @default(uuid())
+  restaurantId String
+  tableId      String
+  guestName    String
+  guestEmail   String?
+  guestPhone   String?
+  partySize    Int
+  date         DateTime
+  notes        String?
+  status       ReservationStatus @default(booked)
+  seatedAt     DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
-  table Table @relation(fields: [tableId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  table      Table      @relation(fields: [tableId], references: [id])
 
+  @@index([restaurantId])
   @@map("reservations")
 }
 
 model Shift {
-  id        String    @id @default(uuid())
-  staffId   String
-  startTime DateTime
-  endTime   DateTime?
-  createdAt DateTime  @default(now())
+  id           String    @id @default(uuid())
+  restaurantId String
+  staffId      String
+  startTime    DateTime
+  endTime      DateTime?
+  createdAt    DateTime  @default(now())
 
-  staff Staff @relation(fields: [staffId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  staff      Staff      @relation(fields: [staffId], references: [id])
 
+  @@index([restaurantId])
   @@map("shifts")
 }
 
 model InventoryItem {
-  id        String   @id @default(uuid())
-  name      String
-  unit      String
-  quantity  Decimal  @db.Decimal(10, 3)
-  minStock  Decimal  @db.Decimal(10, 3)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  restaurantId String
+  name         String
+  unit         String
+  quantity     Decimal  @db.Decimal(10, 3)
+  minStock     Decimal  @db.Decimal(10, 3)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  usages InventoryUsage[]
+  restaurant Restaurant       @relation(fields: [restaurantId], references: [id])
+  usages     InventoryUsage[]
 
+  @@index([restaurantId])
   @@map("inventory_items")
 }
 
@@ -239,16 +317,16 @@ model InventoryUsage {
 }
 
 model Bill {
-  id        String   @id @default(uuid())
-  orderId   String   @unique
-  subtotal  Decimal  @db.Decimal(10, 2)
-  discountPct Decimal @db.Decimal(5, 2) @default(0)
-  tax       Decimal  @db.Decimal(10, 2)
-  total     Decimal  @db.Decimal(10, 2)
-  paid      Boolean  @default(false)
-  paidAt    DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(uuid())
+  orderId     String    @unique
+  subtotal    Decimal   @db.Decimal(10, 2)
+  discountPct Decimal   @db.Decimal(5, 2) @default(0)
+  tax         Decimal   @db.Decimal(10, 2)
+  total       Decimal   @db.Decimal(10, 2)
+  paid        Boolean   @default(false)
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   order    Order     @relation(fields: [orderId], references: [id])
   payments Payment[]
@@ -310,21 +388,6 @@ enum ReservationStatus {
   seated
   no_show
   cancelled
-}
-
-model RestaurantSettings {
-  id            String   @id @default("default")
-  name          String   @default("My Restaurant")
-  description   String?
-  phone         String?
-  email         String?
-  address       String?
-  openingHours  String?
-  baseCurrency  String   @default("EUR")
-  exchangeRates Json     @default("{}")
-  updatedAt     DateTime @updatedAt
-
-  @@map("restaurant_settings")
 }
 
 model PushSubscription {

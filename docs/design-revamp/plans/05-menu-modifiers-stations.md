@@ -41,14 +41,14 @@
 
 **Interfaces:** Produces the new models/enum on the Prisma client + the Zod types (`ModifierGroup`, `CreateModifierGroupDto`, `UpdateModifierGroupDto`, `KitchenStation`) and extended `MenuItem`/`UpdateMenuItemDto` consumed by Tasks 2–6.
 
-- [ ] **Step 1: Add the Prisma models/enum** (from §2 of the spec — add the two enums, the `station` + `modifierGroups` fields on `MenuItem`, and the three models verbatim).
+- [x] **Step 1: Add the Prisma models/enum** (from §2 of the spec — add the two enums, the `station` + `modifierGroups` fields on `MenuItem`, and the three models verbatim).
 
-- [ ] **Step 2: Create + apply the migration**
+- [x] **Step 2: Create + apply the migration**
 
 Run from repo root: `DATABASE_URL="$(grep -m1 '^DATABASE_URL' .env 2>/dev/null | cut -d= -f2- | tr -d '"')" node_modules/.bin/prisma migrate dev --name add_menu_modifiers_stations`
 (If `.env` isn't present, use the `.env.example` default value.) Expected: new migration applied (all-additive, no data-loss prompt), client regenerated. **If it asks to reset, STOP and report.**
 
-- [ ] **Step 3: Extend the shared Zod schemas**
+- [x] **Step 3: Extend the shared Zod schemas**
 
 In `packages/shared/src/schemas/menu.ts` add (and extend the existing item schemas):
 
@@ -93,11 +93,11 @@ export type UpdateModifierGroupDto = z.infer<typeof UpdateModifierGroupSchema>;
 
 Then extend the item schemas: add `station: KitchenStationSchema.nullable().default(null)` to `MenuItemSchema`; add a read-only `modifierGroupIds: z.array(z.string().uuid()).default([])` to `MenuItemSchema`; keep `CreateMenuItemSchema = MenuItemSchema.omit({ id, createdAt, updatedAt, modifierGroupIds })`; redefine `UpdateMenuItemSchema = CreateMenuItemSchema.partial().extend({ modifierGroupIds: z.array(z.string().uuid()).optional() })`.
 
-- [ ] **Step 4: Rebuild shared + verify API builds**
+- [x] **Step 4: Rebuild shared + verify API builds**
 
 Run: `pnpm --filter @restaurant/shared build` then `pnpm --filter @restaurant/api run build`. Expected: both exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add prisma/schema.prisma prisma/migrations packages/shared/src/schemas/menu.ts
@@ -114,7 +114,7 @@ git commit -m "feat: menu modifier + station schema (models, enum, shared zod)"
 - Consumes: Task 1 Prisma models + `CreateModifierGroupDto`/`UpdateModifierGroupDto`.
 - Produces: `MenuService.findAllModifierGroups()`, `createModifierGroup(dto)`, `updateModifierGroup(id, dto)`, `removeModifierGroup(id)`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `apps/api/src/menu/menu.service.spec.ts` (create with the standard `Test.createTestingModule` + `prismaMock` pattern if absent), add `modifierGroup` + `modifierOption` to `prismaMock` (`{ findMany, findUnique, create, update, delete }` / `{ deleteMany, createMany }`, plus `$transaction: jest.fn((fn) => fn(prismaMock))`) and:
 
@@ -139,9 +139,9 @@ describe('modifier groups', () => {
 });
 ```
 
-- [ ] **Step 2: Run → fail** — `pnpm --filter @restaurant/api exec jest src/menu/menu.service.spec.ts` (FAIL: methods undefined).
+- [x] **Step 2: Run → fail** — `pnpm --filter @restaurant/api exec jest src/menu/menu.service.spec.ts` (FAIL: methods undefined).
 
-- [ ] **Step 3: Implement** — add to `MenuService` (import `CreateModifierGroupDto`, `UpdateModifierGroupDto` from `@restaurant/shared`):
+- [x] **Step 3: Implement** — add to `MenuService` (import `CreateModifierGroupDto`, `UpdateModifierGroupDto` from `@restaurant/shared`):
 
 ```typescript
 public findAllModifierGroups() {
@@ -192,7 +192,7 @@ public async removeModifierGroup(id: string) {
 }
 ```
 
-- [ ] **Step 4: Run → pass.** **Step 5: Commit** (`git add apps/api/src/menu/menu.service.ts apps/api/src/menu/menu.service.spec.ts`; `feat(api): modifier-group CRUD service`).
+- [x] **Step 4: Run → pass.** **Step 5: Commit** (`git add apps/api/src/menu/menu.service.ts apps/api/src/menu/menu.service.spec.ts`; `feat(api): modifier-group CRUD service`).
 
 ---
 
@@ -202,7 +202,7 @@ public async removeModifierGroup(id: string) {
 
 **Interfaces:** Produces `findAllItems`/`findOneItem` returning `modifierGroupIds: string[]`; `updateItem(id, dto)` setting `station` + syncing the join.
 
-- [ ] **Step 1: Failing tests**
+- [x] **Step 1: Failing tests**
 
 ```typescript
 describe('item station + modifier attach', () => {
@@ -219,9 +219,9 @@ describe('item station + modifier attach', () => {
 
 (Ensure `prismaMock.menuItem` includes `findMany`, `findUnique`, `update`; add `menuItemModifierGroup: { deleteMany: jest.fn(), upsert: jest.fn() }` to the base mock.)
 
-- [ ] **Step 2: Run → fail.**
+- [x] **Step 2: Run → fail.**
 
-- [ ] **Step 3: Implement** — replace `findAllItems`, `findOneItem`, `updateItem`:
+- [x] **Step 3: Implement** — replace `findAllItems`, `findOneItem`, `updateItem`:
 
 ```typescript
 public async findAllItems(categoryId?: string) {
@@ -266,7 +266,7 @@ public async updateItem(id: string, dto: UpdateMenuItemDto) {
 }
 ```
 
-- [ ] **Step 4: Run → pass; full menu spec green.** **Step 5: Commit** (`feat(api): menu item station + modifier-group attach`).
+- [x] **Step 4: Run → pass; full menu spec green.** **Step 5: Commit** (`feat(api): menu item station + modifier-group attach`).
 
 ---
 
@@ -274,7 +274,7 @@ public async updateItem(id: string, dto: UpdateMenuItemDto) {
 
 **Files:** Modify `apps/api/src/menu/dto/menu.dto.ts`, `apps/api/src/swagger-dtos.ts`, `apps/api/src/menu/menu.controller.ts`.
 
-- [ ] **Step 1: createZodDto wrappers** — in `dto/menu.dto.ts` add:
+- [x] **Step 1: createZodDto wrappers** — in `dto/menu.dto.ts` add:
 
 ```typescript
 import { CreateModifierGroupSchema, UpdateModifierGroupSchema } from '@restaurant/shared';
@@ -282,9 +282,9 @@ export class CreateModifierGroupDto extends createZodDto(CreateModifierGroupSche
 export class UpdateModifierGroupDto extends createZodDto(UpdateModifierGroupSchema) {}
 ```
 
-- [ ] **Step 2: swagger DTOs** — in `swagger-dtos.ts` add `ModifierOptionDto` (`id, groupId, name, priceDelta:number, sortOrder:number`) and `ModifierGroupDto` (`id, name, selectionType:string, required:boolean, options: [ModifierOptionDto]`); extend `MenuItemDto` with `@ApiProperty({ enum: ['grill','cold','bar','pass'], nullable: true }) station!: string | null` and `@ApiProperty({ type: [String] }) modifierGroupIds!: string[]`.
+- [x] **Step 2: swagger DTOs** — in `swagger-dtos.ts` add `ModifierOptionDto` (`id, groupId, name, priceDelta:number, sortOrder:number`) and `ModifierGroupDto` (`id, name, selectionType:string, required:boolean, options: [ModifierOptionDto]`); extend `MenuItemDto` with `@ApiProperty({ enum: ['grill','cold','bar','pass'], nullable: true }) station!: string | null` and `@ApiProperty({ type: [String] }) modifierGroupIds!: string[]`.
 
-- [ ] **Step 3: Controller endpoints** — in `menu.controller.ts` add (import the two DTOs + `ModifierGroupDto`):
+- [x] **Step 3: Controller endpoints** — in `menu.controller.ts` add (import the two DTOs + `ModifierGroupDto`):
 
 ```typescript
 @Get('modifier-groups')
@@ -326,9 +326,9 @@ public removeModifierGroup(@Param('id') id: string) {
 
 (The existing `updateItem` endpoint already passes the DTO through — now carrying `station` + `modifierGroupIds`.)
 
-- [ ] **Step 4: Build + regenerate** — `pnpm --filter @restaurant/api run build` (exit 0), then `pnpm gen:api`. Confirm `apps/web/src/api/menu/menu.ts` now exports `useMenuControllerGetModifierGroups` + mutation hooks.
+- [x] **Step 4: Build + regenerate** — `pnpm --filter @restaurant/api run build` (exit 0), then `pnpm gen:api`. Confirm `apps/web/src/api/menu/menu.ts` now exports `useMenuControllerGetModifierGroups` + mutation hooks.
 
-- [ ] **Step 5: Commit** (`git add apps/api/src/menu apps/api/src/swagger-dtos.ts apps/web/src/api apps/web/openapi.json`; `feat(api): modifier-group endpoints + regenerate hooks`).
+- [x] **Step 5: Commit** (`git add apps/api/src/menu apps/api/src/swagger-dtos.ts apps/web/src/api apps/web/openapi.json`; `feat(api): modifier-group endpoints + regenerate hooks`).
 
 ---
 
@@ -336,11 +336,11 @@ public removeModifierGroup(@Param('id') id: string) {
 
 **Files:** Modify `apps/web/src/routes/_app/menu/index.tsx`.
 
-- [ ] **Step 1:** Add a `Tabs` toggle (`Items` | `Modifiers`) under the `PageHeader`. `Items` renders the existing category-sidebar + grid unchanged. `Modifiers` renders a dense list of groups (via `useMenuControllerGetModifierGroups`) — each `ListRow` shows name + `selectionType`/`required` badges + option count, with edit/delete. A "New group" `Button` (single accent CTA on this tab) and an editor `Sheet`: `Input` name, a single/multi `Select` (or `Switch`), a `required` `Switch`, and an editable options list (rows of `Input` name + number `Input` priceDelta, add/remove). Save → `useMenuControllerCreateModifierGroup`/`...Update`; delete → `...Delete` with a confirm `Dialog`. Invalidate the groups query on success.
+- [x] **Step 1:** Add a `Tabs` toggle (`Items` | `Modifiers`) under the `PageHeader`. `Items` renders the existing category-sidebar + grid unchanged. `Modifiers` renders a dense list of groups (via `useMenuControllerGetModifierGroups`) — each `ListRow` shows name + `selectionType`/`required` badges + option count, with edit/delete. A "New group" `Button` (single accent CTA on this tab) and an editor `Sheet`: `Input` name, a single/multi `Select` (or `Switch`), a `required` `Switch`, and an editable options list (rows of `Input` name + number `Input` priceDelta, add/remove). Save → `useMenuControllerCreateModifierGroup`/`...Update`; delete → `...Delete` with a confirm `Dialog`. Invalidate the groups query on success.
 
-- [ ] **Step 2:** Verify `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green. Use the `run-web` skill: Menu → Modifiers tab; create a group "Cooking temp" (single, required) with options Rare/Medium/Well. Screenshot.
+- [x] **Step 2:** Verify `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green. Use the `run-web` skill: Menu → Modifiers tab; create a group "Cooking temp" (single, required) with options Rare/Medium/Well. Screenshot.
 
-- [ ] **Step 3: Commit** (`feat(web): menu Modifiers tab (group + option management)`).
+- [x] **Step 3: Commit** (`feat(web): menu Modifiers tab (group + option management)`).
 
 ---
 
@@ -348,11 +348,11 @@ public removeModifierGroup(@Param('id') id: string) {
 
 **Files:** Modify `apps/web/src/routes/_app/menu/index.tsx`.
 
-- [ ] **Step 1:** In the add/edit item `Sheet`, add a **Station** `Select` (None / grill / cold / bar / pass, bound to `station`) and an **attach modifier groups** control — a checklist of the groups from `useMenuControllerGetModifierGroups`, bound to `modifierGroupIds`. On save, include `station` + `modifierGroupIds` in the `useMenuControllerUpdateItem` payload (and `station` in create). Pre-fill from the item's current `station`/`modifierGroupIds` when editing.
+- [x] **Step 1:** In the add/edit item `Sheet`, add a **Station** `Select` (None / grill / cold / bar / pass, bound to `station`) and an **attach modifier groups** control — a checklist of the groups from `useMenuControllerGetModifierGroups`, bound to `modifierGroupIds`. On save, include `station` + `modifierGroupIds` in the `useMenuControllerUpdateItem` payload (and `station` in create). Pre-fill from the item's current `station`/`modifierGroupIds` when editing.
 
-- [ ] **Step 2:** Verify build + test green. Use `run-web`: edit an item → set station = grill, attach "Cooking temp" → save → reopen and confirm it persisted. Screenshot the editor.
+- [x] **Step 2:** Verify build + test green. Use `run-web`: edit an item → set station = grill, attach "Cooking temp" → save → reopen and confirm it persisted. Screenshot the editor.
 
-- [ ] **Step 3: Commit** (`feat(web): item editor station + modifier-group attach`).
+- [x] **Step 3: Commit** (`feat(web): item editor station + modifier-group attach`).
 
 ---
 

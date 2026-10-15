@@ -7,8 +7,11 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+// Fixed id so local dev can hardcode `/{restaurantId}/...` URLs across reseeds.
+const FIRST_RESTAURANT_ID = "00000000-0000-0000-0000-000000000001";
+
 async function main() {
-  // Clear in FK-safe order
+  // Clear in FK-safe order (children before parents; Restaurant last — everything FKs to it)
   await prisma.bill.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -18,39 +21,21 @@ async function main() {
   await prisma.pushSubscription.deleteMany();
   await prisma.inventoryUsage.deleteMany();
   await prisma.inventoryItem.deleteMany();
+  await prisma.modifierOption.deleteMany();
+  await prisma.modifierGroup.deleteMany();
   await prisma.menuItem.deleteMany();
   await prisma.menuCategory.deleteMany();
   await prisma.table.deleteMany();
   await prisma.section.deleteMany();
   await prisma.staff.deleteMany();
+  await prisma.platformAdmin.deleteMany();
+  await prisma.restaurant.deleteMany();
   console.log("✓ Cleared existing data");
 
-  // ── Staff ────────────────────────────────────────────────────────────────
-  const passwordHash = await bcrypt.hash("admin123", 12);
-
-  const [admin, waiter1, waiter2, kitchen1, host1] = await Promise.all([
-    prisma.staff.create({
-      data: { name: "Admin Manager", email: "admin@restaurant.local", passwordHash, role: "manager", active: true },
-    }),
-    prisma.staff.create({
-      data: { name: "Sophie Turner", email: "sophie@restaurant.local", passwordHash, role: "waiter", active: true },
-    }),
-    prisma.staff.create({
-      data: { name: "Marco Rossi", email: "marco@restaurant.local", passwordHash, role: "waiter", active: true },
-    }),
-    prisma.staff.create({
-      data: { name: "Chen Wei", email: "chen@restaurant.local", passwordHash, role: "kitchen", active: true },
-    }),
-    prisma.staff.create({
-      data: { name: "Amara Diallo", email: "amara@restaurant.local", passwordHash, role: "host", active: true },
-    }),
-  ]);
-  console.log("✓ Staff (5)");
-
-  // ── Restaurant settings ──────────────────────────────────────────────────
-  await prisma.restaurantSettings.upsert({
-    where: { id: "default" },
-    create: {
+  // ── Restaurant (tenant root) ─────────────────────────────────────────────
+  const restaurant = await prisma.restaurant.create({
+    data: {
+      id: FIRST_RESTAURANT_ID,
       name: "La Bella Tavola",
       description: "Modern Italian cuisine with a cozy atmosphere",
       phone: "+1 (555) 234-5678",
@@ -58,12 +43,41 @@ async function main() {
       address: "42 Vine Street, Downtown",
       openingHours: "Mon–Fri 11:00–23:00, Sat–Sun 10:00–23:30",
     },
-    update: {},
   });
-  console.log("✓ Restaurant settings");
+  const restaurantId = restaurant.id;
+  console.log("✓ Restaurant (1)");
+
+  // ── Platform admin (superuser, outside all restaurants) ─────────────────
+  const platformPasswordHash = await bcrypt.hash("superadmin123", 12);
+  await prisma.platformAdmin.create({
+    data: { email: "platform@restaurant-manager.local", passwordHash: platformPasswordHash, name: "Platform Owner" },
+  });
+  console.log("✓ Platform admin (1)");
+
+  // ── Staff ────────────────────────────────────────────────────────────────
+  const passwordHash = await bcrypt.hash("admin123", 12);
+
+  const [admin, waiter1, waiter2, kitchen1, host1] = await Promise.all([
+    prisma.staff.create({
+      data: { restaurantId, name: "Admin Manager", email: "admin@restaurant.local", username: "admin", passwordHash, role: "manager", active: true },
+    }),
+    prisma.staff.create({
+      data: { restaurantId, name: "Sophie Turner", email: "sophie@restaurant.local", username: "sophie", passwordHash, role: "waiter", active: true },
+    }),
+    prisma.staff.create({
+      data: { restaurantId, name: "Marco Rossi", email: "marco@restaurant.local", username: "marco", passwordHash, role: "waiter", active: true },
+    }),
+    prisma.staff.create({
+      data: { restaurantId, name: "Chen Wei", email: "chen@restaurant.local", username: "chen", passwordHash, role: "kitchen", active: true },
+    }),
+    prisma.staff.create({
+      data: { restaurantId, name: "Amara Diallo", email: "amara@restaurant.local", username: "amara", passwordHash, role: "host", active: true },
+    }),
+  ]);
+  console.log("✓ Staff (5)");
 
   // ── Sections ─────────────────────────────────────────────────────────────
-  const mainRoom = await prisma.section.create({ data: { name: "Main Room", sortOrder: 0 } });
+  const mainRoom = await prisma.section.create({ data: { restaurantId, name: "Main Room", sortOrder: 0 } });
   console.log("✓ Sections (1)");
 
   // ── Tables ───────────────────────────────────────────────────────────────
@@ -79,45 +93,45 @@ async function main() {
       { number: 8, seats: 8, status: "available" as const },
       { number: 9, seats: 2, status: "available" as const },
       { number: 10, seats: 10, status: "reserved" as const },
-    ].map((t) => prisma.table.create({ data: { ...t, sectionId: mainRoom.id } }))
+    ].map((t) => prisma.table.create({ data: { ...t, restaurantId, sectionId: mainRoom.id } }))
   );
   console.log("✓ Tables (10)");
 
   // ── Menu ─────────────────────────────────────────────────────────────────
   const [starters, pasta, mains, desserts, drinks] = await Promise.all([
-    prisma.menuCategory.create({ data: { name: "Starters", sortOrder: 1 } }),
-    prisma.menuCategory.create({ data: { name: "Pasta & Risotto", sortOrder: 2 } }),
-    prisma.menuCategory.create({ data: { name: "Main Courses", sortOrder: 3 } }),
-    prisma.menuCategory.create({ data: { name: "Desserts", sortOrder: 4 } }),
-    prisma.menuCategory.create({ data: { name: "Drinks", sortOrder: 5 } }),
+    prisma.menuCategory.create({ data: { restaurantId, name: "Starters", sortOrder: 1 } }),
+    prisma.menuCategory.create({ data: { restaurantId, name: "Pasta & Risotto", sortOrder: 2 } }),
+    prisma.menuCategory.create({ data: { restaurantId, name: "Main Courses", sortOrder: 3 } }),
+    prisma.menuCategory.create({ data: { restaurantId, name: "Desserts", sortOrder: 4 } }),
+    prisma.menuCategory.create({ data: { restaurantId, name: "Drinks", sortOrder: 5 } }),
   ]);
 
   const menuItems = await Promise.all([
     // Starters
-    prisma.menuItem.create({ data: { name: "Bruschetta al Pomodoro", description: "Toasted bread, tomatoes, garlic, basil", price: 9.5, categoryId: starters.id, station: "cold" } }),
-    prisma.menuItem.create({ data: { name: "Burrata & Prosciutto", description: "Creamy burrata, cured ham, rocket, olive oil", price: 14, categoryId: starters.id, station: "cold" } }),
-    prisma.menuItem.create({ data: { name: "Calamari Fritti", description: "Crispy fried squid, lemon aioli", price: 12, categoryId: starters.id, station: "grill" } }),
-    prisma.menuItem.create({ data: { name: "Zuppa del Giorno", description: "Chef's soup of the day", price: 8, categoryId: starters.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Bruschetta al Pomodoro", description: "Toasted bread, tomatoes, garlic, basil", price: 9.5, categoryId: starters.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Burrata & Prosciutto", description: "Creamy burrata, cured ham, rocket, olive oil", price: 14, categoryId: starters.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Calamari Fritti", description: "Crispy fried squid, lemon aioli", price: 12, categoryId: starters.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Zuppa del Giorno", description: "Chef's soup of the day", price: 8, categoryId: starters.id, station: "pass" } }),
     // Pasta & Risotto
-    prisma.menuItem.create({ data: { name: "Spaghetti Carbonara", description: "Egg, guanciale, Pecorino Romano, black pepper", price: 18, categoryId: pasta.id, station: "pass" } }),
-    prisma.menuItem.create({ data: { name: "Tagliatelle al Ragù", description: "Hand-rolled pasta, slow-cooked beef ragu", price: 19, categoryId: pasta.id, station: "pass" } }),
-    prisma.menuItem.create({ data: { name: "Penne all'Arrabbiata", description: "Spicy tomato sauce, garlic, chilli", price: 15, categoryId: pasta.id, station: "pass" } }),
-    prisma.menuItem.create({ data: { name: "Risotto ai Funghi", description: "Wild mushrooms, Parmigiano, truffle oil", price: 22, categoryId: pasta.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Spaghetti Carbonara", description: "Egg, guanciale, Pecorino Romano, black pepper", price: 18, categoryId: pasta.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Tagliatelle al Ragù", description: "Hand-rolled pasta, slow-cooked beef ragu", price: 19, categoryId: pasta.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Penne all'Arrabbiata", description: "Spicy tomato sauce, garlic, chilli", price: 15, categoryId: pasta.id, station: "pass" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Risotto ai Funghi", description: "Wild mushrooms, Parmigiano, truffle oil", price: 22, categoryId: pasta.id, station: "pass" } }),
     // Mains
-    prisma.menuItem.create({ data: { name: "Branzino al Forno", description: "Oven-roasted sea bass, capers, cherry tomatoes", price: 28, categoryId: mains.id, station: "grill" } }),
-    prisma.menuItem.create({ data: { name: "Pollo alla Milanese", description: "Breaded chicken breast, arugula salad, lemon", price: 24, categoryId: mains.id, station: "grill" } }),
-    prisma.menuItem.create({ data: { name: "Tagliata di Manzo", description: "Sliced ribeye, rocket, Parmigiano shavings", price: 34, categoryId: mains.id, station: "grill" } }),
-    prisma.menuItem.create({ data: { name: "Melanzane alla Parmigiana", description: "Layered aubergine, tomato, mozzarella (v)", price: 18, categoryId: mains.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Branzino al Forno", description: "Oven-roasted sea bass, capers, cherry tomatoes", price: 28, categoryId: mains.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Pollo alla Milanese", description: "Breaded chicken breast, arugula salad, lemon", price: 24, categoryId: mains.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Tagliata di Manzo", description: "Sliced ribeye, rocket, Parmigiano shavings", price: 34, categoryId: mains.id, station: "grill" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Melanzane alla Parmigiana", description: "Layered aubergine, tomato, mozzarella (v)", price: 18, categoryId: mains.id, station: "grill" } }),
     // Desserts
-    prisma.menuItem.create({ data: { name: "Tiramisù", description: "Classic espresso-soaked ladyfingers, mascarpone", price: 9, categoryId: desserts.id, station: "cold" } }),
-    prisma.menuItem.create({ data: { name: "Panna Cotta", description: "Vanilla cream, seasonal berry coulis", price: 8, categoryId: desserts.id, station: "cold" } }),
-    prisma.menuItem.create({ data: { name: "Affogato al Caffè", description: "Vanilla gelato, double espresso shot", price: 7, categoryId: desserts.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Tiramisù", description: "Classic espresso-soaked ladyfingers, mascarpone", price: 9, categoryId: desserts.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Panna Cotta", description: "Vanilla cream, seasonal berry coulis", price: 8, categoryId: desserts.id, station: "cold" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Affogato al Caffè", description: "Vanilla gelato, double espresso shot", price: 7, categoryId: desserts.id, station: "cold" } }),
     // Drinks
-    prisma.menuItem.create({ data: { name: "Sparkling Water 750ml", description: "", price: 4, categoryId: drinks.id, station: "bar" } }),
-    prisma.menuItem.create({ data: { name: "House Red Wine (glass)", description: "Chianti Classico", price: 9, categoryId: drinks.id, station: "bar" } }),
-    prisma.menuItem.create({ data: { name: "House White Wine (glass)", description: "Pinot Grigio", price: 9, categoryId: drinks.id, station: "bar" } }),
-    prisma.menuItem.create({ data: { name: "Espresso", description: "", price: 3, categoryId: drinks.id, station: "bar" } }),
-    prisma.menuItem.create({ data: { name: "San Pellegrino Limonata", description: "330ml can", price: 4, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Sparkling Water 750ml", description: "", price: 4, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "House Red Wine (glass)", description: "Chianti Classico", price: 9, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "House White Wine (glass)", description: "Pinot Grigio", price: 9, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "Espresso", description: "", price: 3, categoryId: drinks.id, station: "bar" } }),
+    prisma.menuItem.create({ data: { restaurantId, name: "San Pellegrino Limonata", description: "330ml can", price: 4, categoryId: drinks.id, station: "bar" } }),
   ]);
   const [bruschetta, burrata, carbonara, tagliatelle, risotto, branzino, pollo, tagliata, tiramisu, pannaCotta, redWine, water, espresso] =
     [menuItems[0], menuItems[1], menuItems[4], menuItems[5], menuItems[7], menuItems[8], menuItems[9], menuItems[10], menuItems[12], menuItems[13], menuItems[16], menuItems[15], menuItems[18]];
@@ -125,16 +139,16 @@ async function main() {
 
   // ── Inventory ────────────────────────────────────────────────────────────
   await Promise.all([
-    prisma.inventoryItem.create({ data: { name: "00 Flour", unit: "kg", quantity: 25, minStock: 5 } }),
-    prisma.inventoryItem.create({ data: { name: "Eggs", unit: "unit", quantity: 120, minStock: 24 } }),
-    prisma.inventoryItem.create({ data: { name: "Guanciale", unit: "kg", quantity: 4.5, minStock: 1 } }),
-    prisma.inventoryItem.create({ data: { name: "Pecorino Romano", unit: "kg", quantity: 3, minStock: 0.5 } }),
-    prisma.inventoryItem.create({ data: { name: "Beef (ribeye)", unit: "kg", quantity: 8, minStock: 2 } }),
-    prisma.inventoryItem.create({ data: { name: "Sea Bass (whole)", unit: "kg", quantity: 6, minStock: 2 } }),
-    prisma.inventoryItem.create({ data: { name: "Mascarpone", unit: "kg", quantity: 5, minStock: 1 } }),
-    prisma.inventoryItem.create({ data: { name: "San Marzano Tomatoes (tin)", unit: "unit", quantity: 48, minStock: 12 } }),
-    prisma.inventoryItem.create({ data: { name: "Parmigiano Reggiano", unit: "kg", quantity: 4, minStock: 1 } }),
-    prisma.inventoryItem.create({ data: { name: "Truffle Oil", unit: "litre", quantity: 0.8, minStock: 0.2 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "00 Flour", unit: "kg", quantity: 25, minStock: 5 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Eggs", unit: "unit", quantity: 120, minStock: 24 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Guanciale", unit: "kg", quantity: 4.5, minStock: 1 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Pecorino Romano", unit: "kg", quantity: 3, minStock: 0.5 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Beef (ribeye)", unit: "kg", quantity: 8, minStock: 2 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Sea Bass (whole)", unit: "kg", quantity: 6, minStock: 2 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Mascarpone", unit: "kg", quantity: 5, minStock: 1 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "San Marzano Tomatoes (tin)", unit: "unit", quantity: 48, minStock: 12 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Parmigiano Reggiano", unit: "kg", quantity: 4, minStock: 1 } }),
+    prisma.inventoryItem.create({ data: { restaurantId, name: "Truffle Oil", unit: "litre", quantity: 0.8, minStock: 0.2 } }),
   ]);
   console.log("✓ Inventory (10 items)");
 
@@ -148,12 +162,12 @@ async function main() {
   };
 
   await Promise.all([
-    prisma.reservation.create({ data: { tableId: tables[3].id, guestName: "Julia & Marc Fontaine", guestEmail: "julia.fontaine@email.com", guestPhone: "+33 6 12 34 56 78", partySize: 4, date: d(0, 19, 30), notes: "Anniversary dinner — please arrange flowers" } }),
-    prisma.reservation.create({ data: { tableId: tables[9].id, guestName: "Becker Corporate Lunch", guestEmail: "events@beckergroup.com", partySize: 8, date: d(0, 12, 30), notes: "Business lunch, separate bills" } }),
-    prisma.reservation.create({ data: { tableId: tables[0].id, guestName: "Naomi Sato", guestPhone: "+81 90 1234 5678", partySize: 2, date: d(1, 20, 0) } }),
-    prisma.reservation.create({ data: { tableId: tables[4].id, guestName: "The Okafor Family", guestEmail: "okafor@home.net", partySize: 4, date: d(1, 18, 0), notes: "One child — high chair needed" } }),
-    prisma.reservation.create({ data: { tableId: tables[6].id, guestName: "Lena & Friends (6)", guestEmail: "lena.m@outlook.com", partySize: 6, date: d(2, 20, 30) } }),
-    prisma.reservation.create({ data: { tableId: tables[1].id, guestName: "David Chen", partySize: 2, date: d(3, 19, 0) } }),
+    prisma.reservation.create({ data: { restaurantId, tableId: tables[3].id, guestName: "Julia & Marc Fontaine", guestEmail: "julia.fontaine@email.com", guestPhone: "+33 6 12 34 56 78", partySize: 4, date: d(0, 19, 30), notes: "Anniversary dinner — please arrange flowers" } }),
+    prisma.reservation.create({ data: { restaurantId, tableId: tables[9].id, guestName: "Becker Corporate Lunch", guestEmail: "events@beckergroup.com", partySize: 8, date: d(0, 12, 30), notes: "Business lunch, separate bills" } }),
+    prisma.reservation.create({ data: { restaurantId, tableId: tables[0].id, guestName: "Naomi Sato", guestPhone: "+81 90 1234 5678", partySize: 2, date: d(1, 20, 0) } }),
+    prisma.reservation.create({ data: { restaurantId, tableId: tables[4].id, guestName: "The Okafor Family", guestEmail: "okafor@home.net", partySize: 4, date: d(1, 18, 0), notes: "One child — high chair needed" } }),
+    prisma.reservation.create({ data: { restaurantId, tableId: tables[6].id, guestName: "Lena & Friends (6)", guestEmail: "lena.m@outlook.com", partySize: 6, date: d(2, 20, 30) } }),
+    prisma.reservation.create({ data: { restaurantId, tableId: tables[1].id, guestName: "David Chen", partySize: 2, date: d(3, 19, 0) } }),
   ]);
   console.log("✓ Reservations (6)");
 
@@ -161,6 +175,7 @@ async function main() {
   // Table 3 (occupied) — order in_progress
   const order1 = await prisma.order.create({
     data: {
+      restaurantId,
       tableId: tables[2].id,
       staffId: waiter1.id,
       status: "in_progress",
@@ -179,6 +194,7 @@ async function main() {
   // Table 6 (occupied) — order sent to kitchen
   const order2 = await prisma.order.create({
     data: {
+      restaurantId,
       tableId: tables[5].id,
       staffId: waiter2.id,
       status: "sent",
@@ -196,6 +212,7 @@ async function main() {
   // Table 8 — already served, bill paid
   const order3 = await prisma.order.create({
     data: {
+      restaurantId,
       tableId: tables[7].id,
       staffId: waiter1.id,
       status: "served",
@@ -225,6 +242,7 @@ async function main() {
   // Draft order — Table 9
   await prisma.order.create({
     data: {
+      restaurantId,
       tableId: tables[8].id,
       staffId: waiter2.id,
       status: "draft",
@@ -249,18 +267,20 @@ async function main() {
 
   await Promise.all([
     // Today's shifts
-    prisma.shift.create({ data: { staffId: waiter1.id, startTime: shiftStart(0, 11), endTime: shiftStart(0, 19) } }),
-    prisma.shift.create({ data: { staffId: waiter2.id, startTime: shiftStart(0, 15), endTime: shiftStart(0, 23) } }),
-    prisma.shift.create({ data: { staffId: kitchen1.id, startTime: shiftStart(0, 10), endTime: shiftStart(0, 22) } }),
-    prisma.shift.create({ data: { staffId: host1.id, startTime: shiftStart(0, 16), endTime: shiftStart(0, 23) } }),
+    prisma.shift.create({ data: { restaurantId, staffId: waiter1.id, startTime: shiftStart(0, 11), endTime: shiftStart(0, 19) } }),
+    prisma.shift.create({ data: { restaurantId, staffId: waiter2.id, startTime: shiftStart(0, 15), endTime: shiftStart(0, 23) } }),
+    prisma.shift.create({ data: { restaurantId, staffId: kitchen1.id, startTime: shiftStart(0, 10), endTime: shiftStart(0, 22) } }),
+    prisma.shift.create({ data: { restaurantId, staffId: host1.id, startTime: shiftStart(0, 16), endTime: shiftStart(0, 23) } }),
     // Tomorrow
-    prisma.shift.create({ data: { staffId: waiter1.id, startTime: shiftStart(1, 15), endTime: shiftStart(1, 23) } }),
-    prisma.shift.create({ data: { staffId: waiter2.id, startTime: shiftStart(1, 11), endTime: shiftStart(1, 19) } }),
-    prisma.shift.create({ data: { staffId: kitchen1.id, startTime: shiftStart(1, 10), endTime: shiftStart(1, 22) } }),
+    prisma.shift.create({ data: { restaurantId, staffId: waiter1.id, startTime: shiftStart(1, 15), endTime: shiftStart(1, 23) } }),
+    prisma.shift.create({ data: { restaurantId, staffId: waiter2.id, startTime: shiftStart(1, 11), endTime: shiftStart(1, 19) } }),
+    prisma.shift.create({ data: { restaurantId, staffId: kitchen1.id, startTime: shiftStart(1, 10), endTime: shiftStart(1, 22) } }),
   ]);
   console.log("✓ Shifts (7)");
 
-  console.log("\nSeed complete. Login: admin@restaurant.local / admin123");
+  console.log(`\nSeed complete. Restaurant: ${restaurant.name} (${restaurant.id})`);
+  console.log("Staff login: admin / admin123 (within that restaurant)");
+  console.log("Platform admin login: platform@restaurant-manager.local / superadmin123");
 }
 
 main()

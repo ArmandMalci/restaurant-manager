@@ -5,6 +5,7 @@ export type InventoryUnit = z.infer<typeof InventoryUnitSchema>;
 
 export const InventoryItemSchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   name: z.string().min(1).max(200),
   unit: InventoryUnitSchema,
   quantity: z.number().nonnegative(),
@@ -16,6 +17,7 @@ export type InventoryItem = z.infer<typeof InventoryItemSchema>;
 
 export const CreateInventoryItemSchema = InventoryItemSchema.omit({
   id: true,
+  restaurantId: true,
   createdAt: true,
   updatedAt: true,
 });

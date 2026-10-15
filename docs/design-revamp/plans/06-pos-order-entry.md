@@ -36,7 +36,7 @@
 
 ## Task 1: Schema + shared Zod
 
-- [ ] **Step 1:** In `prisma/schema.prisma`, add to `OrderItem`: `unitPrice Decimal @db.Decimal(10, 2) @default(0)` and `modifiers OrderItemModifier[]`; add the model:
+- [x] **Step 1:** In `prisma/schema.prisma`, add to `OrderItem`: `unitPrice Decimal @db.Decimal(10, 2) @default(0)` and `modifiers OrderItemModifier[]`; add the model:
 
 ```prisma
 model OrderItemModifier {
@@ -50,9 +50,9 @@ model OrderItemModifier {
 }
 ```
 
-- [ ] **Step 2:** Migrate — `DATABASE_URL="..." node_modules/.bin/prisma migrate dev --name add_order_item_modifiers` from repo root (additive; **no reset** — stop & report if prompted).
+- [x] **Step 2:** Migrate — `DATABASE_URL="..." node_modules/.bin/prisma migrate dev --name add_order_item_modifiers` from repo root (additive; **no reset** — stop & report if prompted).
 
-- [ ] **Step 3:** In `packages/shared/src/schemas/order.ts` add + extend:
+- [x] **Step 3:** In `packages/shared/src/schemas/order.ts` add + extend:
 
 ```typescript
 export const OrderItemModifierSchema = z.object({
@@ -67,9 +67,9 @@ export type OrderItemModifier = z.infer<typeof OrderItemModifierSchema>;
 
 Add to `OrderItemSchema`: `unitPrice: z.number().default(0)` and `modifiers: z.array(OrderItemModifierSchema).default([])`. Add to `CreateOrderItemSchema`: `modifierOptionIds: z.array(z.string().uuid()).default([])`.
 
-- [ ] **Step 4:** `pnpm --filter @restaurant/shared build` then `pnpm --filter @restaurant/api run build` → both exit 0.
+- [x] **Step 4:** `pnpm --filter @restaurant/shared build` then `pnpm --filter @restaurant/api run build` → both exit 0.
 
-- [ ] **Step 5:** Commit (`git add prisma/schema.prisma prisma/migrations packages/shared/src/schemas/order.ts`; `feat: order item price + modifier snapshot schema`).
+- [x] **Step 5:** Commit (`git add prisma/schema.prisma prisma/migrations packages/shared/src/schemas/order.ts`; `feat: order item price + modifier snapshot schema`).
 
 ---
 
@@ -77,7 +77,7 @@ Add to `OrderItemSchema`: `unitPrice: z.number().default(0)` and `modifiers: z.a
 
 **Interfaces:** Produces `OrderService.create` snapshotting `unitPrice` + creating `OrderItemModifier` rows, validating `modifierOptionIds` against the item's attached groups; `WITH_ITEMS` now includes `modifiers`.
 
-- [ ] **Step 1: Failing tests** — add to `order.service.spec.ts` (extend `prismaMock` with `menuItem: { findMany: jest.fn() }`):
+- [x] **Step 1: Failing tests** — add to `order.service.spec.ts` (extend `prismaMock` with `menuItem: { findMany: jest.fn() }`):
 
 ```typescript
 describe('create with modifiers', () => {
@@ -125,9 +125,9 @@ describe('create with modifiers', () => {
 
 (Import `BadRequestException` from `@nestjs/common` in the spec.)
 
-- [ ] **Step 2: Run → fail.**
+- [x] **Step 2: Run → fail.**
 
-- [ ] **Step 3: Implement** — in `order.service.ts`: import `BadRequestException`; change `WITH_ITEMS` to `{ items: { orderBy: { id: 'asc' as const }, include: { modifiers: true } } }`; replace `create`:
+- [x] **Step 3: Implement** — in `order.service.ts`: import `BadRequestException`; change `WITH_ITEMS` to `{ items: { orderBy: { id: 'asc' as const }, include: { modifiers: true } } }`; replace `create`:
 
 ```typescript
 public async create(dto: CreateOrderDto, staffId: string) {
@@ -184,13 +184,13 @@ public async create(dto: CreateOrderDto, staffId: string) {
 }
 ```
 
-- [ ] **Step 4: Run → pass** (the existing create test may need `prismaMock.menuItem.findMany.mockResolvedValue([])` + sending items with a known menuItem; adjust that test's mock so `byId` resolves — set `menuItem.findMany` to return a matching `{ id, price, modifierGroups: [] }`). **Step 5: Commit** (`feat(api): order create snapshots price + validates modifiers`).
+- [x] **Step 4: Run → pass** (the existing create test may need `prismaMock.menuItem.findMany.mockResolvedValue([])` + sending items with a known menuItem; adjust that test's mock so `byId` resolves — set `menuItem.findMany` to return a matching `{ id, price, modifierGroups: [] }`). **Step 5: Commit** (`feat(api): order create snapshots price + validates modifiers`).
 
 ---
 
 ## Task 3: Bill total includes modifiers (TDD)
 
-- [ ] **Step 1: Failing test** — in `billing.service.spec.ts` (create with the standard mock-Prisma module if absent), an order with one item `{ quantity: 2, unitPrice: 20, menuItem: { price: 20 }, modifiers: [{ priceDelta: 3 }] }` → subtotal `(20+3)*2 = 46`:
+- [x] **Step 1: Failing test** — in `billing.service.spec.ts` (create with the standard mock-Prisma module if absent), an order with one item `{ quantity: 2, unitPrice: 20, menuItem: { price: 20 }, modifiers: [{ priceDelta: 3 }] }` → subtotal `(20+3)*2 = 46`:
 
 ```typescript
 it('subtotal includes modifier deltas using snapshot unitPrice', async () => {
@@ -206,9 +206,9 @@ it('subtotal includes modifier deltas using snapshot unitPrice', async () => {
 
 (Note `menuItem.price` is 99 to prove the snapshot `unitPrice: 20` is used, not the live price.)
 
-- [ ] **Step 2: Run → fail.**
+- [x] **Step 2: Run → fail.**
 
-- [ ] **Step 3: Implement** — in `billing.service.ts` change the order `include` to `items: { include: { menuItem: true, modifiers: true } }` and replace the subtotal reduce:
+- [x] **Step 3: Implement** — in `billing.service.ts` change the order `include` to `items: { include: { menuItem: true, modifiers: true } }` and replace the subtotal reduce:
 
 ```typescript
 const subtotal = order.items.reduce((sum, item) => {
@@ -218,15 +218,15 @@ const subtotal = order.items.reduce((sum, item) => {
 }, new Prisma.Decimal(0));
 ```
 
-- [ ] **Step 4: Run → pass.** **Step 5: Commit** (`feat(api): bill total includes order-item modifiers + price snapshot`).
+- [x] **Step 4: Run → pass.** **Step 5: Commit** (`feat(api): bill total includes order-item modifiers + price snapshot`).
 
 ---
 
 ## Task 4: Swagger DTOs + Orval regen
 
-- [ ] **Step 1:** In `swagger-dtos.ts` add `OrderItemModifierDto` (`id, orderItemId, modifierOptionId, name, priceDelta:number`) and extend `OrderItemDto` with `@ApiProperty() unitPrice!: number` + `@ApiProperty({ type: [OrderItemModifierDto] }) modifiers!: OrderItemModifierDto[]`.
-- [ ] **Step 2:** `pnpm --filter @restaurant/api run build` (exit 0), then `pnpm gen:api`. Confirm `apps/web/src/api` order types now carry `unitPrice` + `modifiers`, and `CreateOrderItem` accepts `modifierOptionIds`.
-- [ ] **Step 3: Commit** (`git add apps/api/src/swagger-dtos.ts apps/web/src/api apps/web/openapi.json`; `--no-verify` for generated files; `feat(api): order item modifier DTOs + regenerate hooks`).
+- [x] **Step 1:** In `swagger-dtos.ts` add `OrderItemModifierDto` (`id, orderItemId, modifierOptionId, name, priceDelta:number`) and extend `OrderItemDto` with `@ApiProperty() unitPrice!: number` + `@ApiProperty({ type: [OrderItemModifierDto] }) modifiers!: OrderItemModifierDto[]`.
+- [x] **Step 2:** `pnpm --filter @restaurant/api run build` (exit 0), then `pnpm gen:api`. Confirm `apps/web/src/api` order types now carry `unitPrice` + `modifiers`, and `CreateOrderItem` accepts `modifierOptionIds`.
+- [x] **Step 3: Commit** (`git add apps/api/src/swagger-dtos.ts apps/web/src/api apps/web/openapi.json`; `--no-verify` for generated files; `feat(api): order item modifier DTOs + regenerate hooks`).
 
 ---
 
@@ -234,17 +234,17 @@ const subtotal = order.items.reduce((sum, item) => {
 
 **Files:** Modify `apps/web/src/routes/_app/order/index.tsx`.
 
-- [ ] **Step 1:** Replace the inline `CreateOrderForm` with a full-screen builder opened by "New order" (a `Sheet`/overlay or an in-page mode toggled by `showCreate`). Read the current file first; keep the kanban + `useOrderControllerCreate`/`invalidateOrderControllerGetAll` patterns.
+- [x] **Step 1:** Replace the inline `CreateOrderForm` with a full-screen builder opened by "New order" (a `Sheet`/overlay or an in-page mode toggled by `showCreate`). Read the current file first; keep the kanban + `useOrderControllerCreate`/`invalidateOrderControllerGetAll` patterns.
   - **Left:** a table `Select` (from `useTableControllerGetAll`) + a category-filtered **menu grid** (`useMenuControllerGetItems` + `useMenuControllerGetCategories`); tap a card to add.
   - **Modifier step:** when a tapped item's `modifierGroupIds` is non-empty, open a selection panel built from `useMenuControllerGetModifierGroups` (filter to the item's groups) — `single` → radios, `multi` → checkboxes, `required` must be satisfied before "Add". Compute the line's add-on total from the chosen options' `priceDelta`.
   - **Right (ticket):** line rows — item name + chosen option names + qty stepper + line price (`(price + Σ deltas) × qty`) + remove; an order-notes `Input`; a running **total**; one **"Fire order"** `Button` → `useOrderControllerCreate` with `items: [{ menuItemId, quantity, notes, modifierOptionIds }]` → on success invalidate + close → kanban.
   - Warm-canvas + Plan-1 primitives; tablet-first split (grid + ticket side by side), ticket → bottom sheet under `md`.
 
-- [ ] **Step 2:** `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green.
+- [x] **Step 2:** `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green.
 
-- [ ] **Step 3:** Verify with the `run-web` skill (the API must be running with the new endpoints — restart it if `/order` create 400s): open "New order", add a plain item, add an item with a required modifier group (confirm it blocks until chosen), watch the running total, fire the order → it appears on the kanban. Screenshot the split builder + the modifier step.
+- [x] **Step 3:** Verify with the `run-web` skill (the API must be running with the new endpoints — restart it if `/order` create 400s): open "New order", add a plain item, add an item with a required modifier group (confirm it blocks until chosen), watch the running total, fire the order → it appears on the kanban. Screenshot the split builder + the modifier step.
 
-- [ ] **Step 4: Commit** (`feat(web): POS split order builder with modifiers`).
+- [x] **Step 4: Commit** (`feat(web): POS split order builder with modifiers`).
 
 ---
 

@@ -24,6 +24,7 @@ describe('TableSchema', () => {
   it('parses a valid table', () => {
     const result = TableSchema.safeParse({
       id: uuid(),
+      restaurantId: uuid(),
       number: 1,
       seats: 4,
       status: 'available',
@@ -42,6 +43,7 @@ describe('MenuItemSchema', () => {
   it('parses a valid menu item', () => {
     const result = MenuItemSchema.safeParse({
       id: uuid(),
+      restaurantId: uuid(),
       categoryId: uuid(),
       name: 'Burger',
       description: 'Tasty',
@@ -62,6 +64,7 @@ describe('OrderSchema', () => {
   it('parses a valid order', () => {
     const result = OrderSchema.safeParse({
       id: uuid(),
+      restaurantId: uuid(),
       tableId: uuid(),
       staffId: uuid(),
       status: 'draft',
@@ -90,8 +93,10 @@ describe('StaffSchema', () => {
   it('parses valid staff', () => {
     const result = StaffSchema.safeParse({
       id: uuid(),
+      restaurantId: uuid(),
       name: 'Alice',
       email: 'alice@rest.com',
+      username: 'alice',
       role: 'manager',
       active: true,
       createdAt: now,
@@ -111,7 +116,8 @@ describe('ReservationSchema', () => {
   it('parses a valid reservation', () => {
     const result = ReservationSchema.safeParse({
       id: uuid(),
-      tableId: null,
+      restaurantId: uuid(),
+      tableId: uuid(),
       guestName: 'Bob',
       guestPhone: '+1234',
       guestEmail: null,

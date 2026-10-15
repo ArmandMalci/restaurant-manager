@@ -37,7 +37,7 @@
 
 ## Task 1: Schema + shared Zod
 
-- [ ] **Step 1:** `prisma/schema.prisma` — add `Bill.payments Payment[]` and:
+- [x] **Step 1:** `prisma/schema.prisma` — add `Bill.payments Payment[]` and:
 
 ```prisma
 model Payment {
@@ -51,8 +51,8 @@ model Payment {
 }
 ```
 
-- [ ] **Step 2:** Migrate: `PATH="$HOME/.nvm/versions/node/v24.11.1/bin:$PATH" DATABASE_URL="..." node_modules/.bin/prisma migrate dev --name add_payments` from repo root (additive; **no reset** — stop & report if prompted).
-- [ ] **Step 3:** `packages/shared/src/schemas/bill.ts` — add:
+- [x] **Step 2:** Migrate: `PATH="$HOME/.nvm/versions/node/v24.11.1/bin:$PATH" DATABASE_URL="..." node_modules/.bin/prisma migrate dev --name add_payments` from repo root (additive; **no reset** — stop & report if prompted).
+- [x] **Step 3:** `packages/shared/src/schemas/bill.ts` — add:
 
 ```typescript
 export const PaymentSchema = z.object({
@@ -71,8 +71,8 @@ export const CreatePaymentSchema = z.object({
 export type CreatePaymentDto = z.infer<typeof CreatePaymentSchema>;
 ```
 
-- [ ] **Step 4:** `pnpm --filter @restaurant/shared build` + `pnpm --filter @restaurant/api run build` → exit 0.
-- [ ] **Step 5: Commit** (`--no-verify`; `feat: payment model + shared payment schema`).
+- [x] **Step 4:** `pnpm --filter @restaurant/shared build` + `pnpm --filter @restaurant/api run build` → exit 0.
+- [x] **Step 5: Commit** (`--no-verify`; `feat: payment model + shared payment schema`).
 
 ---
 
@@ -80,7 +80,7 @@ export type CreatePaymentDto = z.infer<typeof CreatePaymentSchema>;
 
 **Interfaces:** Produces `BillingService.recordPayment(id: string, dto: CreatePaymentDto)` and an enriched `findOne(id)` — both returning `{ ...bill, payments: Payment[], amountPaid: number, remaining: number }`.
 
-- [ ] **Step 1: Failing tests** — add to `billing.service.spec.ts` (extend `prismaMock.bill` with `findUnique` returning `payments` via `include`, and add `payment: { create: jest.fn() }`):
+- [x] **Step 1: Failing tests** — add to `billing.service.spec.ts` (extend `prismaMock.bill` with `findUnique` returning `payments` via `include`, and add `payment: { create: jest.fn() }`):
 
 ```typescript
 describe('recordPayment', () => {
@@ -126,9 +126,9 @@ describe('recordPayment', () => {
 });
 ```
 
-- [ ] **Step 2: Run → fail** — `pnpm --filter @restaurant/api exec jest src/billing/billing.service.spec.ts`.
+- [x] **Step 2: Run → fail** — `pnpm --filter @restaurant/api exec jest src/billing/billing.service.spec.ts`.
 
-- [ ] **Step 3: Implement** — replace `findOne` and add `recordPayment` in `billing.service.ts`:
+- [x] **Step 3: Implement** — replace `findOne` and add `recordPayment` in `billing.service.ts`:
 
 ```typescript
 public async findOne(id: string): Promise<Bill & { payments: unknown[]; amountPaid: number; remaining: number }> {
@@ -163,15 +163,15 @@ public async recordPayment(id: string, dto: CreatePaymentDto) {
 
 Add `CreatePaymentDto` to the type-only import at the top of `billing.service.ts` (`import type { CreateBillDto, CreatePaymentDto } from './dto/billing.dto';`).
 
-- [ ] **Step 4: Run → pass.** **Step 5: Commit** (`--no-verify`; `feat(api): record payments + enrich bill with amountPaid/remaining`).
+- [x] **Step 4: Run → pass.** **Step 5: Commit** (`--no-verify`; `feat(api): record payments + enrich bill with amountPaid/remaining`).
 
 ---
 
 ## Task 3: Endpoint + DTO + swagger + regen
 
-- [ ] **Step 1:** `apps/api/src/billing/dto/billing.dto.ts` — add `import { CreateBillSchema, CreatePaymentSchema } from '@restaurant/shared'; export class CreatePaymentDto extends createZodDto(CreatePaymentSchema) {}`.
-- [ ] **Step 2:** `apps/api/src/swagger-dtos.ts` — add `PaymentDto` (`id, billId, amount:number, method:string, createdAt:string`) and extend `BillDto` with `@ApiProperty({ type: [PaymentDto] }) payments!: PaymentDto[]`, `@ApiProperty() amountPaid!: number`, `@ApiProperty() remaining!: number`.
-- [ ] **Step 3:** `billing.controller.ts` — import `CreatePaymentDto`, `PaymentDto`; add:
+- [x] **Step 1:** `apps/api/src/billing/dto/billing.dto.ts` — add `import { CreateBillSchema, CreatePaymentSchema } from '@restaurant/shared'; export class CreatePaymentDto extends createZodDto(CreatePaymentSchema) {}`.
+- [x] **Step 2:** `apps/api/src/swagger-dtos.ts` — add `PaymentDto` (`id, billId, amount:number, method:string, createdAt:string`) and extend `BillDto` with `@ApiProperty({ type: [PaymentDto] }) payments!: PaymentDto[]`, `@ApiProperty() amountPaid!: number`, `@ApiProperty() remaining!: number`.
+- [x] **Step 3:** `billing.controller.ts` — import `CreatePaymentDto`, `PaymentDto`; add:
 
 ```typescript
 @Post(':id/payments')
@@ -182,8 +182,8 @@ public recordPayment(@Param('id') id: string, @Body() dto: CreatePaymentDto) {
 }
 ```
 
-- [ ] **Step 4:** `pnpm --filter @restaurant/api run build` (exit 0); `pnpm gen:api` (Node 22+/pnpm 10). Confirm `apps/web/src/api/billing/billing.ts` exports `useBillingControllerRecordPayment`, and `BillDto` carries `payments/amountPaid/remaining`.
-- [ ] **Step 5: Commit** (`--no-verify`; `feat(api): POST /billing/:id/payments + regenerate hooks`).
+- [x] **Step 4:** `pnpm --filter @restaurant/api run build` (exit 0); `pnpm gen:api` (Node 22+/pnpm 10). Confirm `apps/web/src/api/billing/billing.ts` exports `useBillingControllerRecordPayment`, and `BillDto` carries `payments/amountPaid/remaining`.
+- [x] **Step 5: Commit** (`--no-verify`; `feat(api): POST /billing/:id/payments + regenerate hooks`).
 
 ---
 
@@ -191,17 +191,17 @@ public recordPayment(@Param('id') id: string, @Body() dto: CreatePaymentDto) {
 
 **Files:** Create `apps/web/src/routes/_app/checkout/-split-panel.tsx`; modify `checkout/index.tsx`.
 
-- [ ] **Step 1:** Read the current `checkout/index.tsx` bill-detail panel to find where the bill is displayed and its data hooks (`useBillingControllerFindOne` or similar + the order's items/modifiers).
-- [ ] **Step 2:** Create `-split-panel.tsx` exporting `SplitPanel({ bill, order })`:
+- [x] **Step 1:** Read the current `checkout/index.tsx` bill-detail panel to find where the bill is displayed and its data hooks (`useBillingControllerFindOne` or similar + the order's items/modifiers).
+- [x] **Step 2:** Create `-split-panel.tsx` exporting `SplitPanel({ bill, order })`:
   - Local state `mode: 'even' | 'byItem'`, `shareCount` (even), `assignments: Record<orderItemId, number>` (byItem, split index).
   - **Even:** a stepper for `N`; compute `N` shares of `bill.total` (round to cents, last share takes the remainder).
   - **By item:** list order items; a small `Select`/segmented control per item to assign it to split 1..N; each split's amount = Σ its items' `(unitPrice + Σ modifier.priceDelta) × qty`.
   - For each split: a method `Select` (cash/card/other) + **"Record payment"** `Button` → `useBillingControllerRecordPayment({ id: bill.id, data: { amount, method } })` → invalidate the bill query.
   - Progress line: `paid {bill.amountPaid} of {bill.total} · {bill.remaining} remaining`.
   - When `bill.remaining === 0`: show "Settled" + a **"Print receipt"** `Button` that renders a receipt block (restaurant name from settings if easily available, else static "RestoManager"; table; items + modifiers; subtotal/discountPct/tax/total; payments list with methods; `paidAt`) and calls `window.print()`. Add a print-only stylesheet rule (e.g. a `@media print { .no-print { display: none; } }` scoped class, or a simple `<style>` in the component) so only the receipt shows when printing.
-- [ ] **Step 3:** In `checkout/index.tsx`, render `<SplitPanel bill={...} order={...} />` in the bill-detail area (once a bill exists for the selected order), replacing/augmenting the existing pay action. Keep the existing "Settle" trigger that creates the bill.
-- [ ] **Step 4:** Verify `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green. Lead verifies live: create a bill, split evenly into 2, record both payments, confirm it settles and the receipt prints; try by-item on another bill.
-- [ ] **Step 5: Commit** (`--no-verify`; `feat(web): checkout split payments + printable receipt`).
+- [x] **Step 3:** In `checkout/index.tsx`, render `<SplitPanel bill={...} order={...} />` in the bill-detail area (once a bill exists for the selected order), replacing/augmenting the existing pay action. Keep the existing "Settle" trigger that creates the bill.
+- [x] **Step 4:** Verify `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green. Lead verifies live: create a bill, split evenly into 2, record both payments, confirm it settles and the receipt prints; try by-item on another bill.
+- [x] **Step 5: Commit** (`--no-verify`; `feat(web): checkout split payments + printable receipt`).
 
 ---
 

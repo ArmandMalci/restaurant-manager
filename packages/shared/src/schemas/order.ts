@@ -29,6 +29,7 @@ export type OrderItem = z.infer<typeof OrderItemSchema>;
 
 export const OrderSchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   tableId: z.string().uuid(),
   staffId: z.string().uuid(),
   status: OrderStatusSchema.default('draft'),

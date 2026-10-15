@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export const RestaurantSettingsSchema = z.object({
-  id: z.string(),
+export const RestaurantSchema = z.object({
+  id: z.string().uuid(),
   name: z.string().min(1).max(100),
   description: z.string().max(500).nullable(),
   phone: z.string().max(50).nullable(),
@@ -10,12 +10,14 @@ export const RestaurantSettingsSchema = z.object({
   openingHours: z.string().nullable(),
   baseCurrency: z.string().min(1).max(10),
   exchangeRates: z.record(z.string(), z.number().positive()),
+  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
-export type RestaurantSettings = z.infer<typeof RestaurantSettingsSchema>;
+export type Restaurant = z.infer<typeof RestaurantSchema>;
 
-export const UpdateSettingsSchema = RestaurantSettingsSchema.omit({
+export const UpdateRestaurantSchema = RestaurantSchema.omit({
   id: true,
+  createdAt: true,
   updatedAt: true,
 }).partial();
-export type UpdateSettingsDto = z.infer<typeof UpdateSettingsSchema>;
+export type UpdateRestaurantDto = z.infer<typeof UpdateRestaurantSchema>;

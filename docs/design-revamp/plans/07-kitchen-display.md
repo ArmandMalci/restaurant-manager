@@ -38,7 +38,7 @@
 
 **Interfaces:** Produces `KdsService.getTickets()` returning `Array<{ orderId, tableNumber: number|null, firedAt: Date|null, items: Array<{ id, name, quantity, station: 'grill'|'cold'|'bar'|'pass'|null, status, modifiers: string[] }> }>`, active-only, oldest `sentAt` first.
 
-- [ ] **Step 1: Failing tests** — create `apps/api/src/kds/kds.service.spec.ts`:
+- [x] **Step 1: Failing tests** — create `apps/api/src/kds/kds.service.spec.ts`:
 
 ```typescript
 import { Test } from '@nestjs/testing';
@@ -86,9 +86,9 @@ describe('KdsService', () => {
 });
 ```
 
-- [ ] **Step 2: Run → fail** — `pnpm --filter @restaurant/api exec jest src/kds/kds.service.spec.ts` (module not found).
+- [x] **Step 2: Run → fail** — `pnpm --filter @restaurant/api exec jest src/kds/kds.service.spec.ts` (module not found).
 
-- [ ] **Step 3: Implement** — create `apps/api/src/kds/kds.service.ts`:
+- [x] **Step 3: Implement** — create `apps/api/src/kds/kds.service.ts`:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -131,13 +131,13 @@ export class KdsService {
 }
 ```
 
-- [ ] **Step 4: Run → pass.** **Step 5: Commit** (`git add apps/api/src/kds/kds.service.ts apps/api/src/kds/kds.service.spec.ts`; `--no-verify`; `feat(api): KDS tickets aggregation service`).
+- [x] **Step 4: Run → pass.** **Step 5: Commit** (`git add apps/api/src/kds/kds.service.ts apps/api/src/kds/kds.service.spec.ts`; `--no-verify`; `feat(api): KDS tickets aggregation service`).
 
 ---
 
 ## Task 2: KDS controller + module + DTO + Orval regen
 
-- [ ] **Step 1: DTOs** — in `swagger-dtos.ts` add:
+- [x] **Step 1: DTOs** — in `swagger-dtos.ts` add:
 
 ```typescript
 export class KdsTicketItemDto {
@@ -156,7 +156,7 @@ export class KdsTicketDto {
 }
 ```
 
-- [ ] **Step 2: Controller** — create `apps/api/src/kds/kds.controller.ts`:
+- [x] **Step 2: Controller** — create `apps/api/src/kds/kds.controller.ts`:
 
 ```typescript
 import { Controller, Get, UseGuards } from '@nestjs/common';
@@ -181,11 +181,11 @@ export class KdsController {
 }
 ```
 
-- [ ] **Step 3: Module + register** — create `apps/api/src/kds/kds.module.ts` (providers `[KdsService]`, controllers `[KdsController]`); import + add `KdsModule` to the `imports` array in `app.module.ts` (mirror `ServiceModule`/`ReportsModule`).
+- [x] **Step 3: Module + register** — create `apps/api/src/kds/kds.module.ts` (providers `[KdsService]`, controllers `[KdsController]`); import + add `KdsModule` to the `imports` array in `app.module.ts` (mirror `ServiceModule`/`ReportsModule`).
 
-- [ ] **Step 4: Build + regen** — `pnpm --filter @restaurant/api run build` (exit 0); `pnpm gen:api` (use Node 22+/pnpm 10 if needed). Confirm `apps/web/src/api/kds/kds.ts` exports `useKdsControllerGetTickets`.
+- [x] **Step 4: Build + regen** — `pnpm --filter @restaurant/api run build` (exit 0); `pnpm gen:api` (use Node 22+/pnpm 10 if needed). Confirm `apps/web/src/api/kds/kds.ts` exports `useKdsControllerGetTickets`.
 
-- [ ] **Step 5: Commit** (`git add apps/api/src/kds apps/api/src/swagger-dtos.ts apps/api/src/app.module.ts apps/web/src/api apps/web/openapi.json`; `--no-verify`; `feat(api): expose GET /kds/tickets + generate hook`).
+- [x] **Step 5: Commit** (`git add apps/api/src/kds apps/api/src/swagger-dtos.ts apps/api/src/app.module.ts apps/web/src/api apps/web/openapi.json`; `--no-verify`; `feat(api): expose GET /kds/tickets + generate hook`).
 
 ---
 
@@ -193,7 +193,7 @@ export class KdsController {
 
 **Files:** Modify `apps/web/src/components/layout/nav.ts`; create `apps/web/src/routes/_app/kds/index.tsx`.
 
-- [ ] **Step 1: Nav** — in `nav.ts` import `ChefHat` from lucide-react and insert a group **between** Service and Back office:
+- [x] **Step 1: Nav** — in `nav.ts` import `ChefHat` from lucide-react and insert a group **between** Service and Back office:
 
 ```typescript
   {
@@ -202,7 +202,7 @@ export class KdsController {
   },
 ```
 
-- [ ] **Step 2: Board** — create `apps/web/src/routes/_app/kds/index.tsx` (`createFileRoute('/_app/kds/')`). It:
+- [x] **Step 2: Board** — create `apps/web/src/routes/_app/kds/index.tsx` (`createFileRoute('/_app/kds/')`). It:
   - calls `useKdsControllerGetTickets({ query: { refetchInterval: 6000 } })` and `useOrderControllerUpdateItemStatus`.
   - **Station filter:** local state `station: 'all' | 'grill' | 'cold' | 'bar' | 'pass'`, rendered as a segmented control (buttons). Treat an item's effective station as `item.station ?? 'pass'`.
   - **Tickets:** a responsive grid of ticket cards (`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3`). When `station !== 'all'`, show only tickets that have ≥1 item with that effective station.
@@ -212,11 +212,11 @@ export class KdsController {
   - Warm-canvas tokens + Plan-1 primitives; large legible type (distance reading). One accent treatment.
   - Use the generated `invalidateKdsControllerGetTickets` helper (or `queryClient.invalidateQueries` with the kds query key) on bump success.
 
-- [ ] **Step 3:** Verify `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green.
+- [x] **Step 3:** Verify `pnpm --filter @restaurant/web run build` (exit 0) + `pnpm --filter @restaurant/web run test` green.
 
-- [ ] **Step 4:** (Lead verifies live: with the API running, fire an order from `/order`, open `/kds`, confirm the ticket appears, filter by station, tap an item ready → it checks and when all are ready the ticket drops off. Screenshot the board + a station-filtered view.)
+- [x] **Step 4:** (Lead verifies live: with the API running, fire an order from `/order`, open `/kds`, confirm the ticket appears, filter by station, tap an item ready → it checks and when all are ready the ticket drops off. Screenshot the board + a station-filtered view.)
 
-- [ ] **Step 5: Commit** (`git add apps/web/src/components/layout/nav.ts apps/web/src/routes/_app/kds`; `--no-verify`; `feat(web): kitchen display board with station filter + item bump`).
+- [x] **Step 5: Commit** (`git add apps/web/src/components/layout/nav.ts apps/web/src/routes/_app/kds`; `--no-verify`; `feat(web): kitchen display board with station filter + item bump`).
 
 ---
 

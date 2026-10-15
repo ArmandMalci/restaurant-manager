@@ -5,6 +5,7 @@ export type ReservationStatus = z.infer<typeof ReservationStatusSchema>;
 
 export const ReservationSchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   tableId: z.string().uuid(),
   guestName: z.string().min(1).max(100),
   guestPhone: z.string().max(20).nullable(),

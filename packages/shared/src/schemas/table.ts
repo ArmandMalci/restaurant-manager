@@ -5,6 +5,7 @@ export type TableStatus = z.infer<typeof TableStatusSchema>;
 
 export const TableSchema = z.object({
   id: z.string().uuid(),
+  restaurantId: z.string().uuid(),
   number: z.number().int().positive(),
   name: z.string().min(1).max(100).nullable().default(null),
   seats: z.number().int().positive(),
@@ -18,7 +19,12 @@ export const TableSchema = z.object({
 });
 export type Table = z.infer<typeof TableSchema>;
 
-export const CreateTableSchema = TableSchema.omit({ id: true, createdAt: true, updatedAt: true });
+export const CreateTableSchema = TableSchema.omit({
+  id: true,
+  restaurantId: true,
+  createdAt: true,
+  updatedAt: true,
+});
 export type CreateTableDto = z.infer<typeof CreateTableSchema>;
 
 export const UpdateTableSchema = CreateTableSchema.partial();

@@ -49,7 +49,7 @@
 **Interfaces:**
 - Produces: `Order.sentAt/readyAt/servedAt`, `OrderItem.firedAt/readyAt/createdAt/updatedAt`, `Table.seatedAt`, `Reservation.seatedAt` on the generated Prisma client — consumed by Tasks 2 & 3.
 
-- [ ] **Step 1: Add the fields to the models**
+- [x] **Step 1: Add the fields to the models**
 
 In `prisma/schema.prisma`, add to the respective models (keep existing fields):
 
@@ -72,17 +72,17 @@ In `prisma/schema.prisma`, add to the respective models (keep existing fields):
   seatedAt  DateTime?
 ```
 
-- [ ] **Step 2: Create + apply the migration**
+- [x] **Step 2: Create + apply the migration**
 
 Run (from repo root): `pnpm --filter @restaurant/api exec prisma migrate dev --name add_service_timing_fields`
 Expected: a new folder under `prisma/migrations/`, migration applied, Prisma client regenerated. If it warns that existing rows need a value for `OrderItem.updatedAt`, accept the suggested default (or, since this is dev seed data, `pnpm --filter @restaurant/api exec prisma migrate reset --force` then re-run — the seed at `prisma/seed.ts` repopulates).
 
-- [ ] **Step 3: Verify the client + API compile**
+- [x] **Step 3: Verify the client + API compile**
 
 Run: `pnpm --filter @restaurant/api exec prisma generate` then `pnpm --filter @restaurant/api run build`
 Expected: both exit 0; the generated client now types the new fields.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add prisma/schema.prisma prisma/migrations
@@ -101,7 +101,7 @@ git commit -m "feat(api): add service timing fields (order/item/table/reservatio
 - Consumes: timing fields from Task 1.
 - Produces: `OrderService.updateStatus` stamps sentAt/readyAt/servedAt + fires items' firedAt on `sent`; `OrderService.updateItemStatus` stamps item readyAt and auto-promotes the order to `ready` (with push) when all items are ready; `TableService.setStatus` sets `seatedAt` on occupied / nulls it on available.
 
-- [ ] **Step 1: Add the order tests (failing)**
+- [x] **Step 1: Add the order tests (failing)**
 
 In `apps/api/src/order/order.service.spec.ts`, extend `prismaMock` with `orderItem.updateMany: jest.fn()` and add:
 
@@ -155,12 +155,12 @@ describe('updateItemStatus rollup', () => {
 });
 ```
 
-- [ ] **Step 2: Run the order tests to verify they fail**
+- [x] **Step 2: Run the order tests to verify they fail**
 
 Run: `pnpm --filter @restaurant/api exec jest src/order/order.service.spec.ts`
 Expected: the three new tests FAIL (no sentAt stamped / no rollup).
 
-- [ ] **Step 3: Implement the order service changes**
+- [x] **Step 3: Implement the order service changes**
 
 Replace `updateStatus` and `updateItemStatus` in `apps/api/src/order/order.service.ts` with:
 
@@ -235,12 +235,12 @@ private async promoteIfAllItemsReady(orderId: string, now: Date) {
 }
 ```
 
-- [ ] **Step 4: Run the order tests to verify they pass**
+- [x] **Step 4: Run the order tests to verify they pass**
 
 Run: `pnpm --filter @restaurant/api exec jest src/order/order.service.spec.ts`
 Expected: PASS (existing + 3 new).
 
-- [ ] **Step 5: Add + run the table test (failing → impl → pass)**
+- [x] **Step 5: Add + run the table test (failing → impl → pass)**
 
 In `apps/api/src/table/table.service.spec.ts` (create if missing, mirroring the order spec's module setup with `prismaMock = { table: { findUnique: jest.fn(), update: jest.fn() } }`):
 
@@ -284,7 +284,7 @@ public async setStatus(id: string, dto: SetTableStatusDto) {
 
 Re-run → PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/order/order.service.ts apps/api/src/order/order.service.spec.ts apps/api/src/table/table.service.ts apps/api/src/table/table.service.spec.ts
@@ -302,7 +302,7 @@ git commit -m "feat(api): stamp service timestamps + auto-promote order when all
 - Consumes: `PrismaService`, `InventoryService.findAll()` (returns items with `lowStock`, `name`, `quantity`, `unit`).
 - Produces: `ServiceSnapshotService.getSnapshot(): Promise<ServiceSnapshot>` where `ServiceSnapshot` matches the DTO in §5 of the spec. Exports `TABLE_WAIT_MIN = 10`, `RESERVATION_DUE_MIN = 15`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `apps/api/src/service/service-snapshot.service.spec.ts`:
 
@@ -393,12 +393,12 @@ describe('ServiceSnapshotService', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [x] **Step 2: Run to verify they fail**
 
 Run: `pnpm --filter @restaurant/api exec jest src/service/service-snapshot.service.spec.ts`
 Expected: FAIL — cannot find module `./service-snapshot.service`.
 
-- [ ] **Step 3: Implement the service**
+- [x] **Step 3: Implement the service**
 
 Create `apps/api/src/service/service-snapshot.service.ts`:
 
@@ -556,12 +556,12 @@ export class ServiceSnapshotService {
 }
 ```
 
-- [ ] **Step 4: Run to verify they pass**
+- [x] **Step 4: Run to verify they pass**
 
 Run: `pnpm --filter @restaurant/api exec jest src/service/service-snapshot.service.spec.ts`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/api/src/service/service-snapshot.service.ts apps/api/src/service/service-snapshot.service.spec.ts
@@ -580,7 +580,7 @@ git commit -m "feat(api): service snapshot aggregation (pulse + attention + floo
 - Consumes: `ServiceSnapshotService` (Task 3).
 - Produces: `GET /api/service/snapshot` → `ServiceSnapshotDto`; generated web hook `useServiceControllerGetSnapshot` + `getServiceControllerGetSnapshotQueryKey`.
 
-- [ ] **Step 1: Add the response DTO for Orval**
+- [x] **Step 1: Add the response DTO for Orval**
 
 In `apps/api/src/swagger-dtos.ts`, append (mirroring the existing `@ApiProperty` DTO style):
 
@@ -623,7 +623,7 @@ export class ServiceSnapshotDto {
 }
 ```
 
-- [ ] **Step 2: Create the controller**
+- [x] **Step 2: Create the controller**
 
 Create `apps/api/src/service/service.controller.ts`:
 
@@ -650,7 +650,7 @@ export class ServiceController {
 }
 ```
 
-- [ ] **Step 3: Create the module + export InventoryService + register**
+- [x] **Step 3: Create the module + export InventoryService + register**
 
 Create `apps/api/src/service/service.module.ts`:
 
@@ -670,17 +670,17 @@ export class ServiceModule {}
 
 In `apps/api/src/inventory/inventory.module.ts`, ensure `InventoryService` is exported (add `exports: [InventoryService]` if absent). In `apps/api/src/app.module.ts`, import `ServiceModule` and add it to the `imports` array (mirroring `ReportsModule`).
 
-- [ ] **Step 4: Build the API**
+- [x] **Step 4: Build the API**
 
 Run: `pnpm --filter @restaurant/api run build`
 Expected: exit 0 (DI resolves — `InventoryModule` exports `InventoryService`).
 
-- [ ] **Step 5: Regenerate the OpenAPI spec + web hooks**
+- [x] **Step 5: Regenerate the OpenAPI spec + web hooks**
 
 Run (from repo root): `pnpm gen:api`
 Expected: `apps/web/src/api/service/service.ts` is created exporting `useServiceControllerGetSnapshot`. Confirm with: `ls apps/web/src/api/service/`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/service apps/api/src/swagger-dtos.ts apps/api/src/inventory/inventory.module.ts apps/api/src/app.module.ts apps/web/src/api apps/web/openapi.json
@@ -696,7 +696,7 @@ git commit -m "feat(api): expose GET /service/snapshot + generate web hook"
 **Interfaces:**
 - Consumes: `useServiceControllerGetSnapshot` (Task 4); primitives `PageHeader`, `MetricCell`, `ListRow`, `StatusDot`; `Button`, `Card`, `Skeleton`, `EmptyState`; `useNavigate` from `@tanstack/react-router`.
 
-- [ ] **Step 1: Rewrite the screen**
+- [x] **Step 1: Rewrite the screen**
 
 Replace `apps/web/src/routes/_app/service/index.tsx` with a screen that:
 - Calls `useServiceControllerGetSnapshot({ query: { refetchInterval: 12_000 } })`.
@@ -708,15 +708,15 @@ Replace `apps/web/src/routes/_app/service/index.tsx` with a screen that:
 
 Use a small local `formatMins(m)` (`m >= 60 ? \`${Math.floor(m/60)}h ${m%60}m\` : \`${m}m\``) and `statusToTone` helper in the file.
 
-- [ ] **Step 2: Verify build + tests**
+- [x] **Step 2: Verify build + tests**
 
 Run: `pnpm --filter @restaurant/web run build` (exit 0) and `pnpm --filter @restaurant/web run test` (still green).
 
-- [ ] **Step 3: Verify visually**
+- [x] **Step 3: Verify visually**
 
 Use the `run-web` skill: log in, land on `/service`. Expected: pulse strip with live numbers, an attention queue with action buttons (click one → navigates to the right screen), floor mini-grid. Leave it ~15s to confirm it refetches (the network panel shows a repeat call). Screenshot desktop + 390px.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/web/src/routes/_app/service/index.tsx
@@ -732,19 +732,19 @@ git commit -m "feat(web): live Service home (pulse + attention queue + floor)"
 **Interfaces:**
 - Consumes: `lib/notifications.ts` (`subscribe`, `unsubscribe`, `isSubscribed`); `useServiceControllerGetSnapshot`.
 
-- [ ] **Step 1: Live bell feed**
+- [x] **Step 1: Live bell feed**
 
 Rewrite `notification-feed.tsx` to call `useServiceControllerGetSnapshot({ query: { refetchInterval: 12_000 } })` and render the `attention[]` as a list (reuse the same row shape as Task 5 — a compact `StatusDot` + title/subtitle + age). If `attention.length === 0`, keep the `EmptyState`. Export the count so the topbar bell can badge it — simplest: the feed renders its own header "Notifications (N)"; (a numeric badge on the bell icon is optional polish, not required).
 
-- [ ] **Step 2: Wire the Settings push toggle**
+- [x] **Step 2: Wire the Settings push toggle**
 
 In `settings/index.tsx`, find the notifications "Enable" control. Wire it to `lib/notifications.ts`: on mount call `isSubscribed()` to set state; the button calls `subscribe()` (and shows "Disable" → `unsubscribe()` when subscribed). Reflect the subscribed state in the label. Read the current file first; if a handler is already wired, leave it. Handle the promise rejection (permission denied) by reverting the toggle and showing inline text.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `pnpm --filter @restaurant/web run build` (exit 0). Use the `run-web` skill: open the bell → live attention list; on Settings, the toggle reflects subscribe state (clicking prompts the browser permission). Screenshot the bell feed.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/web/src/components/notification-feed.tsx apps/web/src/routes/_app/settings/index.tsx

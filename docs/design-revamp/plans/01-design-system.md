@@ -49,7 +49,7 @@
 **Interfaces:**
 - Produces: Tailwind utilities `font-sans` (Inter), `font-serif` / `font-heading` (Fraunces) for all later tasks and screens.
 
-- [ ] **Step 1: Add font packages, remove Geist**
+- [x] **Step 1: Add font packages, remove Geist**
 
 In `apps/web/package.json` `dependencies`, remove `"@fontsource-variable/geist"` and add:
 
@@ -58,12 +58,12 @@ In `apps/web/package.json` `dependencies`, remove `"@fontsource-variable/geist"`
 "@fontsource-variable/inter": "^5.2.5",
 ```
 
-- [ ] **Step 2: Install**
+- [x] **Step 2: Install**
 
 Run (from `apps/web/`): `npm install`
 Expected: installs `@fontsource-variable/inter` and `@fontsource-variable/fraunces`, removes geist; exit 0.
 
-- [ ] **Step 3: Update the font import in `index.css`**
+- [x] **Step 3: Update the font import in `index.css`**
 
 Replace the line `@import "@fontsource-variable/geist";` with:
 
@@ -72,7 +72,7 @@ Replace the line `@import "@fontsource-variable/geist";` with:
 @import "@fontsource-variable/fraunces";
 ```
 
-- [ ] **Step 4: Wire the font tokens in the `@theme inline` block**
+- [x] **Step 4: Wire the font tokens in the `@theme inline` block**
 
 Replace the existing two lines:
 
@@ -89,17 +89,17 @@ with:
   --font-heading: 'Fraunces Variable', serif;
 ```
 
-- [ ] **Step 5: Verify build**
+- [x] **Step 5: Verify build**
 
 Run (from `apps/web/`): `npm run build`
 Expected: type-checks and builds clean (exit 0), no missing-module errors for the font packages.
 
-- [ ] **Step 6: Verify visually**
+- [x] **Step 6: Verify visually**
 
 Use the `run-web` skill to launch the app and screenshot `/menu`.
 Expected: body text renders in Inter (not Geist). (Fraunces is wired but only shows once `font-serif` is used in Task 6.)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/web/package.json apps/web/package-lock.json apps/web/src/index.css
@@ -118,7 +118,7 @@ git commit --no-verify -m "feat(web): switch fonts to Inter + Fraunces"
 **Interfaces:**
 - Produces: the Warm canvas palette for every semantic token. `--primary` and `--accent` are both terracotta (`#c2562f`), so `<Button>` default variant and `bg-accent` tints share one accent — this is the "one accent CTA" fix.
 
-- [ ] **Step 1: Replace the entire `default` theme block**
+- [x] **Step 1: Replace the entire `default` theme block**
 
 Replace the whole `:root, [data-theme="default"] { … }` block with:
 
@@ -166,19 +166,19 @@ Replace the whole `:root, [data-theme="default"] { … }` block with:
 }
 ```
 
-- [ ] **Step 2: Verify build**
+- [x] **Step 2: Verify build**
 
 Run (from `apps/web/`): `npm run build`
 Expected: builds clean (exit 0).
 
-- [ ] **Step 3: Verify visually**
+- [x] **Step 3: Verify visually**
 
 Use the `run-web` skill; log in (`admin@restaurant.local` / `admin123`) and screenshot `/menu` and `/tables`.
 Expected: warm paper background (`#f3ece1`), cream cards, **light warm sidebar** (no longer near-black), terracotta primary buttons and active-nav accent. Status colors (green/blue/amber/red) still read correctly.
 
 > Known follow-up (do NOT fix here): `offline-banner.tsx` uses literal `bg-yellow-*` and will look off-palette — it's cleaned up in the shell plan (Plan 2).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/web/src/index.css
@@ -198,7 +198,7 @@ git commit -m "feat(web): retune default theme to Warm canvas identity"
 - Consumes: the `@theme inline` token names (unchanged) from Task 1.
 - Produces: a selectable `midnight` theme and renamed default label "Warm canvas".
 
-- [ ] **Step 1: Append the Midnight theme block in `index.css`**
+- [x] **Step 1: Append the Midnight theme block in `index.css`**
 
 After the closing `}` of the `[data-theme="gruvbox"]` block, add:
 
@@ -245,7 +245,7 @@ After the closing `}` of the `[data-theme="gruvbox"]` block, add:
 }
 ```
 
-- [ ] **Step 2: Add `midnight` to the `Theme` union**
+- [x] **Step 2: Add `midnight` to the `Theme` union**
 
 In `theme-provider.tsx`, change:
 
@@ -259,7 +259,7 @@ to:
 export type Theme = 'default' | 'midnight' | 'monokai' | 'gruvbox';
 ```
 
-- [ ] **Step 3: Update the `THEMES` list + relabel default**
+- [x] **Step 3: Update the `THEMES` list + relabel default**
 
 In `theme-selector.tsx`, replace the `THEMES` array with:
 
@@ -272,17 +272,17 @@ const THEMES: { value: Theme; label: string; description: string }[] = [
 ];
 ```
 
-- [ ] **Step 4: Verify build + typecheck**
+- [x] **Step 4: Verify build + typecheck**
 
 Run (from `apps/web/`): `npm run build`
 Expected: builds clean (exit 0); no TS error on the `Theme` union usage in the selector.
 
-- [ ] **Step 5: Verify visually**
+- [x] **Step 5: Verify visually**
 
 Use the `run-web` skill; go to `/settings` → Appearance, switch to "Midnight".
 Expected: near-black canvas, indigo accent, theme persists on reload (localStorage `theme`). Switch back to "Warm canvas".
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/web/src/index.css apps/web/src/components/theme-provider.tsx apps/web/src/components/theme-selector.tsx
@@ -305,7 +305,7 @@ git commit -m "feat(web): add Midnight dark theme and relabel default as Warm ca
   - `StatusDot({ status, size?, className? })` — `size` is `'sm' | 'md'`
   - `StatusBadge({ status, label?, showDot?, className? })`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `apps/web/src/components/ui/status.test.tsx`:
 
@@ -334,12 +334,12 @@ describe('StatusDot', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/ui/status.test.tsx`
 Expected: FAIL — cannot resolve module `./status`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 Create `apps/web/src/components/ui/status.tsx`:
 
@@ -419,12 +419,12 @@ export function StatusBadge({
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/ui/status.test.tsx`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/components/ui/status.tsx apps/web/src/components/ui/status.test.tsx
@@ -443,7 +443,7 @@ git commit -m "feat(web): add status system primitives (StatusDot, StatusBadge)"
 - Consumes: `cn` from `@/lib/utils`.
 - Produces: `MetricCell({ label, value, sub?, className? })` where `value`/`sub` are `ReactNode`. Renders `value` in `font-serif` (Fraunces) for the display-numeral identity.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `apps/web/src/components/ui/metric-cell.test.tsx`:
 
@@ -466,12 +466,12 @@ describe('MetricCell', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/ui/metric-cell.test.tsx`
 Expected: FAIL — cannot resolve module `./metric-cell`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 Create `apps/web/src/components/ui/metric-cell.tsx`:
 
@@ -497,12 +497,12 @@ export function MetricCell({ label, value, sub, className }: MetricCellProps) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/ui/metric-cell.test.tsx`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/components/ui/metric-cell.tsx apps/web/src/components/ui/metric-cell.test.tsx
@@ -521,7 +521,7 @@ git commit -m "feat(web): add MetricCell primitive"
 - Consumes: `cn` from `@/lib/utils`.
 - Produces: `PageHeader({ title, subtitle?, action?, className? })`. Renders `title` as an `<h1>` in `font-serif` (Fraunces). `action` is the single primary CTA slot (one per screen).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `apps/web/src/components/ui/page-header.test.tsx`:
 
@@ -544,12 +544,12 @@ describe('PageHeader', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/ui/page-header.test.tsx`
 Expected: FAIL — cannot resolve module `./page-header`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 Create `apps/web/src/components/ui/page-header.tsx`:
 
@@ -578,12 +578,12 @@ export function PageHeader({ title, subtitle, action, className }: PageHeaderPro
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/ui/page-header.test.tsx`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/components/ui/page-header.tsx apps/web/src/components/ui/page-header.test.tsx
@@ -602,7 +602,7 @@ git commit -m "feat(web): add PageHeader primitive"
 - Consumes: `cn` from `@/lib/utils`.
 - Produces: `ListRow({ leading?, title, subtitle?, meta?, action?, className? })` — all slots `ReactNode` (title required). Dense row with bottom border (`last:border-b-0`), truncating title/subtitle. Used by orders/reservations/inventory lists and the Service attention queue (Plan 4).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `apps/web/src/components/ui/list-row.test.tsx`:
 
@@ -629,12 +629,12 @@ describe('ListRow', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/ui/list-row.test.tsx`
 Expected: FAIL — cannot resolve module `./list-row`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 Create `apps/web/src/components/ui/list-row.tsx`:
 
@@ -671,17 +671,17 @@ export function ListRow({ leading, title, subtitle, meta, action, className }: L
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/ui/list-row.test.tsx`
 Expected: PASS (1 test).
 
-- [ ] **Step 5: Run the full suite + build**
+- [x] **Step 5: Run the full suite + build**
 
 Run (from `apps/web/`): `npx vitest run` then `npm run build`
 Expected: all tests pass (existing menu-hook test + the 4 new primitive specs); build exits 0.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/web/src/components/ui/list-row.tsx apps/web/src/components/ui/list-row.test.tsx
