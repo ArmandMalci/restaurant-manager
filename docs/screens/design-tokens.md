@@ -1,3 +1,5 @@
+> **Superseded:** this pre-revamp token baseline no longer matches the code. See the root `DESIGN.md`.
+
 # Design Token Baseline
 
 All OpenDesign prompts reference these tokens by name.

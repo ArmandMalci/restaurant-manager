@@ -16,7 +16,7 @@ or `restaurant-implementer` to act on. Scope to the screen(s) or diff in questio
 
 ## Rubric
 
-Ground every finding in a rule, not vibes. Cite the line in `docs/PRODUCT.md` (the design system) or
+Ground every finding in a rule, not vibes. Cite the line in `DESIGN.md` (the design system) or
 CLAUDE.md's frontend design-system section. Non-negotiables to check:
 semantic tokens only (no literal palette values), works in every `data-theme`, exactly one primary CTA,
 Lucide icons only, mobile/tablet-first touch targets.

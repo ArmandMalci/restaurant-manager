@@ -14,7 +14,7 @@ Architecture Decision Records (ADRs), and data-model changes. You produce a plan
 
 ## Read first
 
-- `CLAUDE.md` (stack, commands, data-layer and design-system rules) and `docs/PRODUCT.md` for UI work
+- `CLAUDE.md` (stack, commands, data-layer and design-system rules) and `PRODUCT.md` + `DESIGN.md` for UI work
 - `docs/DOMAIN.md` when the change touches orders, bills, tables, or money; flag those to `restaurant-domain-judge`
 - 3–5 files relevant to the change. Don't go on safari.
 
@@ -46,7 +46,7 @@ Architecture Decision Records (ADRs), and data-model changes. You produce a plan
      the line falls between "new component" and "prop on an existing one".
    - Data fetching: which Orval-generated hook (regenerated after the API change) vs. URL/search-param state
      vs. a Zustand store (client/UI state only). Check an existing route first.
-   - Design tokens: fits the semantic tokens in `docs/PRODUCT.md`, or flag that new tokens are needed (a
+   - Design tokens: fits the semantic tokens in `DESIGN.md`, or flag that new tokens are needed (a
      human call, not something to improvise). Mobile/tablet-first.
 5. **Trade-offs and risks**: pick one recommendation; don't offer three.
 

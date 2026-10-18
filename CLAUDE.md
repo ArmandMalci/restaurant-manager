@@ -42,12 +42,15 @@ pnpm prisma generate                  # regen client after schema edits
 
 ## Frontend design system — read before writing any component
 
-Full design system is the source of truth in **`docs/PRODUCT.md`** (read it first). Non-negotiables:
+Design: read `PRODUCT.md` and `DESIGN.md` before UI work. Non-negotiables:
 
 - **Semantic Tailwind tokens only — zero literal palette values.** Use `bg-card` / `bg-background` / `bg-accent` /
   `text-muted-foreground` / `border-border` / `bg-success|warning|destructive`, never `bg-white` / `bg-zinc-*` / raw hex.
 - **Multi-theme** via `data-theme` on `<html>` (`default` / `monokai` / `gruvbox`); the `.dark` class is **not** used.
 - **Exactly one primary CTA per screen** (`bg-accent text-accent-foreground`); all others secondary. **Lucide icons only.**
+- Every `[data-theme]` block in `apps/web/src/index.css` must define every token variable; literal hex lives only there.
+- `ThemeProvider` keeps the theme in `localStorage` (`theme`) and sets `data-theme`; the inline script in
+  `apps/web/index.html` applies it before first paint to avoid a theme flash. Keep the two in sync.
 - shadcn components are added on demand: `cd apps/web && npx shadcn add <name>`.
 - **Mobile/tablet-first.** Staff use this app on tablets and phones: design every screen for touch and small
   viewports first; desktop is the enhancement, not the default.

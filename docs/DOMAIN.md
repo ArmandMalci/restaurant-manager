@@ -2,7 +2,7 @@
 
 The **business logic** of this system: what the entities mean, how their state moves, and the
 invariants that must hold for the restaurant to trust the software. This is the source of truth for
-*reasoning about correctness* (distinct from `PRODUCT.md`, which is the design system). When a change
+*reasoning about correctness* (distinct from the root `PRODUCT.md` (product) and `DESIGN.md` (design system)). When a change
 touches money, an order/bill/table lifecycle, or the kitchen flow, reason against this file.
 
 ## What this is
