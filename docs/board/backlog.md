@@ -9,7 +9,7 @@ Items waiting to be picked up by an agent.
 ---
 id: TICKET-XXX
 title: 
-agent: [product-manager|architect|ux-ui|frontend-dev|backend-dev|qa|docs]
+agent: [architect|implementer|design-critic|domain-judge]
 model: [claude-opus-4-8|claude-sonnet-4-6|claude-haiku-4-5-20251001]
 status: backlog
 created: YYYY-MM-DD
